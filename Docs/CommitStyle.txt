@@ -1,0 +1,12 @@
+feat:	New feature
+fix:	Bug fix
+refactor:	Code restructuring without changing functionality
+chore:	Maintenance tasks (e.g., dependencies, build)
+docs:	Documentation updates
+test:	Adding or updating tests
+style:	Code style changes (e.g., formatting, missing semi-colons)
+perf:	Performance improvements
+
+Example--->>>   fix(auth): Resolve login issue when session expires
+                style(ui): Improve button alignment on login page
+                feat(api): Add endpoint for password reset
