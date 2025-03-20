@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaFacebook } from "react-icons/fa";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword,getIdToken } from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -59,6 +59,11 @@ function Signup() {
       );
       const user = userCredential.user;
 
+      // Get Firebase Token
+      const token = await getIdToken(user); // Get Firebase ID token
+      localStorage.setItem("token", token); // Store the token locally
+
+      // Store user data in Firestore
       await setDoc(doc(db, "users", user.uid), {
         fullName,
         email,
@@ -69,9 +74,13 @@ function Signup() {
       setUser(user);
       setUserRole(role);
 
-      const response = await fetch("http://localhost:5000/api/signup", {
+      // Send user data to backend
+      const response = await fetch("http://localhost:3000/api/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Now sending the correct token
+        },
         body: JSON.stringify({ uid: user.uid, fullName, email, role }),
       });
 
@@ -107,6 +116,7 @@ function Signup() {
       [name]: value,
     }));
   };
+
 
   return (
     <div className="h-screen flex">

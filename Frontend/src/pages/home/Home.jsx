@@ -259,7 +259,7 @@ const Index = () => {
           direction="right"
           speed="fast"
           className="bg-background"
-          itemClassName="bg-card border border-border p-6 rounded-lg shadow-sm"
+          itemClassName="bg-card p-6 rounded-lg shadow-sm"
           quoteClassName="text-foreground text-lg"
           nameClassName="text-primary font-semibold mt-4"
           titleClassName="text-muted-foreground text-sm"

@@ -39,6 +39,14 @@ import {
   TabsTrigger,
 } from "../../components/ui/tabs";
 import { Progress } from "../../components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../../components/ui/dialog";
 
 // Demo Data
 const demoOrders = [
@@ -165,23 +173,48 @@ const demoStats = {
 };
 
 export default function FarmerDashboard() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [crops, setCrops] = useState(demoCrops);
+  const [selectedCrop, setSelectedCrop] = useState(null);
+
+  const handleAddOrUpdateCrop = (cropData) => {
+    if (selectedCrop) {
+      // Update existing crop
+      setCrops((prevCrops) =>
+        prevCrops.map((crop) =>
+          crop.id === selectedCrop.id ? { ...crop, ...cropData } : crop
+        )
+      );
+    } else {
+      // Add new crop
+      setCrops((prevCrops) => [
+        ...prevCrops,
+        { id: (prevCrops.length + 1).toString(), ...cropData },
+      ]);
+    }
+    setSelectedCrop(null);
+    setIsDialogOpen(false);
+  };
+
+  const handleEditCrop = (crop) => {
+    setSelectedCrop(crop);
+    setIsDialogOpen(true);
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-6 mt-20">
+    <div className="container mx-auto p-4 space-y-6 mt-20 ">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Farmer Dashboard
           </h1>
-          <p className="text-muted-foreground">
-            Manage your farm operations, crops, and orders in one place.
-          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Calendar className="mr-2 h-4 w-4" />
             March 8, 2025
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setIsDialogOpen(true)}>
             <Plant className="mr-2 h-4 w-4" />
             Add New Crop
           </Button>
@@ -248,7 +281,7 @@ export default function FarmerDashboard() {
         </TabsContent>
 
         <TabsContent value="crops" className="space-y-4">
-          <CropsDashboard />
+          <CropsDashboard crops={crops} onEditCrop={handleEditCrop} />
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-4">
@@ -259,6 +292,16 @@ export default function FarmerDashboard() {
           <StatisticsDashboard />
         </TabsContent>
       </Tabs>
+
+      <CropFormDialog
+        isOpen={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setSelectedCrop(null);
+        }}
+        onSubmit={handleAddOrUpdateCrop}
+        initialData={selectedCrop}
+      />
     </div>
   );
 }
@@ -450,8 +493,7 @@ function OrdersDashboard() {
 }
 
 // CropsDashboard Component
-function CropsDashboard() {
-  const [crops, setCrops] = useState([]);
+function CropsDashboard({ crops, onEditCrop }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -459,7 +501,6 @@ function CropsDashboard() {
     try {
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      setCrops(demoCrops);
     } catch {
       setError("Failed to fetch crops. Please try again.");
     } finally {
@@ -486,7 +527,9 @@ function CropsDashboard() {
         <TableRow>
           <TableCell colSpan={5} className="text-center py-8">
             <Loader2 className="animate-spin mx-auto h-6 w-6" />
-            <p className="text-sm text-muted-foreground mt-2">Loading crops...</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Loading crops...
+            </p>
           </TableCell>
         </TableRow>
       );
@@ -497,7 +540,9 @@ function CropsDashboard() {
         <TableRow>
           <TableCell colSpan={5} className="text-center py-8">
             <Plant className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-2">No crops found.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              No crops found.
+            </p>
           </TableCell>
         </TableRow>
       );
@@ -513,10 +558,18 @@ function CropsDashboard() {
             <TableCell>{crop.season}</TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => alert(`Edit crop ${crop.id}`)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditCrop(crop)}
+                >
                   Edit
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => alert(`Update stock for crop ${crop.id}`)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => alert(`Update stock for crop ${crop.id}`)}
+                >
                   Update Stock
                 </Button>
               </div>
@@ -533,9 +586,16 @@ function CropsDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-xl font-bold">Crop Inventory</CardTitle>
-            <CardDescription>Manage your crop inventory and pricing</CardDescription>
+            <CardDescription>
+              Manage your crop inventory and pricing
+            </CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={loading}
+          >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
@@ -570,7 +630,6 @@ function CropsDashboard() {
   );
 }
 
-
 // ReviewsDashboard Component
 function ReviewsDashboard() {
   const [reviews, setReviews] = useState([]);
@@ -592,7 +651,9 @@ function ReviewsDashboard() {
       return (
         <div className="flex flex-col items-center justify-center py-8">
           <Loader2 className="animate-spin h-6 w-6" />
-          <p className="text-sm text-muted-foreground mt-2">Loading reviews...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            Loading reviews...
+          </p>
         </div>
       );
     }
@@ -601,7 +662,9 @@ function ReviewsDashboard() {
       return (
         <div className="flex flex-col items-center justify-center py-8">
           <Star className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground mt-2">No reviews available yet.</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            No reviews available yet.
+          </p>
         </div>
       );
     }
@@ -619,11 +682,15 @@ function ReviewsDashboard() {
                       <Star
                         key={`${review.id}-star-${i}`} // Using unique key
                         className={`h-4 w-4 ${
-                          i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
+                          i < review.rating
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
-                    <span className="ml-2 text-sm text-muted-foreground">{review.date}</span>
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {review.date}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -652,7 +719,6 @@ function ReviewsDashboard() {
     </Card>
   );
 }
-
 
 // StatisticsDashboard Component
 function StatisticsDashboard() {
@@ -734,5 +800,212 @@ function StatisticsDashboard() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// CropFormDialog Component
+function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
+  const [formData, setFormData] = useState(
+    initialData || {
+      name: "",
+      price: "",
+      stock: "",
+      season: "",
+      image: null, // Initialize image as null
+    }
+  );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        image: file, // Update the image in formData
+      }));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Create a FormData object for file uploads
+    const formDataObj = new FormData();
+    formDataObj.append("name", formData.name);
+    formDataObj.append("price", formData.price);
+    formDataObj.append("stock", formData.stock);
+    formDataObj.append("season", formData.season);
+    if (formData.image) {
+      formDataObj.append("image", formData.image); // Append the image file
+    }
+
+    // Example: Submit form data to an API
+    fetch("/api/crops", {
+      method: "POST",
+      body: formDataObj,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Success:", data);
+        onSubmit(data); // Pass the response data to the parent component
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {initialData ? "Edit Crop" : "Add New Crop"}
+          </DialogTitle>
+          <DialogDescription>
+            {initialData
+              ? "Update the crop details."
+              : "Add a new crop to your inventory."}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Crop Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              id="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3"
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="price"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Price
+            </label>
+            <input
+              type="text"
+              name="price"
+              id="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3"
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="stock"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Stock
+            </label>
+            <input
+              type="text"
+              name="stock"
+              id="stock"
+              value={formData.stock}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3"
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="season"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Season
+            </label>
+            <input
+              type="text"
+              name="season"
+              id="season"
+              value={formData.season}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3"
+              required
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="image"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Product Image
+            </label>
+            <div className="mt-1 flex items-center">
+              <label
+                htmlFor="image"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  {formData.image ? (
+                    <img
+                      src={URL.createObjectURL(formData.image)}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
+                  ) : (
+                    <>
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                        ></path>
+                      </svg>
+                      <p className="text-sm text-gray-500 mt-2">
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, or JPEG (MAX. 5MB)
+                      </p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  name="image"
+                  id="image"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+              </label>
+            </div>
+          </div>
+          <div className="mt-6">
+            <Button type="submit" className="w-full">
+              {initialData ? "Update Crop" : "Add Crop"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -15,7 +15,7 @@ function Hero() {
 
     const fetchUserCount = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/users");
+        const response = await fetch("http://localhost:3000/api/users");
         const users = await response.json();
         const totalUsers = users.length;
         animateUsers(totalUsers);

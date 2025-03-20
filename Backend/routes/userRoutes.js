@@ -1,108 +1,48 @@
 const express = require("express");
 const router = express.Router();
+const { verifyToken } = require("../middleware/authMiddleware");
 const { User, Admin, Shopkeeper, Deliveryman, Farmer } = require("../models/User");
 const { body, validationResult } = require("express-validator");
 
-// Custom middleware to ensure input is a plain string (prevents NoSQL injection)
-const ensurePlainString = (value, { req, location, path }) => {
-  // Allow strings only, reject objects/arrays
-  if (typeof value !== "string") {
-    throw new Error(`${path} must be a string`);
-  }
-  // Disallow MongoDB operators ($), but allow dots (.) for emails
-  if (path !== "email" && value.includes("$")) {
-    throw new Error(`${path} must not contain MongoDB operators like $`);
-  }
-  if (path === "email" && value.includes("$")) {
-    throw new Error(`${path} must not contain MongoDB operators like $`);
-  }
-  return value;
-};
-
+// User Signup Route
 router.post(
   "/signup",
   [
-    // Validate and sanitize input fields
-    body("uid")
-      .trim()
-      .isLength({ min: 1 })
-      .custom(ensurePlainString)
-      .escape(),
-    body("fullName")
-      .trim()
-      .isLength({ min: 1 })
-      .custom(ensurePlainString)
-      .escape(),
-    body("email")
-      .trim()
-      .isEmail()
-      .custom(ensurePlainString)
-      .normalizeEmail(),
-    body("role")
-      .isIn(["Admin", "User", "Shopkeeper", "Deliveryman", "Farmer"]),
+    body("uid").trim().isLength({ min: 1 }).escape(),
+    body("fullName").trim().isLength({ min: 1 }).escape(),
+    body("email").trim().isEmail().normalizeEmail(),
+    body("role").optional().isIn(["Admin", "User", "Shopkeeper", "Deliveryman", "Farmer"]),
   ],
   async (req, res) => {
     try {
-      // Check for validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ message: "Validation failed", errors: errors.array() });
       }
 
-      // Extract validated and sanitized input
-      const { uid, fullName, email, role } = req.body;
-
-      // Construct query using sanitized values explicitly as strings
-      const existingUser = await User.findOne({
-        $or: [
-          { uid: String(uid) },
-          { email: String(email) }
-        ]
-      });
+      const { uid, fullName, email, role = "User" } = req.body;
+      const existingUser = await User.findOne({ $or: [{ uid }, { email }] });
 
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      // Create new user based on role
       let newUser;
       switch (role) {
         case "Admin":
           newUser = new Admin({ uid, fullName, email, role });
           break;
         case "Shopkeeper":
-          newUser = new Shopkeeper({
-            uid,
-            fullName,
-            email,
-            role,
-            shopName: req.body.shopName || undefined,
-            shopLocation: req.body.shopLocation || undefined
-          });
+          newUser = new Shopkeeper({ uid, fullName, email, role, shopName: req.body.shopName, shopLocation: req.body.shopLocation });
           break;
         case "Deliveryman":
-          newUser = new Deliveryman({
-            uid,
-            fullName,
-            email,
-            role,
-            vehicleType: req.body.vehicleType || undefined,
-            assignedArea: req.body.assignedArea || undefined
-          });
+          newUser = new Deliveryman({ uid, fullName, email, role, vehicleType: req.body.vehicleType, assignedArea: req.body.assignedArea });
           break;
         case "Farmer":
-          newUser = new Farmer({
-            uid,
-            fullName,
-            email,
-            role,
-            farmName: req.body.farmName || undefined,
-            farmLocation: req.body.farmLocation || undefined,
-            crops: req.body.crops || []
-          });
+          newUser = new Farmer({ uid, fullName, email, role, farmName: req.body.farmName, farmLocation: req.body.farmLocation, crops: req.body.crops || [] });
           break;
         default:
-          newUser = new User({ uid, fullName, email, role: "User" });
+          newUser = new User({ uid, fullName, email, role });
       }
 
       await newUser.save();
@@ -114,7 +54,23 @@ router.post(
   }
 );
 
-// GET endpoint for user count (unchanged)
+// Protected route to fetch user data based on Firebase token
+router.get("/user", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ uid: req.user.uid });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("❌ Error fetching user data:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// GET endpoint to fetch all users (for admin use)
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find({}, "uid fullName email role");

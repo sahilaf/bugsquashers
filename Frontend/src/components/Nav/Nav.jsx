@@ -89,6 +89,7 @@ const navigationPropTypes = {
   loading: PropTypes.bool.isRequired,
 };
 
+
 // MobileNavigation component for smaller screens
 const MobileNavigation = ({
   user,
@@ -186,6 +187,7 @@ MobileNavigation.propTypes = navigationPropTypes;
 // DesktopNavigation component for larger screens
 const DesktopNavigation = ({
   user,
+  userData,
   search,
   setSearch,
   navigate,
@@ -272,15 +274,14 @@ const DesktopNavigation = ({
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="relative rounded-full " size="icon">
+            <Button variant="outline" className="relative rounded-full" size="icon">
               <Avatar className="h-9 w-9">
                 <AvatarImage
-                  src={user.photoURL || "/placeholder-avatar.jpg"}
-                  alt={user.displayName || "User"}
+                  alt={userData?.displayName || "User"}
                 />
                 <AvatarFallback>
-                  {user.displayName ? (
-                    user.displayName[0]
+                  {userData?.displayName ? (
+                    userData.displayName[0]
                   ) : (
                     <User className="h-4 w-4" />
                   )}
@@ -289,16 +290,14 @@ const DesktopNavigation = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 bg-muted p-4" align="end" forceMount>
-            {/* User Info Section */}
             <div className="flex flex-col items-center space-y-2 mb-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage
-                  src={user.photoURL || "/placeholder-avatar.jpg"}
-                  alt={user.displayName || "User"}
+                  alt={user?.role || "User"}
                 />
                 <AvatarFallback>
-                  {user.displayName ? (
-                    user.displayName[0]
+                  {userData?.role ? (
+                    userData.role[0]
                   ) : (
                     <User className="h-8 w-8" />
                   )}
@@ -306,15 +305,14 @@ const DesktopNavigation = ({
               </Avatar>
               <div className="text-center">
                 <p className="font-semibold text-lg">
-                  {user.displayName || "Demo User"}
+                  {userData?.role || "Role"}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {user.email || "demo.user@example.com"}
+                  {userData?.email || "demo.user@example.com"}
                 </p>
               </div>
             </div>
 
-            {/* Menu Items */}
             <DropdownMenuItem
               onClick={handleDashboardClick}
               disabled={loading}
@@ -327,14 +325,14 @@ const DesktopNavigation = ({
               onClick={() => navigate("/profile")}
               className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
             >
-              <Settings className="h-4 w-4" /> {/* Add a settings icon */}
+              <Settings className="h-4 w-4" />
               <span>Profile Settings</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => navigate("/orders")}
               className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
             >
-              <Package className="h-4 w-4" /> {/* Add an orders icon */}
+              <Package className="h-4 w-4" />
               <span>My Orders</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="my-2" />
@@ -342,7 +340,7 @@ const DesktopNavigation = ({
               onClick={handleLogout}
               className="flex items-center space-x-2 p-2 text-red-600 hover:bg-red-50 rounded-md"
             >
-              <LogOut className="h-4 w-4" /> {/* Add a logout icon */}
+              <LogOut className="h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -356,13 +354,57 @@ const DesktopNavigation = ({
   );
 };
 
-DesktopNavigation.propTypes = navigationPropTypes;
+DesktopNavigation.propTypes = {
+  user: PropTypes.object,
+  userData: PropTypes.object,
+  search: PropTypes.string.isRequired,
+  setSearch: PropTypes.func.isRequired,
+  navigate: PropTypes.func.isRequired,
+  handleLogout: PropTypes.func.isRequired,
+  handleDashboardClick: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};
 
 // Main Nav component
+
 const Nav = () => {
   const { user, loading } = useAuth();
   const [search, setSearch] = useState("");
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        localStorage.setItem("authToken", token);
+        
+        try {
+          const response = await fetch("http://localhost:3000/api/user", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          if (!response.ok) {
+            throw new Error("Failed to fetch user data");
+          }
+  
+          const data = await response.json();
+          setUserData(data.user);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setError("Failed to fetch user data. Please try again.");
+        }
+      } else {
+        localStorage.removeItem("authToken");
+        setUserData(null); // Clear user data if the user logs out
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+  
 
   const handleLogout = async () => {
     try {
@@ -379,14 +421,14 @@ const Nav = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-secondary dark:bg-background/80 backdrop-blur-md shadow-md dark:shadow-none"> {/* Logo */}
+    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-secondary dark:bg-background/80 backdrop-blur-md ">
       <h1 className="text-3xl font-black text-white">
         FAIRBASKET<span className="text-primary">.</span>
       </h1>
 
-      {/* Desktop Navigation */}
       <DesktopNavigation
         user={user}
+        userData={userData}
         search={search}
         setSearch={setSearch}
         navigate={navigate}
@@ -395,7 +437,6 @@ const Nav = () => {
         loading={loading}
       />
 
-      {/* Mobile Navigation */}
       <MobileNavigation
         user={user}
         search={search}

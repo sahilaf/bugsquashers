@@ -81,7 +81,8 @@ export default {
       fontFamily: {
         heading: ['Anton', 'sans-serif'],
         secondary: ['Roboto', 'sans-serif'],
-        praise: ['Dancing Script', 'cursive']
+        praise: ['Dancing Script', 'cursive'],
+        legible: ['Atkinson Hyperlegible', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',

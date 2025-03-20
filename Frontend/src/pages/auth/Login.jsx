@@ -1,60 +1,64 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom"; // Import useLocation
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaFacebook } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import {
-  FormControl,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../components/ui/form";
+import { FormControl, FormItem, FormLabel, FormMessage } from "../../components/ui/form";
 import { Input } from "../../components/ui/input";
 import Lottie from "react-lottie-player";
 import welcomeback from "./assets/welcomeback";
 import { toast } from "react-hot-toast";
-
-import { doc, getDoc } from "firebase/firestore"; // Import Firestore functions
-import { db,auth } from "./Firebase"; // Ensure Firebase Firestore is initialized
-
-
-
-
+import { doc, getDoc } from "firebase/firestore";
+import { db, auth } from "./Firebase";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const formMethods = useForm();
-  
+
   const { handleSubmit } = formMethods;
+
+  // Handle token refresh and user state changes
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        const token = await user.getIdToken();
+        console.log(token)
+        localStorage.setItem("authToken", token);
+      } else {
+        localStorage.removeItem("authToken");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   async function onSubmit(data) {
     setIsLoading(true);
     const { email, password } = data;
-  
+
     if (!email || !password) {
       toast.error("Please enter email and password");
       setIsLoading(false);
       return;
     }
-  
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-  
+
       // Fetch user role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
-  
+
       if (userDoc.exists()) {
         const userRole = userDoc.data().role;
-  
         toast.success("Login successful!");
         console.log("User logged in:", user, "Role:", userRole);
-  
-        // Redirect to the appropriate dashboard
+
+        // Redirect based on role
         switch (userRole) {
           case "Admin":
             navigate("/admin");
@@ -91,12 +95,7 @@ export function LoginForm() {
     <div className="h-screen flex overflow-hidden">
       {/* Left Column - Lottie Animation */}
       <div className="hidden lg:block w-1/2 bg-muted items-center justify-center pt-28">
-        <Lottie
-          loop
-          animationData={welcomeback}
-          play
-          className="w-full h-[70%]"
-        />
+        <Lottie loop animationData={welcomeback} play className="w-full h-[70%]" />
         <div className="text-3xl text-primary flex items-center justify-center font-praise">
           <h1>Welcome Back !!</h1>
         </div>
@@ -108,16 +107,12 @@ export function LoginForm() {
           <FormProvider {...formMethods}>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold">Sign in to your account</h2>
-              <p className="text-muted-foreground">
-                Enter your email and password to continue
-              </p>
+              <p className="text-muted-foreground">Enter your email and password to continue</p>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="grid gap-4">
                 <FormItem>
-                  <FormLabel className="sr-only" htmlFor="email">
-                    Email
-                  </FormLabel>
+                  <FormLabel className="sr-only" htmlFor="email">Email</FormLabel>
                   <FormControl>
                     <Input
                       id="email"
@@ -133,9 +128,7 @@ export function LoginForm() {
                   <FormMessage />
                 </FormItem>
                 <FormItem>
-                  <FormLabel className="sr-only" htmlFor="password">
-                    Password
-                  </FormLabel>
+                  <FormLabel className="sr-only" htmlFor="password">Password</FormLabel>
                   <FormControl>
                     <Input
                       id="password"
@@ -150,9 +143,7 @@ export function LoginForm() {
                   <FormMessage />
                 </FormItem>
                 <Button disabled={isLoading} className="w-full">
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </div>
@@ -162,9 +153,7 @@ export function LoginForm() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
             <div className="flex gap-2">
@@ -185,10 +174,7 @@ export function LoginForm() {
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link
-                to="/signup"
-                className="font-medium text-primary hover:underline"
-              >
+              <Link to="/signup" className="font-medium text-primary hover:underline">
                 Sign up
               </Link>
             </p>
