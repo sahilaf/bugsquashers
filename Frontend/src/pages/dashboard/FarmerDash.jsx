@@ -45,7 +45,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "../../components/ui/dialog";
 
 // Demo Data
@@ -179,14 +178,12 @@ export default function FarmerDashboard() {
 
   const handleAddOrUpdateCrop = (cropData) => {
     if (selectedCrop) {
-      // Update existing crop
       setCrops((prevCrops) =>
         prevCrops.map((crop) =>
           crop.id === selectedCrop.id ? { ...crop, ...cropData } : crop
         )
       );
     } else {
-      // Add new crop
       setCrops((prevCrops) => [
         ...prevCrops,
         { id: (prevCrops.length + 1).toString(), ...cropData },
@@ -202,7 +199,7 @@ export default function FarmerDashboard() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6 mt-20 ">
+    <div className="container mx-auto p-4 space-y-6 mt-20">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -380,7 +377,6 @@ function OrdersDashboard() {
     return <p className="text-red-500">{error}</p>;
   }
 
-  // Extracted logic for status badge
   const getBadgeVariant = (status) => {
     if (status === "Delivered") {
       return "success";
@@ -391,7 +387,6 @@ function OrdersDashboard() {
     return "default";
   };
 
-  // Handling loading, empty orders, and regular orders separately
   const renderOrderRows = () => {
     if (loading) {
       return [
@@ -520,7 +515,6 @@ function CropsDashboard({ crops, onEditCrop }) {
     return <p className="text-red-500">{error}</p>;
   }
 
-  // Extract the logic to handle loading, empty crops, and regular crops
   const renderCrops = () => {
     if (loading) {
       return (
@@ -630,6 +624,19 @@ function CropsDashboard({ crops, onEditCrop }) {
   );
 }
 
+CropsDashboard.propTypes = {
+  crops: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      price: PropTypes.string.isRequired,
+      stock: PropTypes.string.isRequired,
+      season: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  onEditCrop: PropTypes.func.isRequired,
+};
+
 // ReviewsDashboard Component
 function ReviewsDashboard() {
   const [reviews, setReviews] = useState([]);
@@ -680,7 +687,7 @@ function ReviewsDashboard() {
                   <div className="flex items-center mt-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
-                        key={`${review.id}-star-${i}`} // Using unique key
+                        key={`${review.id}-star-${i}`}
                         className={`h-4 w-4 ${
                           i < review.rating
                             ? "text-yellow-500 fill-yellow-500"
@@ -720,7 +727,7 @@ function ReviewsDashboard() {
   );
 }
 
-// StatisticsDashboard Component
+// StatisticsDashboard Component with fixed single quote
 function StatisticsDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -792,8 +799,7 @@ function StatisticsDashboard() {
                 Customer data visualization coming soon
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                We&apos;re working on gathering more detailed customer insights
-                for you.
+                We&apos;re working on gathering more detailed customer insights for you.
               </p>
             </div>
           </div>
@@ -811,42 +817,33 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
       price: "",
       stock: "",
       season: "",
-      image: null, // Initialize image as null
+      image: null,
     }
   );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        image: file, // Update the image in formData
-      }));
+      setFormData((prev) => ({ ...prev, image: file }));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Create a FormData object for file uploads
     const formDataObj = new FormData();
     formDataObj.append("name", formData.name);
     formDataObj.append("price", formData.price);
     formDataObj.append("stock", formData.stock);
     formDataObj.append("season", formData.season);
     if (formData.image) {
-      formDataObj.append("image", formData.image); // Append the image file
+      formDataObj.append("image", formData.image);
     }
 
-    // Example: Submit form data to an API
     fetch("/api/crops", {
       method: "POST",
       body: formDataObj,
@@ -854,7 +851,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
       .then((response) => response.json())
       .then((data) => {
         console.log("Success:", data);
-        onSubmit(data); // Pass the response data to the parent component
+        onSubmit(data);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -865,21 +862,14 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Edit Crop" : "Add New Crop"}
-          </DialogTitle>
+          <DialogTitle>{initialData ? "Edit Crop" : "Add New Crop"}</DialogTitle>
           <DialogDescription>
-            {initialData
-              ? "Update the crop details."
-              : "Add a new crop to your inventory."}
+            {initialData ? "Update the crop details." : "Add a new crop to your inventory."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Crop Name
             </label>
             <input
@@ -893,10 +883,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
               Price
             </label>
             <input
@@ -910,10 +897,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label
-              htmlFor="stock"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
               Stock
             </label>
             <input
@@ -927,10 +911,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label
-              htmlFor="season"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="season" className="block text-sm font-medium text-gray-700">
               Season
             </label>
             <input
@@ -944,10 +925,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label
-              htmlFor="image"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
               Product Image
             </label>
             <div className="mt-1 flex items-center">
@@ -979,12 +957,9 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
                         ></path>
                       </svg>
                       <p className="text-sm text-gray-500 mt-2">
-                        <span className="font-semibold">Click to upload</span>{" "}
-                        or drag and drop
+                        <span className="font-semibold">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, or JPEG (MAX. 5MB)
-                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG, or JPEG (MAX. 5MB)</p>
                     </>
                   )}
                 </div>
@@ -1009,3 +984,10 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
     </Dialog>
   );
 }
+
+CropFormDialog.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  initialData: PropTypes.object,
+};
