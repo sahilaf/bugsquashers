@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Use Link for internal navigation
+import { Link, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../../pages/auth/Firebase";
 import {
@@ -10,7 +10,9 @@ import {
   User,
   Moon,
   Sun,
-   Package, LogOut,Settings  
+  Package,
+  LogOut,
+  Settings,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -34,7 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import PropTypes from "prop-types";
 import { useAuth } from "../../pages/auth/Authcontext";
 
-// Constants for repeated values
+// **Constants**
 const NAV_ITEMS = ["Products", "About", "Contact"];
 const CATEGORIES = [
   { name: "Electronics", link: "/categories/electronics" },
@@ -42,7 +44,7 @@ const CATEGORIES = [
   { name: "Home & Garden", link: "/categories/home" },
 ];
 
-// ThemeToggle component to switch between dark and light mode
+// **ThemeToggle Component**
 const ThemeToggle = ({ showText = false }) => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
@@ -57,8 +59,8 @@ const ThemeToggle = ({ showText = false }) => {
 
   return (
     <Button
-    variant="outline"
-    size="icon"
+      variant="outline"
+      size={showText ? "default" : "icon"}
       className={`flex items-center justify-center gap-2 p-2 bg-transparent hover:bg-accent rounded-full hover:text-secondary-foreground ${
         showText ? "w-full" : ""
       }`}
@@ -78,19 +80,7 @@ ThemeToggle.propTypes = {
   showText: PropTypes.bool,
 };
 
-// Shared prop types for DesktopNavigation and MobileNavigation
-const navigationPropTypes = {
-  user: PropTypes.object,
-  search: PropTypes.string.isRequired,
-  setSearch: PropTypes.func.isRequired,
-  navigate: PropTypes.func.isRequired,
-  handleLogout: PropTypes.func.isRequired,
-  handleDashboardClick: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
-};
-
-
-// MobileNavigation component for smaller screens
+// **MobileNavigation Component**
 const MobileNavigation = ({
   user,
   search,
@@ -135,11 +125,9 @@ const MobileNavigation = ({
               </nav>
             </div>
             <div className="border-t pt-4">
-              {/* Dark Mode Toggle inside Mobile Nav */}
               <div className="pb-2">
                 <ThemeToggle showText={true} />
               </div>
-
               <Button
                 variant="outline"
                 className="w-full mb-2 bg-secondary"
@@ -182,9 +170,17 @@ const MobileNavigation = ({
   );
 };
 
-MobileNavigation.propTypes = navigationPropTypes;
+MobileNavigation.propTypes = {
+  user: PropTypes.object,
+  search: PropTypes.string.isRequired,
+  setSearch: PropTypes.func.isRequired,
+  navigate: PropTypes.func.isRequired,
+  handleLogout: PropTypes.func.isRequired,
+  handleDashboardClick: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};
 
-// DesktopNavigation component for larger screens
+// **DesktopNavigation Component**
 const DesktopNavigation = ({
   user,
   userData,
@@ -198,22 +194,15 @@ const DesktopNavigation = ({
   return (
     <div className="hidden lg:flex justify-between items-center space-x-6 text-white">
       <div>
-        <Link to="/">
-          Home
-        </Link>
+        <Link to="/">Home</Link>
       </div>
       <div>
-        <Link to="/market">
-          Market
-        </Link>
+        <Link to="/market">Market</Link>
       </div>
-      {/* Products Dropdown */}
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger className="">
-              Products
-            </NavigationMenuTrigger>
+            <NavigationMenuTrigger className="">Products</NavigationMenuTrigger>
             <NavigationMenuContent className="text-muted-foreground">
               <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                 <li className="row-span-3">
@@ -244,7 +233,6 @@ const DesktopNavigation = ({
         </NavigationMenuList>
       </NavigationMenu>
 
-      {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
@@ -256,32 +244,28 @@ const DesktopNavigation = ({
         />
       </div>
 
-      {/* Icons */}
       <Button variant="outline" size="icon" aria-label="Camera">
         <Camera className="h-6 w-6" />
       </Button>
-      <Button
-        variant="outline"
-        onClick={() => navigate("/cart")}
-        size="icon"
-      ><ShoppingCart className="h-7 w-7"/>
+      <Button variant="outline" onClick={() => navigate("/cart")} size="icon">
+        <ShoppingCart className="h-6 w-6" />
       </Button>
 
-      {/* Dark Mode Toggle */}
       <ThemeToggle />
 
-      {/* Authentication */}
       {user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="relative rounded-full" size="icon">
+            <Button
+              variant="outline"
+              className="relative rounded-full"
+              size="icon"
+            >
               <Avatar className="h-9 w-9">
-                <AvatarImage
-                  alt={userData?.displayName || "User"}
-                />
+                <AvatarImage alt={userData?.displayName || "User"} />
                 <AvatarFallback>
                   {userData?.displayName ? (
-                    userData.displayName[0]
+                    userData.displayName[0].toUpperCase()
                   ) : (
                     <User className="h-4 w-4" />
                   )}
@@ -289,15 +273,17 @@ const DesktopNavigation = ({
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 bg-muted p-4" align="end" forceMount>
+          <DropdownMenuContent
+            className="w-64 bg-muted p-4"
+            align="end"
+            forceMount
+          >
             <div className="flex flex-col items-center space-y-2 mb-4">
               <Avatar className="h-16 w-16">
-                <AvatarImage
-                  alt={user?.role || "User"}
-                />
+                <AvatarImage alt={userData?.displayName || "User"} />
                 <AvatarFallback>
-                  {userData?.role ? (
-                    userData.role[0]
+                  {userData?.displayName ? (
+                    userData.displayName[0].toUpperCase()
                   ) : (
                     <User className="h-8 w-8" />
                   )}
@@ -305,10 +291,13 @@ const DesktopNavigation = ({
               </Avatar>
               <div className="text-center">
                 <p className="font-semibold text-lg">
-                  {userData?.role || "Role"}
+                  {userData?.displayName || "User"}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {userData?.email || "demo.user@example.com"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Role: {userData?.role || "N/A"}
                 </p>
               </div>
             </div>
@@ -365,46 +354,43 @@ DesktopNavigation.propTypes = {
   loading: PropTypes.bool.isRequired,
 };
 
-// Main Nav component
-
+// **Main Nav Component**
 const Nav = () => {
   const { user, loading } = useAuth();
   const [search, setSearch] = useState("");
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const token = await user.getIdToken();
         localStorage.setItem("authToken", token);
-        
+
         try {
           const response = await fetch("http://localhost:3000/api/user", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
-  
+
           if (!response.ok) {
             throw new Error("Failed to fetch user data");
           }
-  
+
           const data = await response.json();
           setUserData(data.user);
         } catch (error) {
           console.error("Error fetching user data:", error);
-          setError("Failed to fetch user data. Please try again.");
         }
       } else {
         localStorage.removeItem("authToken");
-        setUserData(null); // Clear user data if the user logs out
+        setUserData(null);
       }
     });
-  
+
     return () => unsubscribe();
   }, []);
-  
 
   const handleLogout = async () => {
     try {
@@ -416,7 +402,7 @@ const Nav = () => {
   };
 
   const handleDashboardClick = () => {
-    console.log("User Role:", user?.role || "No role assigned");
+    console.log("User Role:", userData?.role || "No role assigned");
     navigate("/dashboard");
   };
 

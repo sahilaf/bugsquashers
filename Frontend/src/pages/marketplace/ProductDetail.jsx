@@ -27,7 +27,7 @@ const ProductReview = ({ review }) => {
   const renderStars = (rating) =>
     [...Array(5)].map((_, i) => (
       <Star
-        key={`star-${rating}-${i}`} // Combine rating and index to create a unique key
+        key={`star-${rating}-${i}`}
         className={`h-4 w-4 ${
           i < rating
             ? "fill-primary text-primary"
@@ -88,7 +88,7 @@ const ProductCard = ({ product }) => {
   const renderStars = (rating) =>
     [...Array(5)].map((_, i) => (
       <Star
-        key={`star-${rating}-${i}`} // Use both rating and index to make the key unique
+        key={`star-${rating}-${i}`}
         className={`h-3 w-3 ${
           i < rating
             ? "fill-primary text-primary"
@@ -238,6 +238,7 @@ const ProductDetail = () => {
   const handleWriteReview = () => {
     alert("Opening review form");
   };
+
   const ratingData = [
     { rating: 5, value: 75, percentage: "75%" },
     { rating: 4, value: 15, percentage: "15%" },
@@ -245,6 +246,7 @@ const ProductDetail = () => {
     { rating: 2, value: 3, percentage: "3%" },
     { rating: 1, value: 2, percentage: "2%" },
   ];
+
   return (
     <div className="container mx-auto px-4 py-8 mt-10">
       {/* Breadcrumb */}
@@ -252,11 +254,11 @@ const ProductDetail = () => {
         <a href="/" className="hover:underline">
           Shop all
         </a>
-        <span>&gt;</span>
+        <span></span>
         <a href="/" className="hover:underline">
           Groceries
         </a>
-        <span>&gt;</span>
+        <span></span>
         <span>Organic Apples</span>
       </div>
 
@@ -298,7 +300,7 @@ const ProductDetail = () => {
                 }`}
                 onClick={() => alert(`Navigate to image ${i + 1}`)}
                 style={{ cursor: "pointer" }}
-                aria-label={`Navigate to image ${i + 1}`} // Provide an accessible label
+                aria-label={`Navigate to image ${i + 1}`}
               />
             ))}
           </div>
@@ -313,7 +315,7 @@ const ProductDetail = () => {
                 {["star1", "star2", "star3", "star4", "star5"].map(
                   (star, i) => (
                     <Star
-                      key={star} // Use a static string as key
+                      key={star}
                       className={`h-5 w-5 ${
                         i < 4
                           ? "fill-primary text-primary"
@@ -323,7 +325,6 @@ const ProductDetail = () => {
                   )
                 )}
               </div>
-
               <span className="text-sm text-muted-foreground">
                 (4.5 stars) • 20 reviews
               </span>
@@ -387,7 +388,7 @@ const ProductDetail = () => {
               </label>
               <Input
                 type="number"
-                id="quantity" // Ensure this ID matches the label's htmlFor
+                id="quantity"
                 value={quantity}
                 onChange={handleQuantityChange}
                 min="1"
@@ -442,9 +443,7 @@ const ProductDetail = () => {
           </TabsContent>
           <TabsContent value="returns" className="mt-4">
             <p className="text-muted-foreground">
-              If you&apos;re not satisfied with your purchase, you can return it
-              within 30 days for a full refund. Simply contact our customer
-              service for assistance. Your satisfaction is our priority!
+              {"If you're not satisfied with your purchase, you can return it within 30 days for a full refund. Simply contact our customer service for assistance. Your satisfaction is our priority!"}
             </p>
           </TabsContent>
         </Tabs>
@@ -463,7 +462,7 @@ const ProductDetail = () => {
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
-                      key={summary}
+                      key={i}
                       className={`h-5 w-5 ${
                         i < 4
                           ? "fill-primary text-primary"
@@ -490,16 +489,15 @@ const ProductDetail = () => {
               ))}
             </div>
 
-            <Button className="w-full " onClick={handleWriteReview}>
+            <Button className="w-full" onClick={handleWriteReview}>
               Write a Review
             </Button>
           </div>
 
           {/* Review List */}
-          {/* Review List */}
           <div className="md:col-span-2 space-y-6">
-            {reviews.map((review) => (
-              <ProductReview key={review.id} review={review} />
+            {reviews.map((review, index) => (
+              <ProductReview key={index} review={review} />
             ))}
 
             <Button
@@ -538,8 +536,8 @@ const ProductDetail = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {suggestedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+          {suggestedProducts.map((product, index) => (
+            <ProductCard key={index} product={product} />
           ))}
         </div>
       </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { cn } from "../../lib/utils";
 import { Avatar, AvatarImage, AvatarFallback } from "../../components/ui/avatar";
@@ -17,38 +17,32 @@ export const InfiniteMovingCards = ({
   const scrollerRef = useRef(null);
   const [start, setStart] = useState(false);
 
+  // Effect to duplicate items for infinite scrolling (runs once on mount)
   useEffect(() => {
-    addAnimation();
-  }, []);
-
-  const addAnimation = () => {
     if (containerRef.current && scrollerRef.current) {
       const scrollerContent = Array.from(scrollerRef.current.children);
 
-      // Duplicate items for seamless scrolling
       scrollerContent.forEach((item) => {
         const duplicatedItem = item.cloneNode(true);
-        if (scrollerRef.current) {
-          scrollerRef.current.appendChild(duplicatedItem);
-        }
+        scrollerRef.current.appendChild(duplicatedItem);
       });
 
-      getDirection();
-      getSpeed();
       setStart(true);
     }
-  };
+  }, []); // Empty dependency array: runs only once
 
-  const getDirection = () => {
+  // Effect to set animation direction
+  useEffect(() => {
     if (containerRef.current) {
       containerRef.current.style.setProperty(
         "--animation-direction",
         direction === "left" ? "forwards" : "reverse"
       );
     }
-  };
+  }, [direction]); // Depends on direction prop
 
-  const getSpeed = () => {
+  // Effect to set animation speed
+  useEffect(() => {
     if (containerRef.current) {
       let animationDuration;
 
@@ -71,7 +65,7 @@ export const InfiniteMovingCards = ({
         animationDuration
       );
     }
-  };
+  }, [speed]); // Depends on speed prop
 
   return (
     <div
@@ -92,7 +86,7 @@ export const InfiniteMovingCards = ({
         {items.map((item, idx) => (
           <li
             className="w-[350px] max-w-full relative rounded-2xl border border-b flex-shrink-0 border-secondary px-8 py-6 md:w-[450px] bg-card"
-            key={`${item.name}-${idx}`} // Use a unique key combining item.name and index
+            key={`${item.name}-${idx}`}
           >
             <blockquote>
               <div
@@ -103,7 +97,6 @@ export const InfiniteMovingCards = ({
                 {item.quote}
               </span>
               <div className="relative z-20 mt-6 flex flex-row items-center gap-4">
-                {/* Avatar */}
                 <Avatar className="w-12 h-12">
                   <AvatarImage src={item.avatar} alt={item.name} />
                   <AvatarFallback className="bg-primary/10 text-primary">
@@ -119,11 +112,10 @@ export const InfiniteMovingCards = ({
                     {item.title}
                   </span>
 
-                  {/* Star Rating */}
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
-                        key={`${item.name}-star-${i}`} // Use a unique key combining item.name and index
+                        key={`${item.name}-star-${i}`}
                         className={cn(
                           "w-4 h-4",
                           i < item.rating
