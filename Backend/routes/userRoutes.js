@@ -15,18 +15,28 @@ router.post(
   ],
   async (req, res) => {
     try {
+      // Validate request body
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ message: "Validation failed", errors: errors.array() });
       }
 
-      const { uid, fullName, email, role = "User" } = req.body;
-      const existingUser = await User.findOne({ $or: [{ uid }, { email }] });
+      // Securely extract and sanitize input
+      const uid = String(req.body.uid).trim();
+      const fullName = String(req.body.fullName).trim();
+      const email = String(req.body.email).trim().toLowerCase(); // Normalize email
+      const role = req.body.role || "User"; // Default role to "User"
+
+      // Prevent NoSQL Injection using explicit $eq
+      const existingUser = await User.findOne({
+        $or: [{ uid: { $eq: uid } }, { email: { $eq: email } }],
+      });
 
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
       }
 
+      // Create user based on role
       let newUser;
       switch (role) {
         case "Admin":
@@ -39,12 +49,21 @@ router.post(
           newUser = new Deliveryman({ uid, fullName, email, role, vehicleType: req.body.vehicleType, assignedArea: req.body.assignedArea });
           break;
         case "Farmer":
-          newUser = new Farmer({ uid, fullName, email, role, farmName: req.body.farmName, farmLocation: req.body.farmLocation, crops: req.body.crops || [] });
+          newUser = new Farmer({
+            uid,
+            fullName,
+            email,
+            role,
+            farmName: req.body.farmName,
+            farmLocation: req.body.farmLocation,
+            crops: Array.isArray(req.body.crops) ? req.body.crops : [], // Ensure crops is an array
+          });
           break;
         default:
           newUser = new User({ uid, fullName, email, role });
       }
 
+      // Save user to database
       await newUser.save();
       res.status(201).json({ message: "User created successfully", user: newUser });
     } catch (error) {
@@ -57,7 +76,7 @@ router.post(
 // Protected route to fetch user data based on Firebase token
 router.get("/user", verifyToken, async (req, res) => {
   try {
-    const user = await User.findOne({ uid: req.user.uid });
+    const user = await User.findOne({ uid: { $eq: req.user.uid } });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

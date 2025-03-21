@@ -238,7 +238,7 @@ const ProductDetail = () => {
   const handleWriteReview = () => {
     alert("Opening review form");
   };
-
+  const stars = Array.from({ length: 5 }, (_, i) => ({ id: `star-${i}` }));
   const ratingData = [
     { rating: 5, value: 75, percentage: "75%" },
     { rating: 4, value: 15, percentage: "15%" },
@@ -443,7 +443,9 @@ const ProductDetail = () => {
           </TabsContent>
           <TabsContent value="returns" className="mt-4">
             <p className="text-muted-foreground">
-              {"If you're not satisfied with your purchase, you can return it within 30 days for a full refund. Simply contact our customer service for assistance. Your satisfaction is our priority!"}
+              {
+                "If you're not satisfied with your purchase, you can return it within 30 days for a full refund. Simply contact our customer service for assistance. Your satisfaction is our priority!"
+              }
             </p>
           </TabsContent>
         </Tabs>
@@ -460,11 +462,11 @@ const ProductDetail = () => {
               <div className="text-4xl font-bold">4.5</div>
               <div className="flex flex-col">
                 <div className="flex">
-                  {[...Array(5)].map((_, i) => (
+                  {stars.map((star, index) => (
                     <Star
-                      key={i}
+                      key={star.id}
                       className={`h-5 w-5 ${
-                        i < 4
+                        index < 4
                           ? "fill-primary text-primary"
                           : "fill-muted stroke-muted-foreground"
                       }`}
@@ -496,8 +498,8 @@ const ProductDetail = () => {
 
           {/* Review List */}
           <div className="md:col-span-2 space-y-6">
-            {reviews.map((review, index) => (
-              <ProductReview key={index} review={review} />
+            {reviews.map((review) => (
+              <ProductReview key={review.id} review={review} />
             ))}
 
             <Button
@@ -536,8 +538,8 @@ const ProductDetail = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {suggestedProducts.map((product, index) => (
-            <ProductCard key={index} product={product} />
+          {suggestedProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
