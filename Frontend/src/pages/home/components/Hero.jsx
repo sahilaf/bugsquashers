@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Lottie from "react-lottie-player";
-import SplitText from "./SplitText/SplitText";
+import SplitText from "./SplitText";
 import HeroAnimation from "../assets/HeroAnimation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "../../../components/ui/button";

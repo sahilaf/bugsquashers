@@ -1,0 +1,45 @@
+[
+    {
+      "image": "/Bento1.jpg",
+      "title": "Fresh Produce",
+      "subtitle": "Farm-fresh vegetables and fruits",
+      "description": "Discover locally sourced, seasonal produce picked at peak freshness. Our selection includes organic options and rare varieties.",
+      "card": "col-span-1 row-span-1 bg-yellow h-60 md:h-72 rounded-md relative overflow-hidden group"
+    },
+    {
+      "image": "/Bento2.jpg",
+      "title": "Special Offers",
+      "subtitle": "Up to 60% off on selected items",
+      "description": "Weekly deals on premium products. Members get early access to exclusive discounts and bundle offers.",
+      "card": "md:col-span-1 col-span-1 md:row-span-2 row-span-1 bg-action_red rounded-md relative overflow-hidden group"
+    },
+    {
+      "image": "/Bento3.jpg",
+      "title": "Dairy & Eggs",
+      "subtitle": "Fresh dairy products daily",
+      "description": "Sourced from local farms, our dairy selection includes organic milk, artisanal cheese, and free-range eggs.",
+      "card": "col-span-1 row-span-1 bg-primary rounded-md relative overflow-hidden group"
+    },
+    {
+      "image": "/Bento4.jpg",
+      "title": "Pantry Essentials",
+      "subtitle": "Stock up on everyday basics",
+      "description": "From grains to canned goods, find everything you need to keep your pantry well-stocked with quality essentials.",
+      "card": "md:col-span-1 col-span-1 md:row-span-2 row-span-1 bg-primary_light rounded-md relative overflow-hidden group"
+    },
+    {
+      "image": "/Bento5.jpg",
+      "title": "Snacks & Treats",
+      "subtitle": "Stock up on everyday basics",
+      "description": "Explore our curated selection of gourmet snacks, chocolates, and healthy alternatives for guilt-free indulgence.",
+      "card": "col-span-1 row-span-1 bg-yellow rounded-md relative overflow-hidden group"
+    },
+    {
+      "image": "/Bento6.jpg",
+      "title": "Organic Selection",
+      "subtitle": "Premium organic products for healthy living",
+      "description": "Certified organic products from trusted suppliers, including fresh produce, pantry items, and wellness products.",
+      "card": "md:col-span-2 col-span-1 row-span-1 bg-green-900 rounded-md relative overflow-hidden group"
+    }
+  ]
+  
