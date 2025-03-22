@@ -27,7 +27,7 @@
     --border: 210, 0%, 85%; /* Light gray for borders */
     --input: 210, 0%, 85%; /* Light gray for input fields */
     --ring: 41, 91%, 53%; /* secondary color for focus rings */
-    --radius: 0.5rem; /* Border radius */
+    --radius: .75rem; /* Border radius */
 
     --card: 0, 0%, 98%; /* Light gray for cards */
     --card-foreground: 150, 10%, 5%; /* Dark gray-green for card text */
@@ -62,7 +62,7 @@
     --border: 41, 87%, 45%; 
     --input: 41, 87%, 45%; 
     --ring: 41, 87%, 45%; 
-    --radius: 0.5rem;
+    --radius: .75rem;
 
     --card: 240, 100%, 1%; 
     --card-foreground: 220, 14%, 95%;

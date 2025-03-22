@@ -1,5 +1,6 @@
 [
     {
+      "id": "bento1",
       "image": "/Bento1.jpg",
       "title": "Fresh Produce",
       "subtitle": "Farm-fresh vegetables and fruits",
@@ -7,6 +8,7 @@
       "card": "col-span-1 row-span-1 bg-yellow h-60 md:h-72 rounded-md relative overflow-hidden group"
     },
     {
+      "id": "bento2",
       "image": "/Bento2.jpg",
       "title": "Special Offers",
       "subtitle": "Up to 60% off on selected items",
@@ -14,6 +16,7 @@
       "card": "md:col-span-1 col-span-1 md:row-span-2 row-span-1 bg-action_red rounded-md relative overflow-hidden group"
     },
     {
+      "id": "bento3",
       "image": "/Bento3.jpg",
       "title": "Dairy & Eggs",
       "subtitle": "Fresh dairy products daily",
@@ -21,6 +24,7 @@
       "card": "col-span-1 row-span-1 bg-primary rounded-md relative overflow-hidden group"
     },
     {
+      "id": "bento4",
       "image": "/Bento4.jpg",
       "title": "Pantry Essentials",
       "subtitle": "Stock up on everyday basics",
@@ -28,6 +32,7 @@
       "card": "md:col-span-1 col-span-1 md:row-span-2 row-span-1 bg-primary_light rounded-md relative overflow-hidden group"
     },
     {
+      "id": "bento5",
       "image": "/Bento5.jpg",
       "title": "Snacks & Treats",
       "subtitle": "Stock up on everyday basics",
@@ -35,6 +40,7 @@
       "card": "col-span-1 row-span-1 bg-yellow rounded-md relative overflow-hidden group"
     },
     {
+      "id": "bento6",
       "image": "/Bento6.jpg",
       "title": "Organic Selection",
       "subtitle": "Premium organic products for healthy living",

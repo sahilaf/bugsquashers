@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 
-const BentoCard = ({ image, title, subtitle, description, card }) => {
+const BentoCard = ({ image, title, subtitle, description }) => {
   return (
-    <div className={`${card}`}>
+    < >
       <img
         src={image}
         alt={title}
@@ -20,7 +20,7 @@ const BentoCard = ({ image, title, subtitle, description, card }) => {
           {description}
         </p>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -29,8 +29,7 @@ BentoCard.propTypes = {
   image: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   subtitle: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  card: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired
 };
 
 export default BentoCard;

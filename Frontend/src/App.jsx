@@ -11,7 +11,7 @@ import Customer from "./pages/dashboard/Customer";
 import RetailerDash from "./pages/dashboard/RetailerDash";
 import DeliveryDash from "./pages/dashboard/DeliveryDash";
 import FarmerDash from "./pages/dashboard/FarmerDash";
-import NotFound from "./pages/NotFound";
+import NotFound from "./components/NotFound";
 import Cart from "./pages/cart/Cart";
 import ProductDetail from "./pages/marketplace/ProductDetail";
 import { Toaster } from "react-hot-toast";
