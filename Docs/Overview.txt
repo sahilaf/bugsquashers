@@ -1,1 +1,93 @@
 Feature List
+
+
+Core Features
+ - Real-time Price Tracking – Live updates on wholesale and retail grocery prices.
+ - Location-Based Pricing – Fair price estimation based on user location.
+ - User Authentication – Secure login with email, phone, or social accounts.
+ - Role-Based Access Control – Different interfaces for wholesalers, retailers, and consumers.
+ - Dashboard for Retailers & Farmers – Insights on sales, demand trends, and inventory.
+
+
+AI-Powered Features
+ - Food Recognition & Recipe Suggestion – Identify food items via images and suggest recipes.
+ - AI-Based Product Recommendation – Suggest grocery products based on recipes and user preferences.
+ - Data Analysis & Market Insights – AI-driven analytics for price trends and demand forecasting.
+
+
+E-commerce & Shopping Features
+ - Shopping Cart & Wishlist – Save and purchase favorite products.
+ - Secure Payment System – Multiple payment options with encryption.
+ - Review & Rating System – User feedback on products and sellers.
+
+
+User Flow
+
+1. User Onboarding & Authentication
+
+Sign Up / Login
+ - Users register via Email, Phone, or Social login.
+ - Authentication via Firebase/Auth0.
+ - Role-Based Access Control (RBAC)
+ - Users redirected to different dashboards based on roles (Consumer, Retailer, Wholesaler, Farmer, Delivery Partner, Admin).
+
+
+2. Consumer Journey
+
+2.1 Browsing & Product Discovery
+ - Search for products or scan items using AI Food Recognition.
+ - View product details (pricing, seller, availability).
+ - Get recipe suggestions based on recognized food items.
+ - Add missing ingredients from the recipe to the cart.
+
+2.2 Shopping & Checkout
+ - Add products to Shopping Cart or Wishlist.
+ - Choose a delivery method (Home Delivery or Pickup).
+ - Secure payment via UPI, Card, Wallets, or COD.
+ - Receive order confirmation & tracking updates.
+
+2.3 Order Tracking & Delivery
+ - View order status (Processing, Shipped, Out for Delivery, Delivered).
+ - Live delivery tracking with ETA.
+
+2.4 Post-Purchase Actions
+ - Leave reviews & ratings for products and retailers.
+ - Get AI-based personalized grocery recommendations.
+
+
+3. Retailer & Wholesaler Journey
+
+3.1 Inventory & Price Management
+ - Add/manage product listings.
+ - Update pricing dynamically (location-based fair pricing).
+
+3.2 Order Processing
+ - Receive orders from consumers or wholesalers.
+ - Accept or reject orders based on stock availability.
+ - Assign orders to Delivery Partners.
+
+3.3 Dashboard & Analytics
+ - View real-time price trends.
+ - Track order history & revenue.
+ - AI-based demand forecasting & stock suggestions.
+
+
+4. Farmer Journey
+
+ - List bulk agricultural products for wholesalers & retailers.
+ - View market pricing trends to decide pricing.
+ - Receive bulk orders and schedule logistics for delivery.
+
+
+5. Delivery Partner Journey
+
+ - Accept delivery requests from retailers.
+ - Live route tracking for optimized delivery.
+ - Update delivery status (Picked Up → Out for Delivery → Delivered).
+
+
+6. Admin Panel (Superuser)
+
+ - Monitor user activity, transactions, and orders.
+ - Manage disputes, refunds, and issue resolutions.
+ - View analytics on marketplace trends and performance.
