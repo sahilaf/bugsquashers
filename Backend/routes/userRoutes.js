@@ -3,10 +3,25 @@ const router = express.Router();
 const { verifyToken } = require("../middleware/authMiddleware");
 const { User, Admin, Shopkeeper, Deliveryman, Farmer } = require("../models/User");
 const { body, validationResult } = require("express-validator");
+const rateLimit = require("express-rate-limit");
 
-// User Signup Route
+// Define rate limiters
+const signupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit to 5 signup requests per windowMs per IP
+  message: { message: "Too many signup attempts, please try again later." },
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit to 100 API requests per windowMs per IP
+  message: { message: "Too many requests, please try again later." },
+});
+
+// Apply rate limiter to signup route
 router.post(
   "/signup",
+  signupLimiter,
   [
     body("uid").trim().isLength({ min: 1 }).escape(),
     body("fullName").trim().isLength({ min: 1 }).escape(),
@@ -24,10 +39,10 @@ router.post(
       // Securely extract and sanitize input
       const uid = String(req.body.uid).trim();
       const fullName = String(req.body.fullName).trim();
-      const email = String(req.body.email).trim().toLowerCase(); // Normalize email
-      const role = req.body.role || "User"; // Default role to "User"
+      const email = String(req.body.email).trim().toLowerCase();
+      const role = req.body.role || "User";
 
-      // Prevent NoSQL Injection using explicit $eq
+      // Prevent NoSQL Injection
       const existingUser = await User.findOne({
         $or: [{ uid: { $eq: uid } }, { email: { $eq: email } }],
       });
@@ -56,7 +71,7 @@ router.post(
             role,
             farmName: req.body.farmName,
             farmLocation: req.body.farmLocation,
-            crops: Array.isArray(req.body.crops) ? req.body.crops : [], // Ensure crops is an array
+            crops: Array.isArray(req.body.crops) ? req.body.crops : [],
           });
           break;
         default:
@@ -72,6 +87,9 @@ router.post(
     }
   }
 );
+
+// Apply rate limiter to all other API routes
+router.use(apiLimiter);
 
 // Protected route to fetch user data based on Firebase token
 router.get("/user", verifyToken, async (req, res) => {
