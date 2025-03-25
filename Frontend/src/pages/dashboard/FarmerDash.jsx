@@ -47,110 +47,19 @@ import {
   DialogDescription,
 } from "../../components/ui/dialog";
 
-// Demo Data
+// Demo Data (for Orders, Reviews, Stats - keeping these as fallback)
 const demoOrders = [
-  {
-    id: "1",
-    crop: "Wheat",
-    quantity: "100 kg",
-    price: "$500",
-    status: "Pending",
-    date: "2025-03-01",
-  },
-  {
-    id: "2",
-    crop: "Rice",
-    quantity: "50 kg",
-    price: "$300",
-    status: "Delivered",
-    date: "2025-02-28",
-  },
-  {
-    id: "3",
-    crop: "Corn",
-    quantity: "200 kg",
-    price: "$600",
-    status: "Processing",
-    date: "2025-03-05",
-  },
-  {
-    id: "4",
-    crop: "Barley",
-    quantity: "75 kg",
-    price: "$375",
-    status: "Pending",
-    date: "2025-03-07",
-  },
-  {
-    id: "5",
-    crop: "Soybeans",
-    quantity: "150 kg",
-    price: "$750",
-    status: "Delivered",
-    date: "2025-02-25",
-  },
-];
-
-const demoCrops = [
-  {
-    id: "1",
-    name: "Tomato",
-    price: "$10/kg",
-    stock: "500 kg",
-    season: "Summer",
-  },
-  {
-    id: "2",
-    name: "Potato",
-    price: "$5/kg",
-    stock: "1200 kg",
-    season: "All Year",
-  },
-  {
-    id: "3",
-    name: "Carrot",
-    price: "$3/kg",
-    stock: "800 kg",
-    season: "Winter",
-  },
-  {
-    id: "4",
-    name: "Lettuce",
-    price: "$7/kg",
-    stock: "300 kg",
-    season: "Spring",
-  },
-  {
-    id: "5",
-    name: "Cucumber",
-    price: "$4/kg",
-    stock: "600 kg",
-    season: "Summer",
-  },
+  { id: "1", crop: "Wheat", quantity: "100 kg", price: "$500", status: "Pending", date: "2025-03-01" },
+  { id: "2", crop: "Rice", quantity: "50 kg", price: "$300", status: "Delivered", date: "2025-02-28" },
+  { id: "3", crop: "Corn", quantity: "200 kg", price: "$600", status: "Processing", date: "2025-03-05" },
+  { id: "4", crop: "Barley", quantity: "75 kg", price: "$375", status: "Pending", date: "2025-03-07" },
+  { id: "5", crop: "Soybeans", quantity: "150 kg", price: "$750", status: "Delivered", date: "2025-02-25" },
 ];
 
 const demoReviews = [
-  {
-    id: "1",
-    customer: "John Doe",
-    rating: 5,
-    comment: "Excellent quality produce!",
-    date: "2025-02-28",
-  },
-  {
-    id: "2",
-    customer: "Jane Smith",
-    rating: 4,
-    comment: "Fresh and tasty vegetables.",
-    date: "2025-03-01",
-  },
-  {
-    id: "3",
-    customer: "Robert Johnson",
-    rating: 5,
-    comment: "Best organic farm in the region!",
-    date: "2025-03-05",
-  },
+  { id: "1", customer: "John Doe", rating: 5, comment: "Excellent quality produce!", date: "2025-02-28" },
+  { id: "2", customer: "Jane Smith", rating: 4, comment: "Fresh and tasty vegetables.", date: "2025-03-01" },
+  { id: "3", customer: "Robert Johnson", rating: 5, comment: "Best organic farm in the region!", date: "2025-03-05" },
 ];
 
 const demoStats = {
@@ -173,7 +82,7 @@ const demoStats = {
 
 export default function FarmerDashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [crops, setCrops] = useState(demoCrops);
+  const [crops, setCrops] = useState([]); // Moved crops state here for simplicity
   const [selectedCrop, setSelectedCrop] = useState(null);
 
   const handleAddOrUpdateCrop = (cropData) => {
@@ -202,14 +111,12 @@ export default function FarmerDashboard() {
     <div className="container mx-auto p-4 space-y-6 mt-20">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Farmer Dashboard
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Farmer Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Calendar className="mr-2 h-4 w-4" />
-            March 8, 2025
+            March 25, 2025
           </Button>
           <Button size="sm" onClick={() => setIsDialogOpen(true)}>
             <Plant className="mr-2 h-4 w-4" />
@@ -278,7 +185,7 @@ export default function FarmerDashboard() {
         </TabsContent>
 
         <TabsContent value="crops" className="space-y-4">
-          <CropsDashboard crops={crops} onEditCrop={handleEditCrop} />
+          <CropsDashboard crops={crops} setCrops={setCrops} onEditCrop={handleEditCrop} />
         </TabsContent>
 
         <TabsContent value="reviews" className="space-y-4">
@@ -321,9 +228,7 @@ function StatCard({ title, value, description, icon, trend, trendDirection }) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="rounded-full bg-muted p-2">{icon}</div>
-          <div
-            className={`text-sm font-medium flex items-center ${trendColor}`}
-          >
+          <div className={`text-sm font-medium flex items-center ${trendColor}`}>
             {trend}
             {trendIcon}
           </div>
@@ -356,7 +261,7 @@ function OrdersDashboard() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Demo data for now
       setOrders(demoOrders);
     } catch {
       setError("Failed to fetch orders. Please try again.");
@@ -373,45 +278,35 @@ function OrdersDashboard() {
     fetchOrders();
   };
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+  if (error) return <p className="text-red-500">{error}</p>;
 
   const getBadgeVariant = (status) => {
-    if (status === "Delivered") {
-      return "success";
-    }
-    if (status === "Processing") {
-      return "warning";
-    }
+    if (status === "Delivered") return "success";
+    if (status === "Processing") return "warning";
     return "default";
   };
 
   const renderOrderRows = () => {
     if (loading) {
-      return [
-        <TableRow key="loading">
+      return (
+        <TableRow>
           <TableCell colSpan={6} className="text-center py-8">
             <Loader2 className="animate-spin mx-auto h-6 w-6" />
-            <p className="text-sm text-muted-foreground mt-2">
-              Loading orders...
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">Loading orders...</p>
           </TableCell>
-        </TableRow>,
-      ];
+        </TableRow>
+      );
     }
 
     if (orders.length === 0) {
-      return [
-        <TableRow key="no-orders">
+      return (
+        <TableRow>
           <TableCell colSpan={6} className="text-center py-8">
             <Clipboard className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-2">
-              No orders found.
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">No orders found.</p>
           </TableCell>
-        </TableRow>,
-      ];
+        </TableRow>
+      );
     }
 
     return orders.map((order) => (
@@ -442,21 +337,10 @@ function OrdersDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-xl font-bold">Recent Orders</CardTitle>
-            <CardDescription>
-              Manage and track your customer orders
-            </CardDescription>
+            <CardDescription>Manage and track your customer orders</CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>
@@ -476,28 +360,28 @@ function OrdersDashboard() {
         </Table>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {orders.length} of {orders.length} orders
-        </p>
-        <Button variant="outline" size="sm">
-          View All Orders
-        </Button>
+        <p className="text-sm text-muted-foreground">Showing {orders.length} of {orders.length} orders</p>
+        <Button variant="outline" size="sm">View All Orders</Button>
       </CardFooter>
     </Card>
   );
 }
 
 // CropsDashboard Component
-function CropsDashboard({ crops, onEditCrop }) {
+function CropsDashboard({ crops, setCrops, onEditCrop }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const fetchCrops = async () => {
     try {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-    } catch {
-      setError("Failed to fetch crops. Please try again.");
+      const response = await fetch("http://localhost:3000/api/crops"); // Direct backend URL
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      setCrops(data); // Update state with fetched data
+    } catch (error) {
+      setError("Failed to fetch crops: " + error.message);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -511,9 +395,7 @@ function CropsDashboard({ crops, onEditCrop }) {
     fetchCrops();
   };
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
-  }
+  if (error) return <p className="text-red-500">{error}</p>;
 
   const renderCrops = () => {
     if (loading) {
@@ -521,9 +403,7 @@ function CropsDashboard({ crops, onEditCrop }) {
         <TableRow>
           <TableCell colSpan={5} className="text-center py-8">
             <Loader2 className="animate-spin mx-auto h-6 w-6" />
-            <p className="text-sm text-muted-foreground mt-2">
-              Loading crops...
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">Loading crops...</p>
           </TableCell>
         </TableRow>
       );
@@ -534,44 +414,34 @@ function CropsDashboard({ crops, onEditCrop }) {
         <TableRow>
           <TableCell colSpan={5} className="text-center py-8">
             <Plant className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-2">
-              No crops found.
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">No crops found.</p>
           </TableCell>
         </TableRow>
       );
     }
 
-    return (
-      <>
-        {crops.map((crop) => (
-          <TableRow key={crop.id}>
-            <TableCell className="font-medium">{crop.name}</TableCell>
-            <TableCell>{crop.price}</TableCell>
-            <TableCell>{crop.stock}</TableCell>
-            <TableCell>{crop.season}</TableCell>
-            <TableCell>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditCrop(crop)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => alert(`Update stock for crop ${crop.id}`)}
-                >
-                  Update Stock
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </>
-    );
+    return crops.map((crop) => (
+      <TableRow key={crop._id || crop.id}> {/* Use _id from MongoDB */}
+        <TableCell className="font-medium">{crop.name}</TableCell>
+        <TableCell>{crop.price}</TableCell>
+        <TableCell>{crop.stock}</TableCell>
+        <TableCell>{crop.season}</TableCell>
+        <TableCell>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => onEditCrop(crop)}>
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => alert(`Update stock for crop ${crop._id || crop.id}`)}
+            >
+              Update Stock
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ));
   };
 
   return (
@@ -580,21 +450,10 @@ function CropsDashboard({ crops, onEditCrop }) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-xl font-bold">Crop Inventory</CardTitle>
-            <CardDescription>
-              Manage your crop inventory and pricing
-            </CardDescription>
+            <CardDescription>Manage your crop inventory and pricing</CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>
@@ -613,12 +472,8 @@ function CropsDashboard({ crops, onEditCrop }) {
         </Table>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {crops.length} of {crops.length} crops
-        </p>
-        <Button variant="outline" size="sm">
-          Add New Crop
-        </Button>
+        <p className="text-sm text-muted-foreground">Showing {crops.length} of {crops.length} crops</p>
+        <Button variant="outline" size="sm">Add New Crop</Button>
       </CardFooter>
     </Card>
   );
@@ -627,13 +482,14 @@ function CropsDashboard({ crops, onEditCrop }) {
 CropsDashboard.propTypes = {
   crops: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.string, // Allow _id or id
       name: PropTypes.string.isRequired,
       price: PropTypes.string.isRequired,
       stock: PropTypes.string.isRequired,
       season: PropTypes.string.isRequired,
     })
   ).isRequired,
+  setCrops: PropTypes.func.isRequired, // Added
   onEditCrop: PropTypes.func.isRequired,
 };
 
@@ -645,11 +501,10 @@ function ReviewsDashboard() {
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Demo data
       setReviews(demoReviews);
       setLoading(false);
     };
-
     fetchReviews();
   }, []);
 
@@ -658,9 +513,7 @@ function ReviewsDashboard() {
       return (
         <div className="flex flex-col items-center justify-center py-8">
           <Loader2 className="animate-spin h-6 w-6" />
-          <p className="text-sm text-muted-foreground mt-2">
-            Loading reviews...
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">Loading reviews...</p>
         </div>
       );
     }
@@ -669,9 +522,7 @@ function ReviewsDashboard() {
       return (
         <div className="flex flex-col items-center justify-center py-8">
           <Star className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground mt-2">
-            No reviews available yet.
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">No reviews available yet.</p>
         </div>
       );
     }
@@ -688,16 +539,10 @@ function ReviewsDashboard() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={`${review.id}-star-${i}`}
-                        className={`h-4 w-4 ${
-                          i < review.rating
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-gray-300"
-                        }`}
+                        className={`h-4 w-4 ${i < review.rating ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}`}
                       />
                     ))}
-                    <span className="ml-2 text-sm text-muted-foreground">
-                      {review.date}
-                    </span>
+                    <span className="ml-2 text-sm text-muted-foreground">{review.date}</span>
                   </div>
                 </div>
               </div>
@@ -713,21 +558,17 @@ function ReviewsDashboard() {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl font-bold">Customer Reviews</CardTitle>
-        <CardDescription>
-          See what your customers are saying about your products
-        </CardDescription>
+        <CardDescription>See what your customers are saying about your products</CardDescription>
       </CardHeader>
       <CardContent>{renderContent()}</CardContent>
       <CardFooter>
-        <Button variant="outline" size="sm" className="w-full">
-          View All Reviews
-        </Button>
+        <Button variant="outline" size="sm" className="w-full">View All Reviews</Button>
       </CardFooter>
     </Card>
   );
 }
 
-// StatisticsDashboard Component with fixed single quote
+// StatisticsDashboard Component
 function StatisticsDashboard() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -741,18 +582,10 @@ function StatisticsDashboard() {
             {demoStats.monthlySales.map((item) => {
               const height = (item.amount / 10000) * 100;
               return (
-                <div
-                  key={item.month}
-                  className="flex flex-col items-center gap-2"
-                >
-                  <div
-                    className="w-16 bg-primary rounded-t-md"
-                    style={{ height: `${height}%` }}
-                  ></div>
+                <div key={item.month} className="flex flex-col items-center gap-2">
+                  <div className="w-16 bg-primary rounded-t-md" style={{ height: `${height}%` }}></div>
                   <div className="text-sm font-medium">{item.month}</div>
-                  <div className="text-sm text-muted-foreground">
-                    ${item.amount}
-                  </div>
+                  <div className="text-sm text-muted-foreground">${item.amount}</div>
                 </div>
               );
             })}
@@ -771,9 +604,7 @@ function StatisticsDashboard() {
               <div key={item.crop} className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">{item.crop}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {item.percentage}%
-                  </span>
+                  <span className="text-sm text-muted-foreground">{item.percentage}%</span>
                 </div>
                 <Progress value={item.percentage} className="h-2" />
               </div>
@@ -784,20 +615,14 @@ function StatisticsDashboard() {
 
       <Card className="md:col-span-2">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">
-            Customer Demographics
-          </CardTitle>
-          <CardDescription>
-            Information about your customer base
-          </CardDescription>
+          <CardTitle className="text-xl font-bold">Customer Demographics</CardTitle>
+          <CardDescription>Information about your customer base</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <Users className="h-16 w-16 mx-auto text-muted-foreground" />
-              <p className="mt-4 text-lg font-medium">
-                Customer data visualization coming soon
-              </p>
+              <p className="mt-4 text-lg font-medium">Customer data visualization coming soon</p>
               <p className="text-sm text-muted-foreground mt-1">
                 We&apos;re working on gathering more detailed customer insights for you.
               </p>
@@ -812,13 +637,7 @@ function StatisticsDashboard() {
 // CropFormDialog Component
 function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
   const [formData, setFormData] = useState(
-    initialData || {
-      name: "",
-      price: "",
-      stock: "",
-      season: "",
-      image: null,
-    }
+    initialData || { name: "", price: "", stock: "", season: "", image: null }
   );
 
   const handleChange = (e) => {
@@ -828,34 +647,30 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, image: file }));
-    }
+    if (file) setFormData((prev) => ({ ...prev, image: file }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataObj = new FormData();
     formDataObj.append("name", formData.name);
     formDataObj.append("price", formData.price);
     formDataObj.append("stock", formData.stock);
     formDataObj.append("season", formData.season);
-    if (formData.image) {
-      formDataObj.append("image", formData.image);
-    }
+    if (formData.image) formDataObj.append("image", formData.image);
 
-    fetch("/api/crops", {
-      method: "POST",
-      body: formDataObj,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
-        onSubmit(data);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
+    try {
+      const response = await fetch("http://localhost:3000/api/crops", {
+        method: "POST",
+        body: formDataObj,
       });
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+      onSubmit(data); // Update state with the new crop
+    } catch (error) {
+      console.error("Error submitting crop:", error);
+      alert("Failed to add crop. Please try again.");
+    }
   };
 
   return (
@@ -869,9 +684,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Crop Name
-            </label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Crop Name</label>
             <input
               type="text"
               name="name"
@@ -883,9 +696,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-              Price
-            </label>
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>
             <input
               type="text"
               name="price"
@@ -897,9 +708,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
-              Stock
-            </label>
+            <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
             <input
               type="text"
               name="stock"
@@ -911,9 +720,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label htmlFor="season" className="block text-sm font-medium text-gray-700">
-              Season
-            </label>
+            <label htmlFor="season" className="block text-sm font-medium text-gray-700">Season</label>
             <input
               type="text"
               name="season"
@@ -925,9 +732,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             />
           </div>
           <div>
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-              Product Image
-            </label>
+            <label htmlFor="image" className="block text-sm font-medium text-gray-700">Product Image</label>
             <div className="mt-1 flex items-center">
               <label
                 htmlFor="image"
@@ -975,9 +780,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
             </div>
           </div>
           <div className="mt-6">
-            <Button type="submit" className="w-full">
-              {initialData ? "Update Crop" : "Add Crop"}
-            </Button>
+            <Button type="submit" className="w-full">{initialData ? "Update Crop" : "Add Crop"}</Button>
           </div>
         </form>
       </DialogContent>

@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
+const cropRoutes = require("./routes/cropRoutes"); // New import
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 
@@ -41,7 +42,10 @@ const apiLimiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 
-app.use("/api", apiLimiter); // Apply limiter to API routes
+app.use("/api", apiLimiter);
+
+// Serve uploaded images statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Connect to MongoDB
 mongoose
@@ -49,12 +53,12 @@ mongoose
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1); // Exit if MongoDB connection fails
+    process.exit(1);
   });
 
 // API Routes
 app.use("/api", userRoutes);
-
+app.use("/api", cropRoutes); // Add crop routes
 
 // Apply rate limiting to static file serving
 const staticLimiter = rateLimit({
