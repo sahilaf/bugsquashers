@@ -261,75 +261,27 @@ function OrdersDashboard() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Demo data for now
-      setOrders(demoOrders);
-    } catch {
+      const response = await fetch("http://localhost:3000/api/orders");
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
       setError("Failed to fetch orders. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Ensure handleRefresh function is defined
+  const handleRefresh = () => {
+    fetchOrders(); // Call fetchOrders to refresh data
+  };
+
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const handleRefresh = () => {
-    fetchOrders();
-  };
-
   if (error) return <p className="text-red-500">{error}</p>;
-
-  const getBadgeVariant = (status) => {
-    if (status === "Delivered") return "success";
-    if (status === "Processing") return "warning";
-    return "default";
-  };
-
-  const renderOrderRows = () => {
-    if (loading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center py-8">
-            <Loader2 className="animate-spin mx-auto h-6 w-6" />
-            <p className="text-sm text-muted-foreground mt-2">Loading orders...</p>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    if (orders.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={6} className="text-center py-8">
-            <Clipboard className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-2">No orders found.</p>
-          </TableCell>
-        </TableRow>
-      );
-    }
-
-    return orders.map((order) => (
-      <TableRow key={order.id}>
-        <TableCell className="font-medium">{order.crop}</TableCell>
-        <TableCell>{order.quantity}</TableCell>
-        <TableCell>{order.price}</TableCell>
-        <TableCell>{order.date}</TableCell>
-        <TableCell>
-          <Badge variant={getBadgeVariant(order.status)}>{order.status}</Badge>
-        </TableCell>
-        <TableCell>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => alert(`Update status for order ${order.id}`)}
-          >
-            Update
-          </Button>
-        </TableCell>
-      </TableRow>
-    ));
-  };
 
   return (
     <Card>
@@ -339,6 +291,7 @@ function OrdersDashboard() {
             <CardTitle className="text-xl font-bold">Recent Orders</CardTitle>
             <CardDescription>Manage and track your customer orders</CardDescription>
           </div>
+          {/* Ensure handleRefresh is called properly */}
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           </Button>
@@ -356,13 +309,37 @@ function OrdersDashboard() {
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>{renderOrderRows()}</TableBody>
+          <TableBody>
+            {orders.length > 0 ? (
+              orders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>{order.crop}</TableCell>
+                  <TableCell>{order.quantity}</TableCell>
+                  <TableCell>{order.price}</TableCell>
+                  <TableCell>{order.date}</TableCell>
+                  <TableCell>
+                    <Badge variant={order.status === "Delivered" ? "success" : order.status === "Processing" ? "warning" : "default"}>
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm">
+                      Update
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8">
+                  <Clipboard className="mx-auto h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mt-2">No orders found.</p>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <p className="text-sm text-muted-foreground">Showing {orders.length} of {orders.length} orders</p>
-        <Button variant="outline" size="sm">View All Orders</Button>
-      </CardFooter>
     </Card>
   );
 }
