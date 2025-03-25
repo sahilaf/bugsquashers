@@ -10,6 +10,7 @@
     "lint": "eslint --ext .js,.jsx ."
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.0",
     "@heroui/drawer": "^2.2.12",
     "@heroui/system": "^2.4.11",
     "@heroui/theme": "^2.4.11",
