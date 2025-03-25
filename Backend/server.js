@@ -3,7 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
-const retailerRoutes = require("./routes/retailerRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 
@@ -55,7 +54,7 @@ mongoose
 
 // API Routes
 app.use("/api", userRoutes);
-app.use("/api/retailer", retailerRoutes);
+
 
 // Apply rate limiting to static file serving
 const staticLimiter = rateLimit({
