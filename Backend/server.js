@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const cropRoutes = require("./routes/cropRoutes"); // New import
+const orderRoutes = require("./routes/orderRoutes"); // Added order routes
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 
@@ -58,7 +59,8 @@ mongoose
 
 // API Routes
 app.use("/api", userRoutes);
-app.use("/api", cropRoutes); // Add crop routes
+app.use("/api", cropRoutes);
+app.use("/api/orders", orderRoutes); // Added order routes
 
 // Apply rate limiting to static file serving
 const staticLimiter = rateLimit({
