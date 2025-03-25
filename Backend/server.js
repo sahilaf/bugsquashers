@@ -5,6 +5,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const retailerRoutes = require("./routes/retailerRoutes");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +17,7 @@ app.disable("x-powered-by");
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? ["https://your-production-domain.com"]
-    : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5175","http://localhost:5174"];
+    : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5175", "http://localhost:5174"];
 
 app.use(
   cors({
@@ -34,6 +35,15 @@ app.use(
 
 app.use(express.json());
 
+// Apply rate limiting to all API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: "Too many requests, please try again later.",
+});
+
+app.use("/api", apiLimiter); // Apply limiter to API routes
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/fairbasket")
@@ -47,8 +57,16 @@ mongoose
 app.use("/api", userRoutes);
 app.use("/api/retailer", retailerRoutes);
 
-// Serve static files in production (if needed for frontend)
+// Apply rate limiting to static file serving
+const staticLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limit static file requests
+  message: "Too many requests for static files, please try again later.",
+});
+
+// Serve static files in production with rate limiting
 if (process.env.NODE_ENV === "production") {
+  app.use(staticLimiter);
   app.use(express.static(path.join(__dirname, "client/build")));
   app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
