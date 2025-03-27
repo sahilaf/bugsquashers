@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types'; // Added import for PropTypes
 import { ArrowRight, MessageSquare, Star, ThumbsDown, ThumbsUp } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
-import { Button } from "../../../components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar"
-import { Badge } from "../../../components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs"
-import { Progress } from "../../../components/ui/progress"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar"
+import { Badge } from "../../../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Progress } from "../../../../components/ui/progress"
 
 export function ReviewsDashboard() {
   return (

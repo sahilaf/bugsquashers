@@ -2,7 +2,7 @@
 import React from "react";
 import { Badge } from "../../../components/ui/badge";
 import { InfiniteMovingCards } from "../../../components/ui/infinite-moving-cards";
-import testimonialsData from "../data/testimonialsData.json"; // Adjust the path as needed
+import {testimonialsData} from "../data/data"; // Adjust the path as needed
 
 const TestimonialsSection = () => {
   return (

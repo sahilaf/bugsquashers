@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { TrendingDown } from "lucide-react"
-import { Progress } from "../../../components/ui/progress"
+import { Progress } from "../../../../components/ui/progress"
 
 export function OrdersThisMonth() {
   return (

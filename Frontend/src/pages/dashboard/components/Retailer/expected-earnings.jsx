@@ -11,12 +11,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "../../../../components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "../../../components/ui/chart";
+} from "../../../../components/ui/chart";
 
 const chartData = [
   { product: "Product A", buyers: 275, fill: "hsl(var(--primary))" },

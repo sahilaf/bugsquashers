@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/table";
-import { Badge } from "../../../components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
+import { Badge } from "../../../../components/ui/badge";
 
 const orders = [
   { id: "ORD001", date: "2023-05-01", total: "$125.00", status: "Delivered" },

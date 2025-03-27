@@ -13,7 +13,7 @@ import {
   Star,
   TrendingUp,
 } from "lucide-react";
-import { Card, CardContent } from "../../../components/ui/card";
+import { Card, CardContent } from "../../../../components/ui/card";
 
 // Demo Data for Statistics
 const demoStats = {

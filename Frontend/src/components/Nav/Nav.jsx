@@ -192,7 +192,7 @@ const DesktopNavigation = ({
   loading,
 }) => {
   return (
-    <div className="hidden lg:flex justify-between items-center space-x-6 text-white">
+    <div className="hidden lg:flex justify-between items-center space-x-6 text-muted-foreground">
       <div>
         <Link to="/">Home</Link>
       </div>
@@ -407,9 +407,9 @@ const Nav = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-secondary dark:bg-background/80 backdrop-blur-md ">
-      <h1 className="text-3xl font-black text-white">
-        FAIRBASKET<span className="text-primary">.</span>
+    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-white dark:bg-background/80 backdrop-blur-md ">
+      <h1 className="text-3xl font-black text-primary">
+        FAIRBASKET<span className="text-secondary">.</span>
       </h1>
 
       <DesktopNavigation

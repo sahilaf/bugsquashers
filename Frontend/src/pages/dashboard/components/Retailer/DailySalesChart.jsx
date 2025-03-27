@@ -10,11 +10,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
+} from "../../../../components/ui/card";
 import {
   ChartContainer,
   ChartTooltipContent,
-} from "../../../components/ui/chart";
+} from "../../../../components/ui/chart";
 
 const dailySalesData = [
   { day: "01 Mar", sales: 120 },

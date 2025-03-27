@@ -19,12 +19,7 @@ Table.displayName = "Table";
 // TableHeader Component (Fixed - removed unused children prop)
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
   <thead ref={ref} className={cn("border-b bg-transparent", className)} {...props}>
-    <tr>
-      <TableHead>Order Id</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Amount</TableHead>
-      <TableHead>Status</TableHead>
-    </tr>
+    <tr><TableHead>Order Id</TableHead><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></tr>
   </thead>
 ));
 TableHeader.propTypes = {

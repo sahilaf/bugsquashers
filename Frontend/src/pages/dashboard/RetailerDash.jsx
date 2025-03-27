@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { BarChart3, Home, Package, Settings, Star } from "lucide-react"
-import { RecentOrders } from "./components/recent-orders"
+import { RecentOrders } from "./components/Retailer/recent-orders"
 import { Button } from "../../components/ui/button"
 import {
   Sidebar,
@@ -11,9 +11,9 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "../../components/ui/sidebar"
-import Overview from "./components/Overview"
-import { ReviewsDashboard } from "./components/Review"
-import { StatisticsDashboard } from "./components/StatisticsDashboard"
+import Overview from "./components/Retailer/Overview"
+import { ReviewsDashboard } from "./components/Retailer/Review"
+import { StatisticsDashboard } from "./components/Retailer/StatisticsDashboard"
 
 function RetailerDash() {
   const [activeSection, setActiveSection] = useState("Overview") // Track active section
