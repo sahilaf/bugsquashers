@@ -13,13 +13,7 @@ import { Button } from "../../../../components/ui/button";
 import { Loader2, RefreshCw, Clipboard } from "lucide-react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
-const demoOrders = [
-  { id: "1", crop: "Wheat", quantity: "100 kg", price: "$500", status: "Pending", date: "2025-03-01" },
-  { id: "2", crop: "Rice", quantity: "50 kg", price: "$300", status: "Delivered", date: "2025-02-28" },
-  { id: "3", crop: "Corn", quantity: "200 kg", price: "$600", status: "Processing", date: "2025-03-05" },
-  { id: "4", crop: "Barley", quantity: "75 kg", price: "$375", status: "Pending", date: "2025-03-07" },
-  { id: "5", crop: "Soybeans", quantity: "150 kg", price: "$750", status: "Delivered", date: "2025-02-25" },
-];
+
 function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +22,11 @@ function OrdersDashboard() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Demo data for now
-      setOrders(demoOrders);
-    } catch {
+      const response = await fetch("http://localhost:3000/api/orders");
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      setOrders(data);
+    } catch (err) {
       setError("Failed to fetch orders. Please try again.");
     } finally {
       setLoading(false);
@@ -41,8 +37,9 @@ function OrdersDashboard() {
     fetchOrders();
   }, []);
 
-  const handleRefresh = () => {
-    fetchOrders();
+   // Ensure handleRefresh function is defined
+   const handleRefresh = () => {
+    fetchOrders(); // Call fetchOrders to refresh data
   };
 
   if (error) return <p className="text-red-500">{error}</p>;
@@ -50,32 +47,34 @@ function OrdersDashboard() {
   const getBadgeVariant = (status) => {
     if (status === "Delivered") return "success";
     if (status === "Processing") return "warning";
-    return "default";
+    if (status === "Pending") return "default"; // Explicitly handling "Pending"
+    return "default"; // Ensuring any unexpected value gets "default"
   };
+  
 
   const renderOrderRows = () => {
     if (loading) {
-      return (
-        <TableRow>
+      return [
+        <TableRow key="loading">
           <TableCell colSpan={6} className="text-center py-8">
             <Loader2 className="animate-spin mx-auto h-6 w-6" />
             <p className="text-sm text-muted-foreground mt-2">Loading orders...</p>
           </TableCell>
         </TableRow>
-      );
+      ];
     }
-
+  
     if (orders.length === 0) {
-      return (
-        <TableRow>
+      return [
+        <TableRow key="empty">
           <TableCell colSpan={6} className="text-center py-8">
             <Clipboard className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground mt-2">No orders found.</p>
           </TableCell>
         </TableRow>
-      );
+      ];
     }
-
+  
     return orders.map((order) => (
       <TableRow key={order.id}>
         <TableCell className="font-medium">{order.crop}</TableCell>
@@ -97,7 +96,7 @@ function OrdersDashboard() {
       </TableRow>
     ));
   };
-
+  
   return (
     <Card>
       <CardHeader>
