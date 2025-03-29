@@ -1,127 +1,402 @@
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { Loader2, RefreshCw, TreesIcon as Plant } from "lucide-react";
+import { Loader2, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../../components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../../../components/ui/table";
+import { Input } from "../../../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../../../../components/ui/dialog";
+import { Label } from "../../../../components/ui/label";
 
-
-function CropsDashboard({ crops, setCrops, onEditCrop }) {
+function CropsDashboard({ crops, setCrops, onViewAll }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCrops, setFilteredCrops] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentCrop, setCurrentCrop] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    category: "",
+    price: 0,
+    stock: 0,
+    supplier: "",
+    harvestDate: "",
+    expirationDate: ""
+  });
 
-  const fetchCrops = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("http://localhost:3000/api/crops"); // Direct backend URL
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      const data = await response.json();
-      setCrops(data); // Update state with fetched data
-    } catch (error) {
-      setError("Failed to fetch crops: " + error.message);
-      console.error("Fetch error:", error);
-    } finally {
-      setLoading(false);
+  // Filter crops based on search and filters
+  const applyFilters = () => {
+    let updatedCrops = crops.filter(crop => 
+      crop.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (categoryFilter && categoryFilter !== "all") {
+      updatedCrops = updatedCrops.filter(crop => crop.category === categoryFilter);
     }
+
+    if (stockFilter === "low") {
+      updatedCrops = updatedCrops.filter(crop => crop.stock < 20);
+    } else if (stockFilter === "high") {
+      updatedCrops = updatedCrops.filter(crop => crop.stock >= 100);
+    }
+
+    return updatedCrops;
   };
 
   useEffect(() => {
     fetchCrops();
   }, []);
 
-  const handleRefresh = () => {
-    fetchCrops();
+  useEffect(() => {
+    setFilteredCrops(applyFilters());
+  }, [searchQuery, categoryFilter, stockFilter, crops]);
+
+  const fetchCrops = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/api/crops");
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      
+      const data = await response.json();
+      setCrops(validateCropData(data));
+    } catch (error) {
+      setError("Failed to fetch crops: " + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (error) return <p className="text-red-500">{error}</p>;
+  const validateCropData = (data) => {
+    return data.map(crop => ({
+      id: crop.id || Date.now(),
+      name: crop.name || "Unnamed Crop",
+      category: crop.category || "Uncategorized",
+      price: Number(crop.price) || 0,
+      stock: Number(crop.stock) || 0,
+      supplier: crop.supplier || "Unknown",
+      harvestDate: crop.harvestDate || "N/A",
+      expirationDate: crop.expirationDate || "N/A",
+    }));
+  };
 
-  const renderCrops = () => {
-    if (loading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={5} className="text-center py-8">
-            <Loader2 className="animate-spin mx-auto h-6 w-6" />
-            <p className="text-sm text-muted-foreground mt-2">Loading crops...</p>
-          </TableCell>
-        </TableRow>
-      );
+  const toggleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const handleDeleteCrop = (id) => {
+    if (window.confirm("Are you sure you want to delete this crop?")) {
+      setCrops(prevCrops => prevCrops.filter(crop => crop.id !== id));
     }
+  };
 
-    if (crops.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={5} className="text-center py-8">
-            <Plant className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground mt-2">No crops found.</p>
-          </TableCell>
-        </TableRow>
-      );
+  const handleEditClick = (crop) => {
+    setCurrentCrop(crop);
+    setEditForm({
+      name: crop.name,
+      category: crop.category,
+      price: crop.price,
+      stock: crop.stock,
+      supplier: crop.supplier,
+      harvestDate: crop.harvestDate,
+      expirationDate: crop.expirationDate
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveChanges = () => {
+    setCrops(prevCrops =>
+      prevCrops.map(crop =>
+        crop.id === currentCrop.id ? { ...crop, ...editForm } : crop
+      )
+    );
+    setIsDialogOpen(false);
+  };
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === "asc" 
+      ? <ChevronUp className="inline h-4 w-4" />
+      : <ChevronDown className="inline h-4 w-4" />;
+  };
+
+  const sortedCrops = [...filteredCrops].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
+    
+    if (sortConfig.direction === "asc") {
+      return aValue > bValue ? 1 : -1;
     }
+    return aValue < bValue ? 1 : -1;
+  });
 
-    return crops.map((crop) => (
-      <TableRow key={crop._id || crop.id}> {/* Use _id from MongoDB */}
-        <TableCell className="font-medium">{crop.name}</TableCell>
-        <TableCell>{crop.price}</TableCell><TableCell>{crop.stock}</TableCell><TableCell>{crop.season}</TableCell><TableCell>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onEditCrop(crop)}>
-              Edit
-            </Button>
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold">Crop Inventory</CardTitle>
+              <CardDescription>Manage your crops efficiently</CardDescription>
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => alert(`Update stock for crop ${crop._id || crop.id}`)}
+              onClick={fetchCrops}
+              disabled={loading}
             >
-              Update Stock
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
             </Button>
           </div>
-        </TableCell>
-      </TableRow>
-    ));
-  };
+          <div className="flex gap-2 mt-3">
+            <Input
+              placeholder="Search crops..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="Fruits">Fruits</SelectItem>
+                <SelectItem value="Vegetables">Vegetables</SelectItem>
+                <SelectItem value="Grains">Grains</SelectItem>
+              </SelectContent>
+            </Select>
 
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">Crop Inventory</CardTitle>
-            <CardDescription>Manage your crop inventory and pricing</CardDescription>
+            <Select value={stockFilter} onValueChange={setStockFilter}>
+              <SelectTrigger className="w-52">
+                <SelectValue placeholder="Stock Level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stock Levels</SelectItem>
+                <SelectItem value="low">Low Stock (&lt;20kg)</SelectItem>
+                <SelectItem value="high">High Stock (&gt;100kg)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        </CardHeader>
+        <CardContent>
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => toggleSort("name")}
+                >
+                  Crop {getSortIndicator("name")}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => toggleSort("category")}
+                >
+                  Category {getSortIndicator("category")}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => toggleSort("price")}
+                >
+                  Price {getSortIndicator("price")}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => toggleSort("stock")}
+                >
+                  Stock {getSortIndicator("stock")}
+                </TableHead>
+                <TableHead>Supplier</TableHead>
+                <TableHead>Harvest Date</TableHead>
+                <TableHead>Expiration Date</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedCrops.length > 0 ? (
+                sortedCrops.map((crop) => (
+                  <TableRow key={crop.id}>
+                    <TableCell>{crop.name}</TableCell>
+                    <TableCell>{crop.category}</TableCell>
+                    <TableCell>${crop.price.toFixed(2)}/kg</TableCell>
+                    <TableCell>{crop.stock} kg</TableCell>
+                    <TableCell>{crop.supplier}</TableCell>
+                    <TableCell>{crop.harvestDate}</TableCell>
+                    <TableCell>{crop.expirationDate}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditClick(crop)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteCrop(crop.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-6">
+                    {loading ? "Loading crops..." : "No crops found"}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <Button variant="outline" onClick={onViewAll}>
+            View All Crops
           </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow><TableHead>Crop</TableHead><TableHead>Price</TableHead><TableHead>Available Stock</TableHead><TableHead>Season</TableHead><TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{renderCrops()}</TableBody>
-        </Table>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <p className="text-sm text-muted-foreground">Showing {crops.length} of {crops.length} crops</p>
-        <Button variant="outline" size="sm">Add New Crop</Button>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Crop</DialogTitle>
+            <DialogDescription>
+              Make changes to the crop details here. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {renderFormField("name", "Name", "text")}
+            {renderCategorySelect()}
+            {renderFormField("price", "Price", "number")}
+            {renderFormField("stock", "Stock (kg)", "number")}
+            {renderFormField("supplier", "Supplier", "text")}
+            {renderFormField("harvestDate", "Harvest Date", "date")}
+            {renderFormField("expirationDate", "Expiration Date", "date")}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSaveChanges}>
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
+
+  function renderFormField(name, label, type) {
+    return (
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor={name} className="text-right">
+          {label}
+        </Label>
+        <Input
+          id={name}
+          name={name}
+          type={type}
+          value={editForm[name]}
+          onChange={handleFormChange}
+          className="col-span-3"
+        />
+      </div>
+    );
+  }
+
+  function renderCategorySelect() {
+    return (
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="category" className="text-right">
+          Category
+        </Label>
+        <Select 
+          name="category"
+          value={editForm.category}
+          onValueChange={(value) => 
+            setEditForm(prev => ({ ...prev, category: value }))
+          }
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Fruits">Fruits</SelectItem>
+            <SelectItem value="Vegetables">Vegetables</SelectItem>
+            <SelectItem value="Grains">Grains</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
 }
+
+export default CropsDashboard;
 
 CropsDashboard.propTypes = {
   crops: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string, // Allow _id or id
+      id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
-      price: PropTypes.string.isRequired,
-      stock: PropTypes.string.isRequired,
-      season: PropTypes.string.isRequired,
+      category: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+      stock: PropTypes.number.isRequired,
+      supplier: PropTypes.string,
+      harvestDate: PropTypes.string,
+      expirationDate: PropTypes.string,
     })
   ).isRequired,
-  setCrops: PropTypes.func.isRequired, // Added
-  onEditCrop: PropTypes.func.isRequired,
+  setCrops: PropTypes.func.isRequired,
+  onViewAll: PropTypes.func.isRequired,
 };
-
-
-export default CropsDashboard;

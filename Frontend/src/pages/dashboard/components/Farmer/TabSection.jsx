@@ -13,11 +13,21 @@ import ReviewsDashboard from "./ReviewsDashboard";
 import StatisticsDashboard from "./StatisticsDashboard";
 
 function TabSection() {
-  const [crops, setCrops] = useState([]); // Moved crops state here for simplicity
+  // Initialize with proper structure or null
+  const [crops, setCrops] = useState([]);
+  const [selectedCrop, setSelectedCrop] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const handleEditCrop = (crop) => {
     setSelectedCrop(crop);
     setIsDialogOpen(true);
   };
+
+  // Add a function to handle viewing all crops if needed
+  const handleViewAll = () => {
+    // Implement view all functionality
+  };
+
   return (
     <div>
       <Tabs defaultValue="orders" className="w-full">
@@ -47,6 +57,7 @@ function TabSection() {
             crops={crops}
             setCrops={setCrops}
             onEditCrop={handleEditCrop}
+            onViewAll={handleViewAll}
           />
         </TabsContent>
         <TabsContent value="reviews" className="space-y-4">

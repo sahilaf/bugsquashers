@@ -17,14 +17,17 @@ Table.propTypes = {
 Table.displayName = "Table";
 
 // TableHeader Component (Fixed - removed unused children prop)
-const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
+const TableHeader = React.forwardRef(({ className, children, ...props }, ref) => (
   <thead ref={ref} className={cn("border-b bg-transparent", className)} {...props}>
-    <tr><TableHead>Order Id</TableHead><TableHead>Date</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></tr>
+    {children} {/* Now it will render the correct headers from OrdersDashboard */}
   </thead>
 ));
+
 TableHeader.propTypes = {
   className: PropTypes.string,
+  children: PropTypes.node, // Allow children (like custom headers)
 };
+
 TableHeader.displayName = "TableHeader";
 
 // TableBody Component
@@ -56,7 +59,7 @@ TableRow.displayName = "TableRow";
 
 // TableHead Component (for column headers)
 const TableHead = React.forwardRef(({ className, ...props }, ref) => (
-  <th ref={ref} className={cn("px-4 py-2 text-left font-medium text-white", className)} {...props} />
+  <th ref={ref} className={cn("px-4 py-2 text-left font-medium text-foreground", className)} {...props} />
 ));
 TableHead.propTypes = {
   className: PropTypes.string,
