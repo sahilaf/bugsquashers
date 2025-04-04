@@ -3,10 +3,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
-const cropRoutes = require("./routes/cropRoutes"); // New import
-const orderRoutes = require("./routes/orderRoutes"); // Added order routes
+const cropRoutes = require("./routes/cropRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
+const fs = require("fs"); // Add for directory creation
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,8 +46,14 @@ const apiLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
 // Serve uploaded images statically
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadsDir));
 
 // Connect to MongoDB
 mongoose
@@ -60,7 +67,7 @@ mongoose
 // API Routes
 app.use("/api", userRoutes);
 app.use("/api", cropRoutes);
-app.use("/api/orders", orderRoutes); // Added order routes
+app.use("/api/orders", orderRoutes);
 
 // Apply rate limiting to static file serving
 const staticLimiter = rateLimit({
