@@ -1,4 +1,4 @@
-import { useState } from "react"; // Removed unnecessary React import
+import { useState } from "react";
 import { Calendar, TreesIcon as Plant } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import PropTypes from "prop-types";
@@ -10,23 +10,12 @@ import {
   DialogDescription,
 } from "../../../../components/ui/dialog";
 
-function FarmerDashHeader({ crops, setCrops }) { // Added crops and setCrops as props
+function FarmerDashHeader() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState(null);
+  const [crops, setCrops] = useState([]); // State moved inside component
 
-  const handleAddOrUpdateCrop = (cropData) => {
-    if (selectedCrop) {
-      // Update existing crop (not implemented in this example)
-      setCrops((prevCrops) =>
-        prevCrops.map((crop) =>
-          crop.id === selectedCrop.id ? { ...crop, ...cropData } : crop
-        )
-      );
-    } else {
-      // Add new crop
-      setCrops((prevCrops) => [...prevCrops, cropData]);
-    }
-    setSelectedCrop(null);
+  const handleAddCrop = (newCrop) => {
+    setCrops(prevCrops => [...prevCrops, newCrop]);
     setIsDialogOpen(false);
   };
 
@@ -35,6 +24,9 @@ function FarmerDashHeader({ crops, setCrops }) { // Added crops and setCrops as 
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Farmer Dashboard</h1>
+          <p className="text-muted-foreground">
+            {crops.length} crops in inventory
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="bg-secondary" size="sm">
@@ -47,52 +39,49 @@ function FarmerDashHeader({ crops, setCrops }) { // Added crops and setCrops as 
           </Button>
         </div>
       </header>
+      
       <CropFormDialog
         isOpen={isDialogOpen}
-        onClose={() => {
-          setIsDialogOpen(false);
-          setSelectedCrop(null);
-        }}
-        onSubmit={handleAddOrUpdateCrop}
-        initialData={selectedCrop}
+        onClose={() => setIsDialogOpen(false)}
+        onSubmit={handleAddCrop}
       />
     </div>
   );
 }
 
-export default FarmerDashHeader;
-
-// CropFormDialog Component
-function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
-  const [formData, setFormData] = useState(
-    initialData || {
-      name: "",
-      category: "", // Changed from season to match backend schema
-      price: "",
-      stock: "",
-      supplier: "",
-      harvestDate: "",
-      expirationDate: "",
-      image: null,
-    }
-  );
-  const [error, setError] = useState(""); // Added error state for feedback
+function CropFormDialog({ isOpen, onClose, onSubmit }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    supplier: "",
+    harvestDate: "",
+    expirationDate: "",
+    image: null,
+  });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) setFormData((prev) => ({ ...prev, image: file }));
+    if (file) setFormData(prev => ({ ...prev, image: file }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.category || !formData.price || !formData.stock) {
+      setError("Please fill in all required fields (Name, Category, Price, Stock)");
+      return;
+    }
+
     const formDataObj = new FormData();
     formDataObj.append("name", formData.name);
-    formDataObj.append("category", formData.category); // Align with backend
+    formDataObj.append("category", formData.category);
     formDataObj.append("price", formData.price);
     formDataObj.append("stock", formData.stock);
     formDataObj.append("supplier", formData.supplier);
@@ -108,12 +97,11 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+        throw new Error(errorData.message || "Failed to add crop");
       }
 
       const data = await response.json();
-      // Ensure the returned data matches the expected structure
-      const newCrop = {
+      onSubmit({
         id: data._id,
         name: data.name,
         category: data.category,
@@ -123,12 +111,23 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
         harvestDate: data.harvestDate,
         expirationDate: data.expirationDate,
         image: data.image,
-      };
-      onSubmit(newCrop); // Pass the formatted crop data to parent
-      setError(""); // Clear any previous errors
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        supplier: "",
+        harvestDate: "",
+        expirationDate: "",
+        image: null,
+      });
+      setError("");
     } catch (error) {
-      console.error("Error submitting crop:", error.message);
-      setError("Failed to add crop: " + error.message); // Display specific error
+      console.error("Error adding crop:", error);
+      setError(error.message || "Failed to add crop. Please try again.");
     }
   };
 
@@ -136,11 +135,9 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{initialData ? "Edit Crop" : "Add New Crop"}</DialogTitle>
+          <DialogTitle>Add New Crop</DialogTitle>
           <DialogDescription>
-            {initialData
-              ? "Update the crop details."
-              : "Add a new crop to your inventory."}
+            Add a new crop to your inventory
           </DialogDescription>
         </DialogHeader>
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -293,7 +290,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit, initialData }) {
           </div>
           <div className="mt-6">
             <Button type="submit" className="w-full">
-              {initialData ? "Update Crop" : "Add Crop"}
+              Add Crop
             </Button>
           </div>
         </form>
@@ -306,24 +303,6 @@ CropFormDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  initialData: PropTypes.object,
 };
 
-// Update FarmerDashHeader PropTypes
-FarmerDashHeader.propTypes = {
-  crops: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      category: PropTypes.string.isRequired,
-      price: PropTypes.number.isRequired,
-      stock: PropTypes.number.isRequired,
-      supplier: PropTypes.string,
-      harvestDate: PropTypes.string,
-      expirationDate: PropTypes.string,
-      image: PropTypes.string,
-    })
-  ).isRequired,
-  setCrops: PropTypes.func.isRequired,
-};
-
+export default FarmerDashHeader;

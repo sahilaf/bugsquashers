@@ -16,7 +16,7 @@ import NotFound from "./components/NotFound";
 import Cart from "./pages/cart/Cart";
 import { ProductDetail } from "./pages/marketplace/ProductDetail";
 import { Toaster } from "react-hot-toast";
-
+import Marketplace from "./pages/marketplace/Marketplace";
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
   switch (userRole) {
@@ -52,82 +52,37 @@ Layout.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const App = () => {
-  const [crops, setCrops] = useState([]); // Define state here
-
-  return (
-    <AuthProvider>
-      <Toaster position="bottom-right" reverseOrder={false} />
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/product" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["Admin", "User", "Shopkeeper", "Deliveryman", "Farmer"]}>
-                  <DashboardRedirect />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={["Admin"]}>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/customerdash"
-              element={
-                <ProtectedRoute allowedRoles={["User"]}>
-                  <Customer />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/retailer"
-              element={
-                <ProtectedRoute allowedRoles={["Shopkeeper"]}>
-                  <RetailerDash />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/deliverydash"
-              element={
-                <ProtectedRoute allowedRoles={["Deliveryman"]}>
-                  <DeliveryDash />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/farmerdash"
-              element={
-                <ProtectedRoute allowedRoles={["Farmer"]}>
-                  <FarmerDash crops={crops} setCrops={setCrops} />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/cart"
-              element={
-                <ProtectedRoute allowedRoles={["User"]}>
-                  <Cart />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </Router>
-    </AuthProvider>
-  );
-};
+const App = () => (
+  <AuthProvider>
+    <Toaster  position="bottom-right" reverseOrder={false} />
+    <Router>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/product" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/market" element={<Marketplace />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["Admin", "User", "Shopkeeper", "Deliveryman", "Farmer"]}>
+                <DashboardRedirect />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={["Admin"]}><Admin /></ProtectedRoute>} />
+          <Route path="/customerdash" element={<ProtectedRoute allowedRoles={["User"]}><Customer /></ProtectedRoute>} />
+          <Route path="/retailer" element={<ProtectedRoute allowedRoles={["Shopkeeper"]}><RetailerDash /></ProtectedRoute>} />
+          <Route path="/deliverydash" element={<ProtectedRoute allowedRoles={["Deliveryman"]}><DeliveryDash /></ProtectedRoute>} />
+          <Route path="/farmerdash" element={<ProtectedRoute allowedRoles={["Farmer"]}><FarmerDash /></ProtectedRoute>} />
+          <Route path="/cart" element={<ProtectedRoute allowedRoles={["User"]}><Cart/> </ProtectedRoute>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
+    </Router>
+  </AuthProvider>
+);
 
 export default App;

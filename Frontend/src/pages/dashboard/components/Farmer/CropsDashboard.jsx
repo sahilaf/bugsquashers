@@ -45,7 +45,6 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Renamed for clarity
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // New state for add dialog
   const [currentCrop, setCurrentCrop] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -56,16 +55,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
     harvestDate: "",
     expirationDate: "",
   });
-  const [addForm, setAddForm] = useState({
-    name: "",
-    category: "",
-    price: "",
-    stock: "",
-    supplier: "",
-    harvestDate: "",
-    expirationDate: "",
-    image: null,
-  });
+  
 
   // Filter crops based on search and filters
   const applyFilters = () => {
@@ -162,10 +152,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) setAddForm((prev) => ({ ...prev, image: file }));
-  };
+  
 
   const handleSaveChanges = async () => {
     try {
@@ -187,45 +174,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
     }
   };
 
-  const handleAddCrop = async () => {
-    try {
-      const formData = new FormData();
-      formData.append("name", addForm.name);
-      formData.append("category", addForm.category);
-      formData.append("price", addForm.price);
-      formData.append("stock", addForm.stock);
-      formData.append("supplier", addForm.supplier);
-      formData.append("harvestDate", addForm.harvestDate);
-      formData.append("expirationDate", addForm.expirationDate);
-      if (addForm.image) formData.append("image", addForm.image);
-
-      const response = await fetch("http://localhost:3000/api/crops", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add crop");
-      }
-
-      const newCrop = await response.json();
-      setCrops((prevCrops) => [...prevCrops, validateCropData([newCrop])[0]]);
-      setIsAddDialogOpen(false);
-      setAddForm({
-        name: "",
-        category: "",
-        price: "",
-        stock: "",
-        supplier: "",
-        harvestDate: "",
-        expirationDate: "",
-        image: null,
-      });
-    } catch (error) {
-      setError("Error adding crop: " + error.message);
-    }
-  };
+  
 
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return null;
@@ -264,9 +213,6 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
                 ) : (
                   <RefreshCw className="h-4 w-4" />
                 )}
-              </Button>
-              <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
-                Add New Crop
               </Button>
             </div>
           </div>
@@ -411,47 +357,6 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
         </DialogContent>
       </Dialog>
 
-      {/* Add Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Crop</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new crop. Click save to add it.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {renderFormField("name", "Name", "text", addForm, setAddForm)}
-            {renderCategorySelect(addForm, setAddForm)}
-            {renderFormField("price", "Price", "number", addForm, setAddForm)}
-            {renderFormField("stock", "Stock (kg)", "number", addForm, setAddForm)}
-            {renderFormField("supplier", "Supplier", "text", addForm, setAddForm)}
-            {renderFormField("harvestDate", "Harvest Date", "date", addForm, setAddForm)}
-            {renderFormField("expirationDate", "Expiration Date", "date", addForm, setAddForm)}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="image" className="text-right">
-                Image
-              </Label>
-              <Input
-                id="image"
-                name="image"
-                type="file"
-                accept="image/*"
-                onChange={handleAddImageChange}
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={handleAddCrop}>
-              Save Crop
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 
