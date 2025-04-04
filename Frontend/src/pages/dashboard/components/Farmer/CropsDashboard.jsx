@@ -44,7 +44,8 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Renamed for clarity
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // New state for add dialog
   const [currentCrop, setCurrentCrop] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -53,23 +54,33 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
     stock: 0,
     supplier: "",
     harvestDate: "",
-    expirationDate: ""
+    expirationDate: "",
+  });
+  const [addForm, setAddForm] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    supplier: "",
+    harvestDate: "",
+    expirationDate: "",
+    image: null,
   });
 
   // Filter crops based on search and filters
   const applyFilters = () => {
-    let updatedCrops = crops.filter(crop => 
+    let updatedCrops = crops.filter((crop) =>
       crop.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (categoryFilter && categoryFilter !== "all") {
-      updatedCrops = updatedCrops.filter(crop => crop.category === categoryFilter);
+      updatedCrops = updatedCrops.filter((crop) => crop.category === categoryFilter);
     }
 
     if (stockFilter === "low") {
-      updatedCrops = updatedCrops.filter(crop => crop.stock < 20);
+      updatedCrops = updatedCrops.filter((crop) => crop.stock < 20);
     } else if (stockFilter === "high") {
-      updatedCrops = updatedCrops.filter(crop => crop.stock >= 100);
+      updatedCrops = updatedCrops.filter((crop) => crop.stock >= 100);
     }
 
     return updatedCrops;
@@ -88,7 +99,6 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
       setLoading(true);
       const response = await fetch("http://localhost:3000/api/crops");
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
       const data = await response.json();
       setCrops(validateCropData(data));
     } catch (error) {
@@ -99,8 +109,8 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   };
 
   const validateCropData = (data) => {
-    return data.map(crop => ({
-      id: crop.id || Date.now(),
+    return data.map((crop) => ({
+      id: crop._id || Date.now(),
       name: crop.name || "Unnamed Crop",
       category: crop.category || "Uncategorized",
       price: Number(crop.price) || 0,
@@ -108,19 +118,28 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
       supplier: crop.supplier || "Unknown",
       harvestDate: crop.harvestDate || "N/A",
       expirationDate: crop.expirationDate || "N/A",
+      image: crop.image || null,
     }));
   };
 
   const toggleSort = (key) => {
-    setSortConfig(prev => ({
+    setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
-  const handleDeleteCrop = (id) => {
+  const handleDeleteCrop = async (id) => {
     if (window.confirm("Are you sure you want to delete this crop?")) {
-      setCrops(prevCrops => prevCrops.filter(crop => crop.id !== id));
+      try {
+        const response = await fetch(`http://localhost:3000/api/crops/${id}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) throw new Error("Failed to delete crop");
+        setCrops((prevCrops) => prevCrops.filter((crop) => crop.id !== id));
+      } catch (error) {
+        setError("Error deleting crop: " + error.message);
+      }
     }
   };
 
@@ -133,38 +152,96 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
       stock: crop.stock,
       supplier: crop.supplier,
       harvestDate: crop.harvestDate,
-      expirationDate: crop.expirationDate
+      expirationDate: crop.expirationDate,
     });
-    setIsDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
-  const handleFormChange = (e) => {
+  const handleFormChange = (e, setForm) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveChanges = () => {
-    setCrops(prevCrops =>
-      prevCrops.map(crop =>
-        crop.id === currentCrop.id ? { ...crop, ...editForm } : crop
-      )
-    );
-    setIsDialogOpen(false);
+  const handleAddImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) setAddForm((prev) => ({ ...prev, image: file }));
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/crops/${currentCrop.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      if (!response.ok) throw new Error("Failed to update crop");
+      const updatedCrop = await response.json();
+      setCrops((prevCrops) =>
+        prevCrops.map((crop) =>
+          crop.id === currentCrop.id ? validateCropData([updatedCrop])[0] : crop
+        )
+      );
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      setError("Error updating crop: " + error.message);
+    }
+  };
+
+  const handleAddCrop = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("name", addForm.name);
+      formData.append("category", addForm.category);
+      formData.append("price", addForm.price);
+      formData.append("stock", addForm.stock);
+      formData.append("supplier", addForm.supplier);
+      formData.append("harvestDate", addForm.harvestDate);
+      formData.append("expirationDate", addForm.expirationDate);
+      if (addForm.image) formData.append("image", addForm.image);
+
+      const response = await fetch("http://localhost:3000/api/crops", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add crop");
+      }
+
+      const newCrop = await response.json();
+      setCrops((prevCrops) => [...prevCrops, validateCropData([newCrop])[0]]);
+      setIsAddDialogOpen(false);
+      setAddForm({
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        supplier: "",
+        harvestDate: "",
+        expirationDate: "",
+        image: null,
+      });
+    } catch (error) {
+      setError("Error adding crop: " + error.message);
+    }
   };
 
   const getSortIndicator = (key) => {
     if (sortConfig.key !== key) return null;
-    return sortConfig.direction === "asc" 
-      ? <ChevronUp className="inline h-4 w-4" />
-      : <ChevronDown className="inline h-4 w-4" />;
+    return sortConfig.direction === "asc" ? (
+      <ChevronUp className="inline h-4 w-4" />
+    ) : (
+      <ChevronDown className="inline h-4 w-4" />
+    );
   };
 
   const sortedCrops = [...filteredCrops].sort((a, b) => {
     if (!sortConfig.key) return 0;
-    
+
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
-    
+
     if (sortConfig.direction === "asc") {
       return aValue > bValue ? 1 : -1;
     }
@@ -180,18 +257,18 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
               <CardTitle className="text-xl font-bold">Crop Inventory</CardTitle>
               <CardDescription>Manage your crops efficiently</CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchCrops}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={fetchCrops} disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+              <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
+                Add New Crop
+              </Button>
+            </div>
           </div>
           <div className="flex gap-2 mt-3">
             <Input
@@ -210,15 +287,14 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
                 <SelectItem value="Grains">Grains</SelectItem>
               </SelectContent>
             </Select>
-
             <Select value={stockFilter} onValueChange={setStockFilter}>
               <SelectTrigger className="w-52">
                 <SelectValue placeholder="Stock Level" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Stock Levels</SelectItem>
-                <SelectItem value="low">Low Stock (&lt;20kg)</SelectItem>
-                <SelectItem value="high">High Stock (&gt;100kg)</SelectItem>
+                <SelectItem value="low">Low Stock (≤20kg)</SelectItem>
+                <SelectItem value="high">High Stock (≥100kg)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -228,33 +304,22 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => toggleSort("name")}
-                >
+                <TableHead className="cursor-pointer" onClick={() => toggleSort("name")}>
                   Crop {getSortIndicator("name")}
                 </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => toggleSort("category")}
-                >
+                <TableHead className="cursor-pointer" onClick={() => toggleSort("category")}>
                   Category {getSortIndicator("category")}
                 </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => toggleSort("price")}
-                >
+                <TableHead className="cursor-pointer" onClick={() => toggleSort("price")}>
                   Price {getSortIndicator("price")}
                 </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => toggleSort("stock")}
-                >
+                <TableHead className="cursor-pointer" onClick={() => toggleSort("stock")}>
                   Stock {getSortIndicator("stock")}
                 </TableHead>
                 <TableHead>Supplier</TableHead>
                 <TableHead>Harvest Date</TableHead>
                 <TableHead>Expiration Date</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -269,6 +334,17 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
                     <TableCell>{crop.supplier}</TableCell>
                     <TableCell>{crop.harvestDate}</TableCell>
                     <TableCell>{crop.expirationDate}</TableCell>
+                    <TableCell>
+                      {crop.image ? (
+                        <img
+                          src={`http://localhost:3000${crop.image}`}
+                          alt={crop.name}
+                          className="h-10 w-10 object-cover"
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
@@ -291,7 +367,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-6">
+                  <TableCell colSpan={9} className="text-center py-6">
                     {loading ? "Loading crops..." : "No crops found"}
                   </TableCell>
                 </TableRow>
@@ -307,7 +383,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Crop</DialogTitle>
@@ -316,16 +392,16 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {renderFormField("name", "Name", "text")}
-            {renderCategorySelect()}
-            {renderFormField("price", "Price", "number")}
-            {renderFormField("stock", "Stock (kg)", "number")}
-            {renderFormField("supplier", "Supplier", "text")}
-            {renderFormField("harvestDate", "Harvest Date", "date")}
-            {renderFormField("expirationDate", "Expiration Date", "date")}
+            {renderFormField("name", "Name", "text", editForm, setEditForm)}
+            {renderCategorySelect(editForm, setEditForm)}
+            {renderFormField("price", "Price", "number", editForm, setEditForm)}
+            {renderFormField("stock", "Stock (kg)", "number", editForm, setEditForm)}
+            {renderFormField("supplier", "Supplier", "text", editForm, setEditForm)}
+            {renderFormField("harvestDate", "Harvest Date", "date", editForm, setEditForm)}
+            {renderFormField("expirationDate", "Expiration Date", "date", editForm, setEditForm)}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancel
             </Button>
             <Button type="button" onClick={handleSaveChanges}>
@@ -334,10 +410,52 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Crop</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new crop. Click save to add it.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {renderFormField("name", "Name", "text", addForm, setAddForm)}
+            {renderCategorySelect(addForm, setAddForm)}
+            {renderFormField("price", "Price", "number", addForm, setAddForm)}
+            {renderFormField("stock", "Stock (kg)", "number", addForm, setAddForm)}
+            {renderFormField("supplier", "Supplier", "text", addForm, setAddForm)}
+            {renderFormField("harvestDate", "Harvest Date", "date", addForm, setAddForm)}
+            {renderFormField("expirationDate", "Expiration Date", "date", addForm, setAddForm)}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="image" className="text-right">
+                Image
+              </Label>
+              <Input
+                id="image"
+                name="image"
+                type="file"
+                accept="image/*"
+                onChange={handleAddImageChange}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleAddCrop}>
+              Save Crop
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
-  function renderFormField(name, label, type) {
+  function renderFormField(name, label, type, form, setForm) {
     return (
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor={name} className="text-right">
@@ -347,26 +465,24 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
           id={name}
           name={name}
           type={type}
-          value={editForm[name]}
-          onChange={handleFormChange}
+          value={form[name]}
+          onChange={(e) => handleFormChange(e, setForm)}
           className="col-span-3"
         />
       </div>
     );
   }
 
-  function renderCategorySelect() {
+  function renderCategorySelect(form, setForm) {
     return (
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="category" className="text-right">
           Category
         </Label>
-        <Select 
+        <Select
           name="category"
-          value={editForm.category}
-          onValueChange={(value) => 
-            setEditForm(prev => ({ ...prev, category: value }))
-          }
+          value={form.category}
+          onValueChange={(value) => setForm((prev) => ({ ...prev, category: value }))}
         >
           <SelectTrigger className="col-span-3">
             <SelectValue placeholder="Select category" />
@@ -382,12 +498,10 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   }
 }
 
-export default CropsDashboard;
-
 CropsDashboard.propTypes = {
   crops: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number.isRequired,
+      id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
       price: PropTypes.number.isRequired,
@@ -395,8 +509,11 @@ CropsDashboard.propTypes = {
       supplier: PropTypes.string,
       harvestDate: PropTypes.string,
       expirationDate: PropTypes.string,
+      image: PropTypes.string,
     })
   ).isRequired,
   setCrops: PropTypes.func.isRequired,
   onViewAll: PropTypes.func.isRequired,
 };
+
+export default CropsDashboard;
