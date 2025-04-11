@@ -22,7 +22,8 @@ import {
 function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [setError] = useState("");
+  const [error, setError] = useState(""); // proper state destructuring
+
 
   const fetchOrders = async () => {
     try {
@@ -32,6 +33,7 @@ function OrdersDashboard() {
       const data = await response.json();
       setOrders(data);
     } catch (err) {
+      console.error("Failed to fetch orders:", err);
       setError("Failed to fetch orders. Please try again.");
     } finally {
       setLoading(false);
@@ -123,6 +125,11 @@ function OrdersDashboard() {
 
   return (
     <Card>
+      {error && (
+        <div className="p-4 bg-red-100 text-red-800 rounded-md mb-4">
+          {error}
+        </div>
+      )}
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>

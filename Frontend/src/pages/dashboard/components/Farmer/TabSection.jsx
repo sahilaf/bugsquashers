@@ -15,8 +15,6 @@ import StatisticsDashboard from "./StatisticsDashboard";
 function TabSection() {
   // Initialize with proper structure or null
   const [crops, setCrops] = useState([]);
-  const [selectedCrop, setSelectedCrop] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleEditCrop = (crop) => {
     setSelectedCrop(crop);
