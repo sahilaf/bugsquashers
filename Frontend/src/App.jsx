@@ -1,4 +1,3 @@
-import { useState } from "react"; // Add this
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { AuthProvider, useAuth } from "./pages/auth/Authcontext";
