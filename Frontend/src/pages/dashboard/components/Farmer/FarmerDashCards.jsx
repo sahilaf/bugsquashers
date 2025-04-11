@@ -203,7 +203,7 @@ function FarmerDashCards() {
         title="New Customers"
         value="300+"
         description="Joined in last 30 days"
-        icon={<BarChart3 className="h-4 w-4 text-purple-500" />}
+        icon={<UserPlus className="h-4 w-4 text-orange-500" />}
         trend="Consistent"
         trendDirection="neutral"
       />
