@@ -1,6 +1,8 @@
 import { Button } from "../../../../components/ui/button";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card";
 import { EditAddressDialog } from "./EditAddressDialog";
+import PropTypes from 'prop-types';
 
 export const AddressCard = ({ address, onEdit, onDelete }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -8,7 +10,7 @@ export const AddressCard = ({ address, onEdit, onDelete }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{address.name}</CardTitle>
+        <CardTitle>{address}</CardTitle>
       </CardHeader>
       <CardContent>
         {/* Address details */}

@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../../components/ui/dialog";
-
+import PropTypes from 'prop-types';
 export const AddressDialog = ({ title, children, open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

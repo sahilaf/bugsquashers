@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, BarChart3, TrendingUp } from "lucide-react";
+import { ShoppingCart, BarChart3, TrendingUp, UserPlus } from "lucide-react";
 import { Card, CardContent } from "../../../../components/ui/card";
 import PropTypes from "prop-types";
 
@@ -20,7 +20,9 @@ function StatCard({ title, value, description, icon, trend, trendDirection }) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="rounded-full bg-muted p-2">{icon}</div>
-          <div className={`text-sm font-medium flex items-center ${trendColor}`}>
+          <div
+            className={`text-sm font-medium flex items-center ${trendColor}`}
+          >
             {trend}
             {trendIcon}
           </div>
@@ -58,16 +60,50 @@ function FarmerDashCards() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const calculateTotal = (orders) => {
+      return orders.reduce((sum, order) => {
+        const price = parseFloat(order.price || 0);
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+    };
+
+    const filterOrdersByDate = (orders, startDate, endDate = new Date()) => {
+      return orders.filter((order) => {
+        const orderDate = new Date(order.date);
+        return orderDate >= startDate && orderDate < endDate;
+      });
+    };
+
+    const getTrend = (current, previous) => {
+      let trendValue;
+      if (previous !== 0) {
+        const change = ((current - previous) / previous) * 100;
+        trendValue = change.toFixed(1);
+      } else {
+        trendValue = current > 0 ? "100" : "0";
+      }
+
+      const numericValue = parseFloat(trendValue);
+      let direction;
+      if (numericValue > 0) {
+        direction = "up";
+      } else if (numericValue < 0) {
+        direction = "down";
+      } else {
+        direction = "neutral";
+      }
+
+      return { value: trendValue, direction };
+    };
+
     const fetchOrders = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/orders");
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(`HTTP error! Status: ${response.status}`);
-        }
         const orders = await response.json();
-        console.log("Fetched orders:", orders); // Log raw data
 
-        // Date ranges
+        // Date calculations
         const now = new Date();
         const last30DaysStart = new Date(now);
         last30DaysStart.setDate(now.getDate() - 30);
@@ -75,56 +111,31 @@ function FarmerDashCards() {
         prev30DaysStart.setDate(last30DaysStart.getDate() - 30);
 
         // Filter orders
-        const last30DaysOrders = orders.filter((order) => new Date(order.date) >= last30DaysStart);
-        const prev30DaysOrders = orders.filter(
-          (order) => new Date(order.date) >= prev30DaysStart && new Date(order.date) < last30DaysStart
+        const last30DaysOrders = filterOrdersByDate(orders, last30DaysStart);
+        const prev30DaysOrders = filterOrdersByDate(
+          orders,
+          prev30DaysStart,
+          last30DaysStart
         );
 
-        // Debug prices
-        console.log("Last 30 days orders:", last30DaysOrders);
-        last30DaysOrders.forEach((order, index) => {
-          console.log(`Order ${index} price:`, order.price, "Parsed:", parseFloat(order.price || 0));
-        });
-
-        // Current period stats
-        const totalRevenue = last30DaysOrders.reduce(
-          (sum, order) => {
-            const price = parseFloat(order.price || 0);
-            return sum + (isNaN(price) ? 0 : price); // Fallback to 0 if NaN
-          },
-          0
-        );
-        console.log("Calculated totalRevenue:", totalRevenue); // Log result
-
+        // Calculate totals
+        const totalRevenue = calculateTotal(last30DaysOrders);
+        const prevTotalRevenue = calculateTotal(prev30DaysOrders);
         const totalOrders = last30DaysOrders.length;
+        const prevTotalOrders = prev30DaysOrders.length;
 
+        // Calculate trends
+        const revenueTrend = getTrend(totalRevenue, prevTotalRevenue);
+        const ordersTrend = getTrend(totalOrders, prevTotalOrders);
+
+        // Calculate top crop
         const cropCounts = last30DaysOrders.reduce((acc, order) => {
           acc[order.crop] = (acc[order.crop] || 0) + 1;
           return acc;
         }, {});
-        const topCrop = Object.entries(cropCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
-
-        // Previous period stats for trends
-        const prevTotalRevenue = prev30DaysOrders.reduce(
-          (sum, order) => {
-            const price = parseFloat(order.price || 0);
-            return sum + (isNaN(price) ? 0 : price);
-          },
-          0
-        );
-        const prevTotalOrders = prev30DaysOrders.length;
-
-        // Calculate trends
-        const revenueTrend = prevTotalRevenue
-          ? (((totalRevenue - prevTotalRevenue) / prevTotalRevenue) * 100).toFixed(1)
-          : totalRevenue > 0
-          ? "100"
-          : "0";
-        const ordersTrend = prevTotalOrders
-          ? (((totalOrders - prevTotalOrders) / prevTotalOrders) * 100).toFixed(1)
-          : totalOrders > 0
-          ? "100"
-          : "0";
+        const topCrop =
+          Object.entries(cropCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+          "N/A";
 
         setStats({
           totalRevenue: `$${totalRevenue.toLocaleString()}`,
@@ -132,12 +143,14 @@ function FarmerDashCards() {
           topCrop,
           trends: {
             revenue: {
-              value: `${revenueTrend > 0 ? "+" : ""}${revenueTrend}%`,
-              direction: revenueTrend > 0 ? "up" : revenueTrend < 0 ? "down" : "neutral",
+              value: `${revenueTrend.value > 0 ? "+" : ""}${
+                revenueTrend.value
+              }%`,
+              direction: revenueTrend.direction,
             },
             orders: {
-              value: `${ordersTrend > 0 ? "+" : ""}${ordersTrend}%`,
-              direction: ordersTrend > 0 ? "up" : ordersTrend < 0 ? "down" : "neutral",
+              value: `${ordersTrend.value > 0 ? "+" : ""}${ordersTrend.value}%`,
+              direction: ordersTrend.direction,
             },
           },
         });
@@ -182,6 +195,14 @@ function FarmerDashCards() {
         title="Top Selling Crop"
         value={stats.topCrop}
         description="By volume, last 30 days"
+        icon={<BarChart3 className="h-4 w-4 text-purple-500" />}
+        trend="Consistent"
+        trendDirection="neutral"
+      />
+      <StatCard
+        title="New Customers"
+        value="300+"
+        description="Joined in last 30 days"
         icon={<BarChart3 className="h-4 w-4 text-purple-500" />}
         trend="Consistent"
         trendDirection="neutral"

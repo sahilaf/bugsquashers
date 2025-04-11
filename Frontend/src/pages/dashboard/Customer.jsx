@@ -22,7 +22,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Package, CreditCard, MapPin, User } from "lucide-react";
 import RecentOrders from "./components/Customer/RecentOrder";
-import SavedAddresses from "./components/Customer/SavedAddresses";
+import {SavedAddresses} from "./components/Customer/SavedAddresses";
 
 const DashboardCard = ({ title, value, description, icon }) => (
   <Card>

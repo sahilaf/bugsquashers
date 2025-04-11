@@ -7,7 +7,9 @@ export const SavedAddresses = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   // Handler functions...
-
+  const handleAddAddress = (newAddress) => {
+    setAddresses([...addresses, newAddress]);
+  };
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">

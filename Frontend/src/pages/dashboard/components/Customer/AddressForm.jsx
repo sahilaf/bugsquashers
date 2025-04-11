@@ -1,6 +1,6 @@
 import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
-
+import PropTypes from 'prop-types';
 export const AddressForm = ({ address, onSubmit, buttonText = "Save" }) => {
   const [formData, setFormData] = useState(address || {
     name: "",
