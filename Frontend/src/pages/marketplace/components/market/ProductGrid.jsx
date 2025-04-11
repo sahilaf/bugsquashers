@@ -13,22 +13,206 @@ import {
 } from "../../../../components/ui/select";
 
 function ProductGrid() {
-  const [shops] = useState(
-    Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      name: `Shop ${i + 1}`,
-      products: Array.from({ length: 10 }, (_, j) => ({
-        id: (i + 1) * 100 + j,
-        name: `Product ${j + 1}`,
-        price: Math.random() * 10 + 5,
-        originalPrice: Math.random() * 10 + 10,
-        description: "Sample product description",
-        image: "https://placehold.co/300x300",
-        isOrganic: Math.random() > 0.5,
-        soldCount: Math.floor(Math.random() * 100)
-      }))
-    }))
-  );
+  const [shops] = useState([
+    {
+      id: 1,
+      name: "Fresh Farms",
+      products: [
+        {
+          id: 101,
+          name: "Organic Apples (3 lb)",
+          price: 4.99,
+          originalPrice: 6.99,
+          description: "Freshly Picked, Local Farm",
+          image:
+            "https://hips.hearstapps.com/hmg-prod/images/half-of-orange-on-the-heap-of-oranges-royalty-free-image-1598525395.jpg?resize=2048:*",
+          isOrganic: true,
+          soldCount: 120,
+        },
+        {
+          id: 102,
+          name: "Carrots (2 lb)",
+          price: 2.49,
+          originalPrice: 3.49,
+          description: "Fresh from the garden",
+          image:
+            "https://www.butter-n-thyme.com/wp-content/uploads/2022/10/DIFFERENT-VARIATIONS-OF-CARROTS-1.jpg",
+          isOrganic: false,
+          soldCount: 85,
+        },
+        {
+          id: 103,
+          name: "Bananas (1 lb)",
+          price: 0.99,
+          originalPrice: 1.29,
+          description: "Perfectly ripe",
+          image: "https://www.refinery29.com/images/10329784.jpg?crop=40:21",
+          isOrganic: false,
+          soldCount: 200,
+        },
+        {
+          id: 104,
+          name: "Organic Kale",
+          price: 2.99,
+          originalPrice: 3.99,
+          description: "Nutrient-packed greens",
+          image:
+            "https://cdn.britannica.com/74/181374-050-83F7B492/kale-leaves.jpg",
+          isOrganic: true,
+          soldCount: 75,
+        },
+        {
+          id: 105,
+          name: "Strawberries",
+          price: 3.49,
+          originalPrice: 4.49,
+          description: "Sweet and juicy",
+          image:
+            "https://tse3.mm.bing.net/th?id=OIP.WSsapuZAnvVzcbWhxj68mAHaE8&pid=Api&P=0&h=220",
+          isOrganic: false,
+          soldCount: 150,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image:
+            "https://www.tastingtable.com/img/gallery/15-types-of-blueberries-and-what-makes-them-unique/l-intro-1656439699.jpg",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image:
+            "https://images.freeimages.com/images/large-previews/3cc/blueberries-1325514.jpg",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image: "https://placehold.co/300x300?text=Blueberries",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image: "https://placehold.co/300x300?text=Blueberries",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image: "https://placehold.co/300x300?text=Blueberries",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image: "https://placehold.co/300x300?text=Blueberries",
+          isOrganic: true,
+          soldCount: 95,
+        },
+        {
+          id: 106,
+          name: "Organic Blueberries",
+          price: 4.99,
+          originalPrice: 5.99,
+          description: "Antioxidant-rich",
+          image: "https://placehold.co/300x300?text=Blueberries",
+          isOrganic: true,
+          soldCount: 95,
+        },
+      ],
+    },
+    {
+      id: 2,
+      name: "Green Grocers",
+      products: [
+        {
+          id: 201,
+          name: "Organic Spinach",
+          price: 3.99,
+          originalPrice: 4.99,
+          description: "Locally grown",
+          image: "https://placehold.co/300x300?text=Spinach",
+          isOrganic: true,
+          soldCount: 65,
+        },
+        {
+          id: 202,
+          name: "Tomatoes (1 lb)",
+          price: 2.99,
+          originalPrice: 3.49,
+          description: "Vine ripened",
+          image: "https://placehold.co/300x300?text=Tomatoes",
+          isOrganic: false,
+          soldCount: 110,
+        },
+        {
+          id: 203,
+          name: "Cucumbers",
+          price: 1.49,
+          originalPrice: 1.99,
+          description: "Crisp and fresh",
+          image: "https://placehold.co/300x300?text=Cucumbers",
+          isOrganic: false,
+          soldCount: 90,
+        },
+        {
+          id: 204,
+          name: "Organic Bell Peppers",
+          price: 2.49,
+          originalPrice: 3.49,
+          description: "Colorful and sweet",
+          image: "https://placehold.co/300x300?text=Bell+Peppers",
+          isOrganic: true,
+          soldCount: 60,
+        },
+        {
+          id: 205,
+          name: "Avocados",
+          price: 1.99,
+          originalPrice: 2.49,
+          description: "Creamy and delicious",
+          image: "https://placehold.co/300x300?text=Avocados",
+          isOrganic: false,
+          soldCount: 180,
+        },
+        {
+          id: 206,
+          name: "Organic Zucchini",
+          price: 1.79,
+          originalPrice: 2.29,
+          description: "Versatile summer squash",
+          image: "https://placehold.co/300x300?text=Zucchini",
+          isOrganic: true,
+          soldCount: 70,
+        },
+      ],
+    },
+  ]);
 
 
   const [currentPage, setCurrentPage] = useState(1);
