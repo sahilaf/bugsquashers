@@ -2,9 +2,13 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const mongoose = require("mongoose");
 const Crop = require("../models/Crop");
 
-// Configure multer for file uploads
+// 📌 Function to sanitize input (prevents script injection)
+const sanitizeInput = (input) => input.replace(/[\$<>]/g, "");
+
+// 📌 Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -28,22 +32,24 @@ const upload = multer({
   },
 });
 
-// POST /api/crops - Add a new crop
+// 📌 POST /api/crops - Add a new crop
 router.post("/crops", upload.single("image"), async (req, res) => {
   try {
     const { name, category, price, stock, supplier, harvestDate, expirationDate } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
+    // Validate required fields
     if (!name || !category || !price || !stock) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Sanitize user input
     const newCrop = new Crop({
-      name,
-      category,
+      name: sanitizeInput(name),
+      category: sanitizeInput(category),
       price: Number(price),
       stock: Number(stock),
-      supplier,
+      supplier: sanitizeInput(supplier),
       harvestDate,
       expirationDate,
       image,
@@ -57,10 +63,18 @@ router.post("/crops", upload.single("image"), async (req, res) => {
   }
 });
 
-// GET /api/crops - Fetch all crops
+// 📌 GET /api/crops - Fetch all crops (with query parameter whitelist)
 router.get("/crops", async (req, res) => {
   try {
-    const crops = await Crop.find();
+    const allowedFilters = ["name", "category"]; // Only allow these fields for queries
+    const filters = Object.keys(req.query).reduce((acc, key) => {
+      if (allowedFilters.includes(key)) {
+        acc[key] = req.query[key]; // Only allow safe fields
+      }
+      return acc;
+    }, {});
+
+    const crops = await Crop.find(filters);
     res.status(200).json(crops);
   } catch (error) {
     console.error("Error fetching crops:", error.message);
@@ -68,23 +82,28 @@ router.get("/crops", async (req, res) => {
   }
 });
 
-// PUT /api/crops/:id - Update a crop
+// 📌 PUT /api/crops/:id - Update a crop securely
 router.put("/crops/:id", upload.single("image"), async (req, res) => {
   try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid crop ID" });
+    }
+
     const { name, category, price, stock, supplier, harvestDate, expirationDate } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     const updatedCrop = await Crop.findByIdAndUpdate(
-      req.params.id,
+      { _id: { $eq: id } }, // Secure against NoSQL injection
       {
-        name,
-        category,
+        name: sanitizeInput(name),
+        category: sanitizeInput(category),
         price: Number(price),
         stock: Number(stock),
-        supplier,
+        supplier: sanitizeInput(supplier),
         harvestDate,
         expirationDate,
-        ...(image && { image }), // Only update image if a new one is uploaded
+        ...(image && { image }), // Only update image if provided
       },
       { new: true }
     );
@@ -100,13 +119,19 @@ router.put("/crops/:id", upload.single("image"), async (req, res) => {
   }
 });
 
-// DELETE /api/crops/:id - Delete a crop
+// 📌 DELETE /api/crops/:id - Securely delete a crop
 router.delete("/crops/:id", async (req, res) => {
   try {
-    const deletedCrop = await Crop.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid crop ID" });
+    }
+
+    const deletedCrop = await Crop.findByIdAndDelete({ _id: { $eq: id } }); // Prevents NoSQL injection
     if (!deletedCrop) {
       return res.status(404).json({ message: "Crop not found" });
     }
+
     res.status(200).json({ message: "Crop deleted successfully" });
   } catch (error) {
     console.error("Error deleting crop:", error.message);

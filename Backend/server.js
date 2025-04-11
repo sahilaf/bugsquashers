@@ -7,15 +7,13 @@ const cropRoutes = require("./routes/cropRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-const fs = require("fs"); // Add for directory creation
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Disable "X-Powered-By" for security
 app.disable("x-powered-by");
 
-// Define allowed CORS origins
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? ["https://your-production-domain.com"]
@@ -37,25 +35,32 @@ app.use(
 
 app.use(express.json());
 
-// Apply rate limiting to all API routes
+// Log incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: "Too many requests, please try again later.",
 });
 
 app.use("/api", apiLimiter);
 
-// Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-// Serve uploaded images statically
 app.use("/uploads", express.static(uploadsDir));
 
-// Connect to MongoDB
+// Simple test route
+app.get("/", (req, res) => {
+  res.json({ message: "Server is running!" });
+});
+
 mongoose
   .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/fairbasket")
   .then(() => console.log("✅ MongoDB connected successfully"))
@@ -69,14 +74,12 @@ app.use("/api", userRoutes);
 app.use("/api", cropRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Apply rate limiting to static file serving
 const staticLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit static file requests
+  windowMs: 15 * 60 * 1000,
+  max: 50,
   message: "Too many requests for static files, please try again later.",
 });
 
-// Serve static files in production with rate limiting
 if (process.env.NODE_ENV === "production") {
   app.use(staticLimiter);
   app.use(express.static(path.join(__dirname, "client/build")));
@@ -85,12 +88,10 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// Start Server with Error Handling
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// Handle EADDRINUSE Error
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
     console.error(`❌ Port ${PORT} is already in use. Try a different port.`);
