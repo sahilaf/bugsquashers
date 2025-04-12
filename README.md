@@ -35,7 +35,7 @@ By integrating real-time pricing, profit analysis tools, and a transparent suppl
 | AJFShuvo          | Developer     |
 | Sajidcodecrack    | Developer     |
 
-### 👨‍🏫 Mentor: [naimjeem](https://github.com/naimjeem)
+### 👨‍🏫 Mentor: [moshiuzzaman](https://github.com/moshiuzzaman)
 
 ---
 
