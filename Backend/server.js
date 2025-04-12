@@ -7,9 +7,15 @@ const userRoutes = require("./routes/userRoutes");
 const cropRoutes = require("./routes/cropRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const retailerOrderRoutes = require("./routes/retailerOrderRoutes");
+const customerOrderRoutes = require("./routes/customerOrderRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
+
+// Register models
+require("./models/shopModel"); // Add this line
+require("./models/customerOrderModel");
+require("./models/retailerOrderModel");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,7 +57,7 @@ const apiLimiter = rateLimit({
 
 app.use("/api", apiLimiter);
 
-const uploadsDir = path.join(__dirname, "uploads");
+const uploadsDir = path.join(__dirname, "Uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
@@ -76,6 +82,7 @@ app.use("/api", userRoutes);
 app.use("/api", cropRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/retailer-orders", retailerOrderRoutes);
+app.use("/api/customer-orders", customerOrderRoutes);
 
 const staticLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
