@@ -87,7 +87,7 @@ FairBasket aims to:
 
 ### 🔧 Clone the Repository
 ```bash
-git clone [https://github.com/<your-org>/fairbasket.git](https://github.com/Learnathon-By-Geeky-Solutions/bugsquashers.git)
+git clone [https://github.com/Learnathon-By-Geeky-Solutions/bugsquashers.git]
 cd fairbasket
 ```
 
