@@ -1,3 +1,4 @@
+// index.js
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -5,6 +6,7 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const cropRoutes = require("./routes/cropRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const retailerOrderRoutes = require("./routes/retailerOrderRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
@@ -65,7 +67,7 @@ mongoose
   .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/fairbasket")
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    console.error(" MongoDB connection error:", err.message);
     process.exit(1);
   });
 
@@ -73,6 +75,7 @@ mongoose
 app.use("/api", userRoutes);
 app.use("/api", cropRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/retailer-orders", retailerOrderRoutes);
 
 const staticLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -89,14 +92,14 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(` Server running on port ${PORT}`);
 });
 
 server.on("error", (err) => {
   if (err.code === "EADDRINUSE") {
-    console.error(`❌ Port ${PORT} is already in use. Try a different port.`);
+    console.error(` Port ${PORT} is already in use. Try a different port.`);
     process.exit(1);
   } else {
-    console.error("❌ Server error:", err);
+    console.error(" Server error:", err);
   }
 });
