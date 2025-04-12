@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { ExpectedEarnings } from "./expected-earnings";
 import { AvgMonthlySales } from "./average-monthly-sales";
 import { DailySalesChart } from "./DailySalesChart";
-import { OrdersThisMonth } from "./orders-this-month";
 import { NewCustomersChart } from "./new-customers";
 import { TodaysHeroes } from "./todays-heroes";
 import { RecentOrders } from "./recent-orders";
@@ -14,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Card, CardContent } from "../../../../components/ui/card";
+import ProductInventory from './ProductInventory';
 
 // Demo Data for Statistics
 const demoStats = {
@@ -124,7 +124,7 @@ function Overview() {
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          <OrdersThisMonth />
+          <DiscountedSalesChart />
           <NewCustomersChart />
           <TodaysHeroes />
         </div>
@@ -132,7 +132,7 @@ function Overview() {
         {/* Detailed Stats */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           <RecentOrders />
-          <DiscountedSalesChart />
+          <ProductInventory/>
         </div>
       </main>
     </div>
