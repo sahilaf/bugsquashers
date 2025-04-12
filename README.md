@@ -30,13 +30,13 @@ By integrating real-time pricing, profit analysis tools, and a transparent suppl
 
 | 👨‍💻 Member          | 🏷️ Role        |
 |-------------------|--------------|
-| sahilaf           | Team Leader   |
-| AJFShuvo          | Developer     |
-| Sajidcodecrack    | Developer     |
+| sahilaf           | Frontend Developer (Team-lead)   |
+| Sajidcodecrack    | Backend Developer     |
+|  AJFShuvo         | Tester     |
 
 ### 👨‍🏫 Mentor: [moshiuzzaman](https://github.com/moshiuzzaman)
 
----
+--- 
 
 ## 🎯 Project Objective
 
