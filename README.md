@@ -15,7 +15,6 @@
 - [🛠 Getting Started](#-getting-started)
 - [⚙ Development Workflow](#-development-workflow)
 - [📚 Resources](#-resources)
-- [🤝 Join the Movement](#-join-the-movement)
 
 ---
 
@@ -88,7 +87,7 @@ FairBasket aims to:
 
 ### 🔧 Clone the Repository
 ```bash
-git clone https://github.com/<your-org>/fairbasket.git
+git clone [https://github.com/<your-org>/fairbasket.git](https://github.com/Learnathon-By-Geeky-Solutions/bugsquashers.git)
 cd fairbasket
 ```
 
@@ -105,8 +104,3 @@ npm run dev
 # or
 yarn dev
 ```
-
-### 📚 Resources
-📖 Project Docs
-
-🛠 Setup Instructions
