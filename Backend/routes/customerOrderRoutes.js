@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const { body, param, validationResult } = require("express-validator");
 const CustomerOrder = require("../models/customerOrderModel");
 const RetailerOrder = require("../models/retailerOrderModel");
+
 const router = express.Router();
 
 // Generate unique order ID
@@ -49,8 +50,8 @@ router.get(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const shopId = req.params.shopId; // Sanitized ObjectId
-      const orders = await CustomerOrder.find({ shopId }).populate("customerId shopId");
+      const shopId = req.params.shopId;
+      const orders = await CustomerOrder.find({ shopId: mongoose.Types.ObjectId(shopId) }).populate("customerId shopId");
       res.json(orders);
     } catch (error) {
       console.error("Error fetching shop orders:", error);
@@ -103,6 +104,7 @@ router.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
     try {
       const { customerId, shopId, shopName, items, payment } = req.body;
       const totalAmount = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -119,9 +121,11 @@ router.post(
         payment,
         status: "Processing",
       });
+
       await newOrder.save();
 
-      let retailerOrder = await RetailerOrder.findOne({ shopId });
+      let retailerOrder = await RetailerOrder.findOne({ shopId: mongoose.Types.ObjectId(shopId) });
+
       if (retailerOrder) {
         retailerOrder.items = retailerOrder.items.concat(items);
         retailerOrder.total = `$${(
@@ -161,12 +165,15 @@ router.put(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
     try {
-      const orderId = req.params.id; // Sanitized ObjectId
+      const orderId = req.params.id;
       const order = await CustomerOrder.findById(orderId);
+
       if (!order) {
         return res.status(404).json({ error: "Order not found" });
       }
+
       if (order.status === "Cancelled") {
         return res.status(400).json({ error: "Order already cancelled" });
       }
@@ -174,10 +181,14 @@ router.put(
       order.status = "Cancelled";
       await order.save();
 
-      const retailerOrder = await RetailerOrder.findOne({ shopId: order.shopId });
+      const retailerOrder = await RetailerOrder.findOne({ shopId: mongoose.Types.ObjectId(order.shopId) });
+
       if (retailerOrder) {
         const orderTotal = parseFloat(order.total.replace("$", ""));
-        retailerOrder.total = `$${(parseFloat(retailerOrder.total.replace("$", "")) - orderTotal).toFixed(2)}`;
+        retailerOrder.total = `$${(
+          parseFloat(retailerOrder.total.replace("$", "")) - orderTotal
+        ).toFixed(2)}`;
+
         if (retailerOrder.total === "$0.00") {
           await RetailerOrder.deleteOne({ _id: retailerOrder._id });
         } else {
