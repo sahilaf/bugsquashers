@@ -3,8 +3,36 @@ import { ProductInfo } from "./components/product/ProductInfo";
 import { ProductTabs } from "./components/product/ProductTabs";
 import { ProductReviews } from "./components/product/ProductReviews";
 import { SuggestedProducts } from "./components/product/SuggestedProducts";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 export const ProductDetail = () => {
+  const { productId } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/products/${productId}`
+        );
+        if (!response.ok) {
+          throw new Error("Product not found");
+        }
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
+
   const reviews = [
     {
       id: 1,
@@ -75,7 +103,21 @@ export const ProductDetail = () => {
   const handleWriteReview = () => {
     alert("Opening review form");
   };
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8 mt-10">Loading...</div>;
+  }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-10">Error: {error}</div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="container mx-auto px-4 py-8 mt-10">Product not found</div>
+    );
+  }
   return (
     <div className="container mx-auto px-4 py-8 mt-10">
       {/* Breadcrumb */}
@@ -83,17 +125,21 @@ export const ProductDetail = () => {
         <a href="/" className="hover:underline">
           Shop all
         </a>
-        <span></span>
+        <span>-</span>
         <a href="/" className="hover:underline">
-          Groceries
+          {product.category}
         </a>
-        <span></span>
-        <span>Organic Apples</span>
+        <span>-</span>
+        <span>{product.name}</span>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <ProductGallery />
-        <ProductInfo onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+        <ProductGallery product={product} />
+        <ProductInfo
+          product={product}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+        />
       </div>
 
       <ProductTabs />

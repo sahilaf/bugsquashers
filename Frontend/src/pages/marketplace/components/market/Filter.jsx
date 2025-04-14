@@ -39,12 +39,12 @@ const deliveryOptions = [
   "Shipping Available",
 ];
 const getInitialFilters = () => ({
-    category: [],
-    delivery: [],
-    rating: "",
-    organic: false,
-    local: false,
-  });
+  category: [],
+  delivery: [], // Ensure delivery array exists
+  rating: "",
+  organic: false,
+  local: false,
+});
   
 function Filters({ filters, setFilters }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -334,5 +334,5 @@ AppliedFilters.propTypes = {
   setFilters: PropTypes.func.isRequired,
 };
 
-export { Filters, AppliedFilters };
+export { Filters, AppliedFilters, getInitialFilters  };
 export default Filters;

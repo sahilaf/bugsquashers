@@ -16,6 +16,8 @@ import Cart from "./pages/cart/Cart";
 import { ProductDetail } from "./pages/marketplace/ProductDetail";
 import { Toaster } from "react-hot-toast";
 import Marketplace from "./pages/marketplace/Marketplace";
+import FarmerMarket from "./pages/marketplace/FarmerMarket"; // You'll need to create this component
+
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
   switch (userRole) {
@@ -31,6 +33,20 @@ const DashboardRedirect = () => {
       return <Navigate to="/farmerdash" replace />;
     default:
       return <Navigate to="/" replace />;
+  }
+};
+
+const MarketplaceRedirect = () => {
+  const { userRole } = useAuth();
+  
+  switch (userRole) {
+    case "Farmer":
+    case "Shopkeeper":
+      return <Navigate to="/farmermarket" replace />;
+    case "User":
+    case "Deliveryman":
+    default:
+      return <Navigate to="/market" replace />;
   }
 };
 
@@ -53,22 +69,29 @@ Layout.propTypes = {
 
 const App = () => (
   <AuthProvider>
-    <Toaster  position="bottom-right" reverseOrder={false} />
+    <Toaster position="bottom-right" reverseOrder={false} />
     <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/product" element={<ProductDetail />} />
+          <Route path="/product/:productId" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/market" element={<Marketplace />} />
+          <Route path="/farmermarket" element={<FarmerMarket />} />
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute allowedRoles={["Admin", "User", "Shopkeeper", "Deliveryman", "Farmer"]}>
                 <DashboardRedirect />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace"
+            element={
+                <MarketplaceRedirect />
             }
           />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={["Admin"]}><Admin /></ProtectedRoute>} />

@@ -2,18 +2,13 @@ import { useState } from "react";
 import { Star, ShoppingCart } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
 import PropTypes from "prop-types";
-export const ProductInfo = ({ onAddToCart, onBuyNow }) => {
+
+export const ProductInfo = ({ product, onAddToCart, onBuyNow }) => {
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState("red");
 
   const handleQuantityChange = (e) => {
     setQuantity(Math.max(1, parseInt(e.target.value) || 1));
-  };
-
-  const handleVariantChange = (value) => {
-    setSelectedVariant(value);
   };
 
   const handleAddToCart = () => {
@@ -27,14 +22,14 @@ export const ProductInfo = ({ onAddToCart, onBuyNow }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Organic Apples</h1>
+        <h1 className="text-3xl font-bold">{product.name}</h1>
         <div className="flex items-center gap-2 mt-1">
           <div className="flex">
-            {["star1", "star2", "star3", "star4", "star5"].map((star, i) => (
+            {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
                 className={`h-5 w-5 ${
-                  i < 4
+                  star <= 4
                     ? "fill-primary text-primary"
                     : "fill-muted stroke-muted-foreground"
                 }`}
@@ -42,46 +37,31 @@ export const ProductInfo = ({ onAddToCart, onBuyNow }) => {
             ))}
           </div>
           <span className="text-sm text-muted-foreground">
-            (4.5 stars) • 20 reviews
+            (4.5 stars) • {product.soldCount || 0} sold
           </span>
         </div>
-        <div className="text-2xl font-bold mt-2">$3</div>
+        <div className="text-2xl font-bold mt-2">
+          ${product.price.toFixed(2)}
+          {product.originalPrice > product.price && (
+            <span className="ml-2 text-base text-muted-foreground line-through">
+              ${product.originalPrice.toFixed(2)}
+            </span>
+          )}
+        </div>
       </div>
 
-      <p className="text-muted-foreground">
-        Enjoy the crisp, refreshing taste of our organic apples, sourced from
-        local farms. Perfect for snacking or adding to your favorite recipes.
-      </p>
+      <p className="text-muted-foreground">{product.description}</p>
 
-      <ul className="space-y-1 list-disc pl-5">
-        <li>Fresh and delicious choice</li>
-        <li>Packed with nutrients</li>
-        <li>Perfect for healthy snacks</li>
-      </ul>
+      {product.keyFeatures && product.keyFeatures.length > 0 && (
+        <ul className="space-y-1 list-disc pl-5">
+          {product.keyFeatures.map((feature) => (
+            <li key={feature}>{feature}</li>
+          ))}
+        </ul>
+      )}
 
       <div className="space-y-4">
-        <div>
-          <label htmlFor="variant" className="text-sm font-medium mb-1 block">
-            Variant:
-          </label>
-          <Tabs
-            defaultValue={selectedVariant}
-            className="w-full"
-            onValueChange={handleVariantChange}
-          >
-            <TabsList className="grid grid-cols-3 h-auto">
-              <TabsTrigger id="variant-red" value="red" className="py-2">
-                Red Apples
-              </TabsTrigger>
-              <TabsTrigger id="variant-green" value="green" className="py-2">
-                Green Apples
-              </TabsTrigger>
-              <TabsTrigger id="variant-yellow" value="yellow" className="py-2">
-                Yellow Apples
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        
 
         <div>
           <label htmlFor="quantity" className="text-sm font-medium mb-1 block">
@@ -112,9 +92,11 @@ export const ProductInfo = ({ onAddToCart, onBuyNow }) => {
           >
             Buy now
           </Button>
-          <p className="text-xs text-center text-muted-foreground">
-            Free shipping over $10
-          </p>
+          {product.isOrganic && (
+            <p className="text-xs text-center text-green-600">
+              Certified Organic Product
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -122,6 +104,15 @@ export const ProductInfo = ({ onAddToCart, onBuyNow }) => {
 };
 
 ProductInfo.propTypes = {
+  product: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    price: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    keyFeatures: PropTypes.arrayOf(PropTypes.string),
+    soldCount: PropTypes.number,
+    isOrganic: PropTypes.bool,
+  }).isRequired,
   onAddToCart: PropTypes.func.isRequired,
   onBuyNow: PropTypes.func.isRequired,
 };

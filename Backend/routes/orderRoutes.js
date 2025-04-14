@@ -1,7 +1,31 @@
 const express = require("express");
 const Order = require("../models/orderModel");
+const mongoose = require("mongoose");
 
 const router = express.Router();
+
+// Error handler middleware (could be moved to a separate file)
+const handleError = (error, res) => {
+  console.error(error); // Log the error for debugging
+  
+  if (error instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({ error: error.message });
+  }
+  
+  if (error instanceof mongoose.Error.CastError) {
+    return res.status(400).json({ error: "Invalid ID format" });
+  }
+  
+  if (error.name === 'MongoServerError' && error.code === 11000) {
+    return res.status(400).json({ error: "Duplicate key error" });
+  }
+  
+  // Default to 500 server error
+  res.status(500).json({ 
+    error: "An unexpected error occurred",
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+  });
+};
 
 // Fetch all orders
 router.get("/", async (req, res) => {
@@ -9,7 +33,7 @@ router.get("/", async (req, res) => {
     const orders = await Order.find();
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch orders" });
+    handleError(error, res);
   }
 });
 
@@ -20,27 +44,41 @@ router.post("/", async (req, res) => {
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (error) {
-    res.status(500).json({ error: "Failed to add order" });
+    handleError(error, res);
   }
 });
 
 // Update order status
 router.put("/:id", async (req, res) => {
   try {
-    const updatedOrder = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    
     res.json(updatedOrder);
   } catch (error) {
-    res.status(500).json({ error: "Failed to update order" });
+    handleError(error, res);
   }
 });
 
 // Delete an order
 router.delete("/:id", async (req, res) => {
   try {
-    await Order.findByIdAndDelete(req.params.id);
+    const deletedOrder = await Order.findByIdAndDelete(req.params.id);
+    
+    if (!deletedOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    
     res.json({ message: "Order deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete order" });
+    handleError(error, res);
   }
 });
 

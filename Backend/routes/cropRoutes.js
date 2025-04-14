@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const Crop = require("../models/Crop");
 
 // 📌 Function to sanitize input (prevents script injection)
-const sanitizeInput = (input) => input.replace(/[\$<>]/g, "");
+const sanitizeInput = (input) => input.replace(/[<>]/g, "");
 
 // 📌 Configure multer for file uploads
 const storage = multer.diskStorage({

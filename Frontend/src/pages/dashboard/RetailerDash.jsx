@@ -16,6 +16,7 @@ import { ReviewsDashboard } from "./components/Retailer/Review"
 import { StatisticsDashboard } from "./components/Retailer/StatisticsDashboard"
 import PurchaseHistory from "./components/Retailer/PurchaseHistory"
 import ProductInventory from "./components/Retailer/ProductInventory"
+import ShopDetails from "./components/Retailer/ShopDetails"
 
 function RetailerDash() {
   const [activeSection, setActiveSection] = useState("Overview") // Track active section
@@ -27,12 +28,13 @@ function RetailerDash() {
     { label: "Statistics", icon: BarChart3, component: <StatisticsDashboard /> },
     { label: "Products", icon: Package, component: <ProductInventory /> },
     { label: "Orders", icon: Settings, component: <RecentOrders /> },
-    { label: "Purchase history", icon: History, component: <PurchaseHistory /> }
+    { label: "Purchase history", icon: History, component: <PurchaseHistory /> },
+    { label: "Shop detail", icon: History, component: <ShopDetails /> }
   ]
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex mt-[68px] border-t border-muted">
+      <div className="min-h-screen flex mt-[68px] border-t border-muted overflow-x-hidden">
         {/* Desktop Sidebar */}
         <Sidebar className="hidden md:flex border-r mt-[68px] border-t border-muted">
           <SidebarContent className="p-4">

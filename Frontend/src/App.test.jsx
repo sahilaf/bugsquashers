@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen, cleanup } from "@testing-library/react";
 import { describe, it, expect, afterEach, vi } from "vitest";
+import PropTypes from "prop-types";
 
 // ---------------------------------------------------
 // Global variable for the current user role in tests.
@@ -11,11 +12,17 @@ let mockedUserRole = "User";
 // MOCK AUTH CONTEXT
 // Instead of importing the real auth module, we create a mock
 // that returns the current value of `mockedUserRole`.
-vi.mock("./pages/auth/Authcontext", () => ({
-  AuthProvider: ({ children }) => <>{children}</>,
-  useAuth: () => ({ userRole: mockedUserRole }),
-}));
-
+vi.mock("./pages/auth/Authcontext", () => {
+  const MockAuthProvider = ({ children }) => <>{children}</>;
+  MockAuthProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+  
+  return {
+    AuthProvider: MockAuthProvider,
+    useAuth: () => ({ userRole: mockedUserRole }),
+  };
+});
 // ---------------------------------------------------
 // MOCK COMPONENTS
 // Replace implementations with simple identifiable elements.

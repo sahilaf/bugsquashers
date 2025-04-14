@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -13,9 +14,12 @@ import {
   TableRow,
 } from "../../../../components/ui/table";
 import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Plus } from "lucide-react";
+import { AddProductDialog } from "./AddProductDialog"; // We'll create this component
 
 export function ProductInventory() {
-  const products = [
+  const [products, setProducts] = useState([
     {
       id: 1,
       name: "Organic Tomatoes",
@@ -48,7 +52,9 @@ export function ProductInventory() {
       price: 120.0,
       status: "In Stock",
     },
-  ];
+  ]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const statusVariants = {
     "In Stock": "default",
@@ -61,10 +67,37 @@ export function ProductInventory() {
     0
   );
 
+  const handleAddProduct = async (newProduct) => {
+    try {
+      const response = await fetch("http://localhost:3000/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add product");
+      }
+
+      const addedProduct = await response.json();
+      setProducts([...products, addedProduct]);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Failed to add product. Please try again.");
+    }
+  };
+
   return (
     <Card className="border border-muted">
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-semibold">Inventory Overview</CardTitle>
+        <Button onClick={() => setIsDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Product
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="overflow-auto max-h-[500px]">
@@ -106,6 +139,12 @@ export function ProductInventory() {
             <span>₹{totalInventoryValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
           </div>
         </div>
+
+        <AddProductDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          onAddProduct={handleAddProduct}
+        />
       </CardContent>
     </Card>
   );

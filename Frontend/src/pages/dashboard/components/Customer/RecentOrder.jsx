@@ -1,4 +1,3 @@
-// RecentOrders.jsx
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -44,19 +43,26 @@ const RecentOrders = ({ fullList = false, customerId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleApiError = (err, defaultMessage) => {
+    console.error(err);
+    const errorMessage = err.response?.data?.error || err.message || defaultMessage;
+    setError(errorMessage);
+    return errorMessage;
+  };
+
   // Fetch customer orders
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/customer-orders");
+        const { data } = await axios.get("http://localhost:3000/api/customer-orders");
         // Filter orders by customerId if provided
         const filteredOrders = customerId
-          ? response.data.filter((order) => order.customerId === customerId)
-          : response.data;
+          ? data.filter((order) => order.customerId === customerId)
+          : data;
         setOrders(filteredOrders);
-        setLoading(false);
       } catch (err) {
-        setError("Failed to load orders");
+        handleApiError(err, "Failed to load orders");
+      } finally {
         setLoading(false);
       }
     };
@@ -66,23 +72,23 @@ const RecentOrders = ({ fullList = false, customerId }) => {
   // Handle order cancellation
   const handleCancelOrder = async (orderId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:3000/api/customer-orders/${orderId}/cancel`
-      );
+      await axios.put(`http://localhost:3000/api/customer-orders/${orderId}/cancel`);
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === orderId ? { ...order, status: "Cancelled" } : order
         )
       );
     } catch (err) {
-      setError("Failed to cancel order");
+      const message = handleApiError(err, "Failed to cancel order");
+      alert(message);
     }
   };
 
   const displayOrders = fullList ? orders : orders.slice(0, 3);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="p-4 text-center">Loading orders...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (orders.length === 0) return <div className="p-4">No orders found</div>;
 
   return (
     <Card>
@@ -113,7 +119,7 @@ const RecentOrders = ({ fullList = false, customerId }) => {
                 <TableCell>
                   {order.items.map((item) => `${item.name} (x${item.quantity})`).join(", ")}
                 </TableCell>
-                <TableCell>{order.total}</TableCell>
+                <TableCell>${order.total.toFixed(2)}</TableCell>
                 <TableCell>{order.payment}</TableCell>
                 <TableCell>
                   <OrderStatus status={order.status} />
@@ -140,6 +146,11 @@ const RecentOrders = ({ fullList = false, customerId }) => {
 RecentOrders.propTypes = {
   fullList: PropTypes.bool,
   customerId: PropTypes.string,
+};
+
+RecentOrders.defaultProps = {
+  fullList: false,
+  customerId: null,
 };
 
 export default RecentOrders;

@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { ExpectedEarnings } from "./expected-earnings";
 import { AvgMonthlySales } from "./average-monthly-sales";
 import { DailySalesChart } from "./DailySalesChart";
@@ -6,14 +6,17 @@ import { NewCustomersChart } from "./new-customers";
 import { TodaysHeroes } from "./todays-heroes";
 import { RecentOrders } from "./recent-orders";
 import { DiscountedSalesChart } from "./discounted-sales";
-import {
-  BarChart3,
-  ShoppingCart,
-  Star,
-  TrendingUp,
-} from "lucide-react";
+import { BarChart3, ShoppingCart, Star, TrendingUp,MapPin, Tag, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent } from "../../../../components/ui/card";
-import ProductInventory from './ProductInventory';
+import ProductInventory from "./ProductInventory";
+
+const demoShop = {
+  name: "GreenLeaf Organics",
+  location: "Bhondve Vasti, Pune",
+  category: "Organic",
+  rating: 4.5,
+  isCertified: true,
+};
 
 // Demo Data for Statistics
 const demoStats = {
@@ -52,7 +55,9 @@ function StatCard({ title, value, description, icon, trend, trendDirection }) {
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="rounded-full bg-muted p-2">{icon}</div>
-          <div className={`text-sm font-medium flex items-center ${trendClass}`}>
+          <div
+            className={`text-sm font-medium flex items-center ${trendClass}`}
+          >
             {trend}
             {trendIcon}
           </div>
@@ -67,20 +72,72 @@ function StatCard({ title, value, description, icon, trend, trendDirection }) {
   );
 }
 
-
 StatCard.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   icon: PropTypes.element.isRequired,
   trend: PropTypes.string.isRequired,
-  trendDirection: PropTypes.oneOf(['up', 'down', 'neutral']).isRequired,
+  trendDirection: PropTypes.oneOf(["up", "down", "neutral"]).isRequired,
 };
 
 function Overview() {
   return (
-    <div className="flex-1 bg-background m-0">
+    <div className="flex-1 bg-background m-0 overflow-x-hidden">
       <main className="px-4 lg:px-6 space-y-6">
+        <Card className="shadow-md ">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+              <div className="space-y-2">
+                <div className="mb-2">
+                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                    {demoShop.name}
+                  </h2>
+                  <p className="text-sm text-gray-500 font-medium">
+                    <MapPin className="inline-block w-4 h-4 mr-1 -mt-1" />
+                    {demoShop.location}
+                  </p>
+                </div>
+
+                <div className="flex gap-4 text-sm">
+                  <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
+                    <Tag className="w-4 h-4 mr-2 text-primary" />
+                    <span className="font-medium text-gray-700">
+                      {demoShop.category}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Star className="w-4 h-4 mr-1 text-amber-500 fill-amber-500" />
+                    <span className="font-semibold text-gray-900">
+                      {demoShop.rating}
+                    </span>
+                    <span className="text-gray-500 ml-1">/5.0</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="sm:self-start flex-shrink-0">
+                {demoShop.isCertified ? (
+                  <div className="flex items-center bg-emerald-50/80 px-4 py-2 rounded-full border border-emerald-100">
+                    <CheckCircle2 className="w-5 h-5 mr-2 text-emerald-600" />
+                    <span className="text-sm font-semibold text-emerald-700">
+                      Organic Certified
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center bg-gray-100 px-4 py-2 rounded-full">
+                    <XCircle className="w-5 h-5 mr-2 text-gray-500" />
+                    <span className="text-sm font-semibold text-gray-600">
+                      Not Certified
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Revenue"
@@ -132,7 +189,7 @@ function Overview() {
         {/* Detailed Stats */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           <RecentOrders />
-          <ProductInventory/>
+          <ProductInventory />
         </div>
       </main>
     </div>

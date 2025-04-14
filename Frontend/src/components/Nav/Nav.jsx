@@ -5,7 +5,6 @@ import { auth } from "../../pages/auth/Firebase";
 import {
   ShoppingCart,
   Menu,
-  Search,
   Camera,
   User,
   Moon,
@@ -15,7 +14,6 @@ import {
   Settings,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import {
   NavigationMenu,
@@ -37,7 +35,7 @@ import PropTypes from "prop-types";
 import { useAuth } from "../../pages/auth/Authcontext";
 
 // **Constants**
-const NAV_ITEMS = ["Products", "About", "Contact"];
+const MOBILE_NAV_ITEMS = ["Market", "Products", "About", "Contact"];
 const CATEGORIES = [
   { name: "Electronics", link: "/categories/electronics" },
   { name: "Clothing", link: "/categories/clothing" },
@@ -83,11 +81,10 @@ ThemeToggle.propTypes = {
 // **MobileNavigation Component**
 const MobileNavigation = ({
   user,
-  search,
-  setSearch,
   navigate,
   handleLogout,
   handleDashboardClick,
+  handleMarketClick,
   loading,
 }) => {
   return (
@@ -105,23 +102,27 @@ const MobileNavigation = ({
         <SheetContent side="right">
           <div className="flex flex-col h-full py-8">
             <div className="flex-1 py-4">
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full mb-4"
-              />
               <nav className="space-y-4">
-                {NAV_ITEMS.map((item) => (
-                  <Link
-                    key={item}
-                    to={`/${item.toLowerCase()}`}
-                    className="block py-2 hover:underline"
-                  >
-                    {item}
-                  </Link>
-                ))}
+                {MOBILE_NAV_ITEMS.map((item) =>
+                  item === "Market" ? (
+                    <Button
+                      key="market"
+                      variant="ghost"
+                      onClick={handleMarketClick}
+                      className="w-full justify-start hover:underline"
+                    >
+                      Market
+                    </Button>
+                  ) : (
+                    <Link
+                      key={item}
+                      to={`/${item.toLowerCase()}`}
+                      className="block py-2 hover:underline"
+                    >
+                      {item}
+                    </Link>
+                  )
+                )}
               </nav>
             </div>
             <div className="border-t pt-4">
@@ -172,11 +173,10 @@ const MobileNavigation = ({
 
 MobileNavigation.propTypes = {
   user: PropTypes.object,
-  search: PropTypes.string.isRequired,
-  setSearch: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
   handleLogout: PropTypes.func.isRequired,
   handleDashboardClick: PropTypes.func.isRequired,
+  handleMarketClick: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
 };
 
@@ -184,11 +184,10 @@ MobileNavigation.propTypes = {
 const DesktopNavigation = ({
   user,
   userData,
-  search,
-  setSearch,
   navigate,
   handleLogout,
   handleDashboardClick,
+  handleMarketClick,
   loading,
 }) => {
   return (
@@ -197,7 +196,13 @@ const DesktopNavigation = ({
         <Link to="/">Home</Link>
       </div>
       <div>
-        <Link to="/market">Market</Link>
+        <Button
+          variant="ghost"
+          onClick={handleMarketClick}
+          className="bg-transparent hover:bg-transparent hover:text-muted-foreground text-base"
+        >
+          Market
+        </Button>
       </div>
       <NavigationMenu>
         <NavigationMenuList>
@@ -232,17 +237,6 @@ const DesktopNavigation = ({
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder="Search products..."
-          className="pl-10 pr-4 py-2 w-64 bg-muted"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
 
       <Button variant="outline" size="icon" aria-label="Camera">
         <Camera className="h-6 w-6" />
@@ -346,18 +340,16 @@ const DesktopNavigation = ({
 DesktopNavigation.propTypes = {
   user: PropTypes.object,
   userData: PropTypes.object,
-  search: PropTypes.string.isRequired,
-  setSearch: PropTypes.func.isRequired,
   navigate: PropTypes.func.isRequired,
   handleLogout: PropTypes.func.isRequired,
   handleDashboardClick: PropTypes.func.isRequired,
+  handleMarketClick: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
 };
 
 // **Main Nav Component**
 const Nav = () => {
   const { user, loading } = useAuth();
-  const [search, setSearch] = useState("");
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -405,6 +397,24 @@ const Nav = () => {
     console.log("User Role:", userData?.role || "No role assigned");
     navigate("/dashboard");
   };
+  const handleMarketClick = () => {
+    if (!userData?.role) {
+      navigate("/market"); // Default to regular market if no role
+      return;
+    }
+
+    // Redirect based on role
+    switch (userData.role) {
+      case "Farmer":
+      case "Shopkeeper":
+        navigate("/farmermarket");
+        break;
+      case "User":
+      case "Deliveryman":
+      default:
+        navigate("/market");
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-white dark:bg-background/80 backdrop-blur-md ">
@@ -415,21 +425,19 @@ const Nav = () => {
       <DesktopNavigation
         user={user}
         userData={userData}
-        search={search}
-        setSearch={setSearch}
         navigate={navigate}
         handleLogout={handleLogout}
         handleDashboardClick={handleDashboardClick}
+        handleMarketClick={handleMarketClick}
         loading={loading}
       />
 
       <MobileNavigation
         user={user}
-        search={search}
-        setSearch={setSearch}
         navigate={navigate}
         handleLogout={handleLogout}
         handleDashboardClick={handleDashboardClick}
+        handleMarketClick={handleMarketClick}
         loading={loading}
       />
     </nav>

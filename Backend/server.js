@@ -8,6 +8,8 @@ const cropRoutes = require("./routes/cropRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const retailerOrderRoutes = require("./routes/retailerOrderRoutes");
 const customerOrderRoutes = require("./routes/customerOrderRoutes");
+const shopRoutes = require("./routes/shops");
+const productRoutes = require("./routes/productRoutes");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
@@ -110,3 +112,7 @@ server.on("error", (err) => {
     console.error(" Server error:", err);
   }
 });
+
+app.use("/api/shops", shopRoutes);
+app.use("/api/products", productRoutes);
+
