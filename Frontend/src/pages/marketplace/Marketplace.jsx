@@ -81,93 +81,76 @@ function MarketPlace() {
     );
   };
 
-  const handleUseLocation = () => {
+  const handleUseLocation = async () => {
     setLocationRequested(true);
+  
+    // Ask permission using Permissions API (optional pre-check)
+    if (navigator.permissions) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+  
+        if (permissionStatus.state === "denied") {
+          setError("Location access is denied. Please enable it in your browser settings or browse all farms.");
+          return;
+        }
+      } catch (err) {
+        console.warn("Permission query failed", err);
+      }
+    }
+  
+    // Inform user what we are doing
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        () => {
+        (position) => {
           setUseLocation(true);
-          fetchShops(1);
+          fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
         },
         handleLocationError,
         {
           enableHighAccuracy: true,
           timeout: 5000,
-          maximumAge: 0
+          maximumAge: 0,
         }
       );
     } else {
-      setError("Geolocation is not supported by your browser");
+      setError("Geolocation is not supported by your browser.");
     }
   };
-
-  const handleLocationError = (error) => {
-    console.error("Location error:", error);
-    setUseLocation(false);
-    
-    switch(error.code) {
-      case error.PERMISSION_DENIED:
-        setError("Location access was denied. Please enable it in your browser settings or browse all shops.");
-        break;
-      case error.POSITION_UNAVAILABLE:
-        setError("Location information is unavailable. Please try again later or browse all shops.");
-        break;
-      case error.TIMEOUT:
-        setError("The request to get your location timed out. Please try again.");
-        break;
-      default:
-        setError("An unknown error occurred while getting your location.");
-    }
-  };
-
-  const fetchShops = async (page = 1) => {
+  
+  const fetchShopsWithPosition = async (lat, lng, page = 1) => {
     setIsLoading(true);
     setError("");
-    
+  
     try {
       let params = {
         page,
         limit: 10,
+        lat: lat.toFixed(6),
+        lng: lng.toFixed(6),
         ...(filters.category.length && { category: filters.category.join(",") }),
         ...(filters.rating && { rating: filters.rating }),
         ...(filters.organic && { organic: true }),
         ...(filters.local && { local: true }),
         ...(searchQuery && { search: searchQuery }),
       };
-
-      // Only add location if explicitly requested
-      if (useLocation) {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-        params.lat = position.coords.latitude.toFixed(6);
-        params.lng = position.coords.longitude.toFixed(6);
-      } else if (manualLocation) {
-        params.lat = manualLocation.lat;
-        params.lng = manualLocation.lng;
-      } else {
-        // If no location is selected, use a default location
-        params.lat = 40.7128; // Default to NYC coordinates
-        params.lng = -74.0060;
-      }
-
+  
       const res = await fetch(
         `http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`
       );
-      
+  
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to fetch shops');
+        throw new Error(errorData.error || "Failed to fetch shops");
       }
-      
+  
       const data = await res.json();
-      
+  
       if (data.success) {
         setNearbyShops(data.data);
         setTotalPages(data.totalPages);
         setCurrentPage(data.currentPage);
       } else {
-        throw new Error(data.error || 'Failed to fetch shops');
+        throw new Error(data.error || "Failed to fetch shops");
       }
     } catch (err) {
       console.error("Failed to fetch shops", err);
@@ -176,13 +159,22 @@ function MarketPlace() {
       setIsLoading(false);
     }
   };
-
+  
+  const handleLocationError = (error) => {
+    console.error("Geolocation error:", error);
+    setError("Unable to access your location. Please allow permission or try again later.");
+  };
+  
   useEffect(() => {
-    // Only fetch if we have a location method selected or use default
-    if (useLocation || manualLocation || (!locationRequested && !manualLocation)) {
-      fetchShops(1);
+    if (useLocation || manualLocation) {
+      const lat = manualLocation?.lat;
+      const lng = manualLocation?.lng;
+      if (lat != null && lng != null) {
+        fetchShopsWithPosition(lat, lng, currentPage);
+      }
     }
   }, [filters, searchQuery, useLocation, manualLocation, locationRequested]);
+  
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -191,8 +183,13 @@ function MarketPlace() {
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
-    fetchShops(newPage);
+  
+    const location = manualLocation;
+    if (location) {
+      fetchShopsWithPosition(location.lat, location.lng, newPage);
+    }
   };
+  
 
   return (
     <div className="min-h-screen bg-background mt-20 lg:px-32 px-4">
