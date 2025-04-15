@@ -84,7 +84,7 @@ function MarketPlace() {
   const handleUseLocation = async () => {
     setLocationRequested(true);
   
-    // Inform the user why geolocation is needed and get explicit consent
+    // Explicit user consent with clear explanation
     const userUnderstands = window.confirm(
       "We use your location to find nearby farms. Your location is never stored. Do you want to proceed?"
     );
@@ -99,33 +99,27 @@ function MarketPlace() {
       return;
     }
   
-    // Check permission status with the Permissions API
-    try {
-      const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
-      if (permissionStatus.state === "denied") {
-        setError("Location access is denied. Please enable it in your browser settings or browse all farms.");
-        return;
-      }
-      // For both "granted" and "prompt" states, request location
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUseLocation(true);
-          fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setError("Unable to access your location. Please allow permission or browse all farms.");
-        },
-        {
-          enableHighAccuracy: false, // approximate location is sufficient
-          timeout: 5000,
-          maximumAge: 0,
+    // Directly request location without pre-checking permissions
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUseLocation(true);
+        fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        if (error.code === error.PERMISSION_DENIED) {
+          setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
+        } else {
+          setError("Unable to access your location. Please try again or browse all farms.");
         }
-      );
-    } catch (err) {
-      console.error("Error querying geolocation permission:", err);
-      setError("Unexpected error accessing location permissions.");
-    }
+        setLocationRequested(false); // Reset location request state
+      },
+      {
+        enableHighAccuracy: false, // Prefer approximate location
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
   };
   
 
