@@ -100,6 +100,37 @@ function MarketPlace() {
     }
   
     // Directly request location without pre-checking permissions
+    navigator.permissions
+  .query({ name: "geolocation" })
+  .then((result) => {
+    if (result.state === "denied") {
+      setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
+      setLocationRequested(false);
+    } else {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUseLocation(true);
+          fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          if (error.code === error.PERMISSION_DENIED) {
+            setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
+          } else {
+            setError("Unable to access your location. Please try again or browse all farms.");
+          }
+          setLocationRequested(false);
+        },
+        {
+          enableHighAccuracy: false, // Prefer approximate location
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    }
+  })
+  .catch((err) => {
+    console.warn("Permission query failed, proceeding with geolocation.getCurrentPosition:", err);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setUseLocation(true);
@@ -112,14 +143,16 @@ function MarketPlace() {
         } else {
           setError("Unable to access your location. Please try again or browse all farms.");
         }
-        setLocationRequested(false); // Reset location request state
+        setLocationRequested(false);
       },
       {
-        enableHighAccuracy: false, // Prefer approximate location
+        enableHighAccuracy: false,
         timeout: 5000,
         maximumAge: 0,
       }
     );
+  });
+
   };
   
 
