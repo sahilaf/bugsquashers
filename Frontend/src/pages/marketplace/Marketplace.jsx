@@ -1,6 +1,6 @@
 "use client";
 import PropTypes from "prop-types";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search, MapPin } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import ProductGrid from "./components/market/ProductGrid";
@@ -11,6 +11,7 @@ import {
   DrawerContent,
   DrawerTrigger,
 } from "../../components/ui/drawer";
+import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 
 function MarketPlace() {
   const [filters, setFilters] = useState(getInitialFilters());
@@ -20,16 +21,54 @@ function MarketPlace() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
-
-
+  const [useLocation, setUseLocation] = useState(false);
+  const [manualLocation, setManualLocation] = useState(null);
+  const [locationRequested, setLocationRequested] = useState(false);
 
   const renderContent = () => {
     if (error) {
-      return <div className="text-center py-8 text-red-500">{error}</div>;
+      return (
+        <Alert variant="destructive" className="my-4">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      );
     }
     
     if (isLoading) {
       return <div className="text-center py-8">Loading shops...</div>;
+    }
+    
+    if (!locationRequested && !manualLocation) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <div className="bg-background p-6 rounded-lg max-w-md w-full text-center">
+            <MapPin className="h-8 w-8 mx-auto mb-3 text-foreground" />
+            <h3 className="font-medium text-lg mb-2">Find local farmers</h3>
+            <p className="text-muted-foreground mb-4">
+              See products available near you or browse all farms
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button 
+                onClick={handleUseLocation}
+                variant="default"
+                className="bg-primary hover:bg-primary-hover"
+              >
+                Use My Location
+              </Button>
+              <Button 
+                onClick={() => setManualLocation({lat: 40.7128, lng: -74.0060})}
+                variant="outline"
+              >
+                Browse All Farms
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Your location is only used to find nearby shops and isn't stored.
+            </p>
+          </div>
+        </div>
+      );
     }
     
     return (
@@ -42,14 +81,51 @@ function MarketPlace() {
     );
   };
 
-  const fetchShops = async (lat, lng, page = 1) => {
+  const handleUseLocation = () => {
+    setLocationRequested(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          setUseLocation(true);
+          fetchShops(1);
+        },
+        handleLocationError,
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by your browser");
+    }
+  };
+
+  const handleLocationError = (error) => {
+    console.error("Location error:", error);
+    setUseLocation(false);
+    
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        setError("Location access was denied. Please enable it in your browser settings or browse all shops.");
+        break;
+      case error.POSITION_UNAVAILABLE:
+        setError("Location information is unavailable. Please try again later or browse all shops.");
+        break;
+      case error.TIMEOUT:
+        setError("The request to get your location timed out. Please try again.");
+        break;
+      default:
+        setError("An unknown error occurred while getting your location.");
+    }
+  };
+
+  const fetchShops = async (page = 1) => {
     setIsLoading(true);
     setError("");
     
     try {
-      const params = new URLSearchParams({
-        lat: lat.toFixed(6),
-        lng: lng.toFixed(6),
+      let params = {
         page,
         limit: 10,
         ...(filters.category.length && { category: filters.category.join(",") }),
@@ -57,13 +133,32 @@ function MarketPlace() {
         ...(filters.organic && { organic: true }),
         ...(filters.local && { local: true }),
         ...(searchQuery && { search: searchQuery }),
-      });
+      };
+
+      // Only add location if explicitly requested
+      if (useLocation) {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        params.lat = position.coords.latitude.toFixed(6);
+        params.lng = position.coords.longitude.toFixed(6);
+      } else if (manualLocation) {
+        params.lat = manualLocation.lat;
+        params.lng = manualLocation.lng;
+      } else {
+        // If no location is selected, use a default location
+        params.lat = 40.7128; // Default to NYC coordinates
+        params.lng = -74.0060;
+      }
 
       const res = await fetch(
-        `http://localhost:3000/api/shops/nearby?${params}`
+        `http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`
       );
       
-      if (!res.ok) throw new Error('Failed to fetch shops');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch shops');
+      }
       
       const data = await res.json();
       
@@ -83,51 +178,20 @@ function MarketPlace() {
   };
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          fetchShops(latitude, longitude);
-        },
-        (error) => {
-          console.error("Location error:", error);
-          setError("Please enable location services to view nearby shops");
-        }
-      );
-    } else {
-      setError("Geolocation is not supported by your browser");
+    // Only fetch if we have a location method selected or use default
+    if (useLocation || manualLocation || (!locationRequested && !manualLocation)) {
+      fetchShops(1);
     }
-  }, []);
-
-  // Re-fetch shops when filters or search changes
-  useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          fetchShops(latitude, longitude, 1); // Reset to page 1 when filters change
-        },
-        (error) => {
-          console.error("Location error:", error);
-        }
-      );
-    }
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, useLocation, manualLocation, locationRequested]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    // Add debounce if needed
   };
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        fetchShops(latitude, longitude, newPage);
-      },
-      (error) => console.error("Location error:", error)
-    );
+    setCurrentPage(newPage);
+    fetchShops(newPage);
   };
 
   return (
@@ -189,7 +253,9 @@ function MarketPlace() {
       </header>
 
       {/* Applied Filters */}
-      <AppliedFilters filters={filters} setFilters={setFilters} />
+      {(useLocation || manualLocation) && (
+        <AppliedFilters filters={filters} setFilters={setFilters} />
+      )}
 
       <div className="py-4 md:py-6 w-full">
         <main className="w-full">
@@ -199,7 +265,7 @@ function MarketPlace() {
     </div>
   );
 }
-// Add safe default values in the prop validation
+
 Filters.propTypes = {
   filters: PropTypes.shape({
     category: PropTypes.array,
@@ -218,7 +284,6 @@ Filters.defaultProps = {
   mobile: false,
 };
 
-// Do the same for AppliedFilters
 AppliedFilters.propTypes = {
   filters: PropTypes.shape({
     category: PropTypes.array,
