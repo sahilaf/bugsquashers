@@ -34,11 +34,11 @@ function MarketPlace() {
         </Alert>
       );
     }
-    
+
     if (isLoading) {
       return <div className="text-center py-8">Loading shops...</div>;
     }
-    
+
     if (!locationRequested && !manualLocation) {
       return (
         <div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -57,7 +57,7 @@ function MarketPlace() {
                 Use My Location
               </Button>
               <Button 
-                onClick={() => setManualLocation({lat: 40.7128, lng: -74.0060})}
+                onClick={() => setManualLocation({ lat: 40.7128, lng: -74.0060 })}
                 variant="outline"
               >
                 Browse All Farms
@@ -70,7 +70,7 @@ function MarketPlace() {
         </div>
       );
     }
-    
+
     return (
       <ProductGrid 
         shops={nearbyShops} 
@@ -83,46 +83,49 @@ function MarketPlace() {
 
   const handleUseLocation = async () => {
     setLocationRequested(true);
-  
-    // Ask permission using Permissions API (optional pre-check)
-    if (navigator.permissions) {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
-  
-        if (permissionStatus.state === "denied") {
-          setError("Location access is denied. Please enable it in your browser settings or browse all farms.");
-          return;
-        }
-      } catch (err) {
-        console.warn("Permission query failed", err);
-      }
+
+    const userUnderstands = window.confirm(
+      "We use your location to find nearby farms. Your location is never stored. Do you want to proceed?"
+    );
+
+    if (!userUnderstands) {
+      setLocationRequested(false);
+      return;
     }
-  
-    // Inform user what we are doing
-    if ("geolocation" in navigator) {
+
+    if (!("geolocation" in navigator)) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    try {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUseLocation(true);
           fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
         },
-        handleLocationError,
+        (error) => {
+          console.error("Geolocation error:", error);
+          setError("Unable to access your location. Please allow permission or browse all farms.");
+        },
         {
-          enableHighAccuracy: true,
+          enableHighAccuracy: false,
           timeout: 5000,
           maximumAge: 0,
         }
       );
-    } else {
-      setError("Geolocation is not supported by your browser.");
+    } catch (err) {
+      console.error("Unexpected error accessing location:", err);
+      setError("Unexpected error accessing location.");
     }
   };
-  
+
   const fetchShopsWithPosition = async (lat, lng, page = 1) => {
     setIsLoading(true);
     setError("");
-  
+
     try {
-      let params = {
+      const params = {
         page,
         limit: 10,
         lat: lat.toFixed(6),
@@ -133,18 +136,16 @@ function MarketPlace() {
         ...(filters.local && { local: true }),
         ...(searchQuery && { search: searchQuery }),
       };
-  
-      const res = await fetch(
-        `http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`
-      );
-  
+
+      const res = await fetch(`http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`);
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to fetch shops");
       }
-  
+
       const data = await res.json();
-  
+
       if (data.success) {
         setNearbyShops(data.data);
         setTotalPages(data.totalPages);
@@ -159,12 +160,7 @@ function MarketPlace() {
       setIsLoading(false);
     }
   };
-  
-  const handleLocationError = (error) => {
-    console.error("Geolocation error:", error);
-    setError("Unable to access your location. Please allow permission or try again later.");
-  };
-  
+
   useEffect(() => {
     if (useLocation || manualLocation) {
       const lat = manualLocation?.lat;
@@ -174,7 +170,6 @@ function MarketPlace() {
       }
     }
   }, [filters, searchQuery, useLocation, manualLocation, locationRequested]);
-  
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -183,20 +178,17 @@ function MarketPlace() {
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
-  
+
     const location = manualLocation;
     if (location) {
       fetchShopsWithPosition(location.lat, location.lng, newPage);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-background mt-20 lg:px-32 px-4">
-      {/* Header */}
       <header className="border-b sticky top-0 bg-background z-10 py-2 md:py-0">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 w-full">
-          {/* Mobile Filter Button and Categories */}
           <div className="flex items-center justify-between w-full md:w-auto">
             <Drawer>
               <DrawerTrigger asChild>
@@ -214,7 +206,6 @@ function MarketPlace() {
               </DrawerContent>
             </Drawer>
 
-            {/* Desktop Categories */}
             <div className="hidden md:flex items-center gap-2">
               <Button variant="ghost" className="text-sm">
                 Categories <ChevronDown className="ml-1 h-4 w-4" />
@@ -231,8 +222,7 @@ function MarketPlace() {
             </div>
           </div>
         </div>
-        
-        {/* Search Bar */}
+
         <div className="flex items-center gap-2 w-full md:w-auto md:max-w-md my-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground rounded-full" />
@@ -249,7 +239,6 @@ function MarketPlace() {
         </div>
       </header>
 
-      {/* Applied Filters */}
       {(useLocation || manualLocation) && (
         <AppliedFilters filters={filters} setFilters={setFilters} />
       )}
