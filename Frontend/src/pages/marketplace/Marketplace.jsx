@@ -94,7 +94,15 @@ function MarketPlace() {
       />
     );
   };
-
+  /**
+ * Geolocation Usage Justification:
+ * - Core feature: Finding nearby farms based on user location
+ * - Privacy considerations: 
+ *   1. Location rounded to city-level precision (~3 decimal places)
+ *   2. Coordinates never stored on server
+ *   3. Alternative manual location input provided
+ *   4. Clear user consent with explanation before requesting
+ */
   // Centralized function to check permissions before requesting location
   const getLocationWithPermissionCheck = async () => {
     // First check if APIs are available
