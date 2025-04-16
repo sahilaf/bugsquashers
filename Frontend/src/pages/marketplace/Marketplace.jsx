@@ -5,7 +5,10 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import ProductGrid from "./components/market/ProductGrid";
 import { useState, useEffect } from "react";
-import Filters, { AppliedFilters, getInitialFilters } from "./components/market/Filter";
+import Filters, {
+  AppliedFilters,
+  getInitialFilters,
+} from "./components/market/Filter";
 import {
   Drawer,
   DrawerContent,
@@ -44,36 +47,47 @@ function MarketPlace() {
         <div className="flex flex-col items-center justify-center py-12 gap-4">
           <div className="bg-background p-6 rounded-lg max-w-md w-full text-center">
             <MapPin className="h-8 w-8 mx-auto mb-3 text-foreground" />
-            <h3 className="font-medium text-lg mb-2">Find local farmers</h3>
+            <h3 className="font-medium text-lg mb-2">Find local shops</h3>
             <p className="text-muted-foreground mb-4">
-              See products available near you or browse all farms
+              See products available near you or browse all shops
             </p>
+
+            {/* Privacy-focused explanation */}
+            <div className="text-sm text-muted-foreground mb-4 p-3 bg-muted rounded-md">
+              <p className="font-medium mb-1">How we use location:</p>
+              <ul className="text-left list-disc pl-5 space-y-1">
+                <li>Only to find shops near your general area</li>
+                <li>Coordinates are rounded to city level</li>
+                <li>Your location is never stored or tracked</li>
+                <li>You can always browse all shops instead</li>
+              </ul>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button 
+              <Button
                 onClick={handleUseLocation}
                 variant="default"
                 className="bg-primary hover:bg-primary-hover"
               >
-                Use My Location
+                Find Nearby shops
               </Button>
-              <Button 
-                onClick={() => setManualLocation({ lat: 40.7128, lng: -74.0060 })}
+              <Button
+                onClick={() =>
+                  setManualLocation({ lat: 40.7128, lng: -74.006 })
+                }
                 variant="outline"
               >
-                Browse All Farms
+                Browse All shops
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Your location is only used to find nearby shops and isn't stored.
-            </p>
           </div>
         </div>
       );
     }
 
     return (
-      <ProductGrid 
-        shops={nearbyShops} 
+      <ProductGrid
+        shops={nearbyShops}
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
@@ -81,78 +95,142 @@ function MarketPlace() {
     );
   };
 
-  const handleUseLocation = async () => {
-    setLocationRequested(true);
-
-    const userUnderstands = window.confirm(
-      "We use your location to find nearby farms. Your location is never stored. Do you want to proceed?"
-    );
-
-    if (!userUnderstands) {
-      setLocationRequested(false);
-      return;
-    }
-
+  // Centralized function to check permissions before requesting location
+  const getLocationWithPermissionCheck = async () => {
+    // First check if APIs are available
     if (!("geolocation" in navigator) || !("permissions" in navigator)) {
-      setError("Geolocation or permission API not supported by your browser.");
-      return;
+      throw new Error(
+        "Geolocation or permission API not supported by your browser."
+      );
     }
-
-    try {
-      const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
-
-      if (permissionStatus.state === "granted" || permissionStatus.state === "prompt") {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setUseLocation(true);
-            setIsLoading(true); // 👈 Show loading right after permission is granted
-            fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
-          },
-          (error) => {
-            console.error("Geolocation error:", error);
-            if (error.code === error.PERMISSION_DENIED) {
-              setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
-            } else {
-              setError("Unable to access your location. Please try again.");
-            }
-            setLocationRequested(false);
-          },
-          {
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 0,
-          }
-        );
-      } else {
-        setError("Geolocation permission denied. You can browse all farms instead.");
-        setUseLocation(false);
-        setLocationRequested(false);
-      }
-    } catch (err) {
-      console.error("Permission query error:", err);
-      setError("Failed to check location permission. Please try again.");
-      setLocationRequested(false);
+  
+    // Check permission status
+    const permissionStatus = await navigator.permissions.query({
+      name: "geolocation",
+    });
+  
+    // Handle based on permission state
+    if (permissionStatus.state === "granted" || permissionStatus.state === "prompt") {
+      // Permission already granted or will prompt user for permission
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 60000, // Cache location for a minute
+        });
+      });
+    } else {
+      // Permission denied
+      throw new Error("Location access previously denied.");
     }
   };
 
+  const handleUseLocation = async () => {
+    setLocationRequested(true);
+    setIsLoading(true);
+
+    try {
+      // Use the centralized function to check permission and get location
+      const position = await getLocationWithPermissionCheck();
+
+      setUseLocation(true);
+      fetchShopsWithPosition(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+
+      // Get permission status for event listener
+      const permissionStatus = await navigator.permissions.query({
+        name: "geolocation",
+      });
+      permissionStatus.addEventListener("change", handlePermissionChange);
+    } catch (err) {
+      console.error("Location error:", err);
+      handleLocationError(err);
+    }
+  };
+
+  // Handle permission status changes
+  const handlePermissionChange = async (e) => {
+    const permissionStatus = e.target;
+
+    if (permissionStatus.state === "granted") {
+      // User granted permission after initially denying it
+      try {
+        // Always use the centralized function to get location
+        const position = await getLocationWithPermissionCheck();
+        setUseLocation(true);
+        fetchShopsWithPosition(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+      } catch (error) {
+        handleLocationError(error);
+      }
+    } else if (permissionStatus.state === "denied") {
+      // User denied permission after initially granting it
+      setError("Location access was denied. Showing all farms instead.");
+      setUseLocation(false);
+      setManualLocation({ lat: 40.7128, lng: -74.006 });
+    }
+  };
+
+  // Centralized error handling for location errors
+  const handleLocationError = (error) => {
+    let errorMessage =
+      "Unable to access your location. Showing all farms instead.";
+
+    if (error.code === 1) {
+      // PERMISSION_DENIED
+      errorMessage = "Location access was denied. Showing all farms instead.";
+    } else if (error.code === 2) {
+      // POSITION_UNAVAILABLE
+      errorMessage =
+        "Location information is unavailable. Showing all farms instead.";
+    } else if (error.code === 3) {
+      // TIMEOUT
+      errorMessage = "Location request timed out. Showing all farms instead.";
+    } else if (error.message) {
+      // Handle errors from our permission check
+      errorMessage = `${error.message} Showing all farms instead.`;
+    }
+
+    setError(errorMessage);
+    setLocationRequested(false);
+    setUseLocation(false);
+    // Fall back to showing all farms
+    setManualLocation({ lat: 40.7128, lng: -74.006 });
+    setIsLoading(false);
+  };
+
+  // Modify the fetchShopsWithPosition to be more privacy-aware
   const fetchShopsWithPosition = async (lat, lng, page = 1) => {
     setIsLoading(true);
     setError("");
 
     try {
+      // Round coordinates to lower precision (city-level rather than exact location)
+      // 3 decimal places is roughly town/city level precision (~100m)
+      const roundedLat = parseFloat(lat.toFixed(3));
+      const roundedLng = parseFloat(lng.toFixed(3));
+
       const params = {
         page,
         limit: 10,
-        lat: lat.toFixed(6),
-        lng: lng.toFixed(6),
-        ...(filters.category.length && { category: filters.category.join(",") }),
+        lat: roundedLat,
+        lng: roundedLng,
+        ...(filters.category.length && {
+          category: filters.category.join(","),
+        }),
         ...(filters.rating && { rating: filters.rating }),
         ...(filters.organic && { organic: true }),
         ...(filters.local && { local: true }),
         ...(searchQuery && { search: searchQuery }),
       };
 
-      const res = await fetch(`http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`);
+      const res = await fetch(
+        `http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`
+      );
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -259,9 +337,7 @@ function MarketPlace() {
       )}
 
       <div className="py-4 md:py-6 w-full">
-        <main className="w-full">
-          {renderContent()}
-        </main>
+        <main className="w-full">{renderContent()}</main>
       </div>
     </div>
   );
