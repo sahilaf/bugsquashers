@@ -83,45 +83,57 @@ function MarketPlace() {
 
   const handleUseLocation = async () => {
     setLocationRequested(true);
-  
-    // Explicit user consent with clear explanation
+
     const userUnderstands = window.confirm(
       "We use your location to find nearby farms. Your location is never stored. Do you want to proceed?"
     );
-  
+
     if (!userUnderstands) {
       setLocationRequested(false);
       return;
     }
-  
-    if (!("geolocation" in navigator)) {
-      setError("Geolocation is not supported by your browser.");
+
+    if (!("geolocation" in navigator) || !("permissions" in navigator)) {
+      setError("Geolocation or permission API not supported by your browser.");
       return;
     }
-  
-    // Directly request location without pre-checking permissions
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setUseLocation(true);
-        fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        if (error.code === error.PERMISSION_DENIED) {
-          setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
-        } else {
-          setError("Unable to access your location. Please try again or browse all farms.");
-        }
-        setLocationRequested(false); // Reset location request state
-      },
-      {
-        enableHighAccuracy: false, // Prefer approximate location
-        timeout: 5000,
-        maximumAge: 0,
+
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
+
+      if (permissionStatus.state === "granted" || permissionStatus.state === "prompt") {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setUseLocation(true);
+            setIsLoading(true); // 👈 Show loading right after permission is granted
+            fetchShopsWithPosition(position.coords.latitude, position.coords.longitude);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            if (error.code === error.PERMISSION_DENIED) {
+              setError("Location access denied. Please enable permissions in browser settings or browse all farms.");
+            } else {
+              setError("Unable to access your location. Please try again.");
+            }
+            setLocationRequested(false);
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 0,
+          }
+        );
+      } else {
+        setError("Geolocation permission denied. You can browse all farms instead.");
+        setUseLocation(false);
+        setLocationRequested(false);
       }
-    );
+    } catch (err) {
+      console.error("Permission query error:", err);
+      setError("Failed to check location permission. Please try again.");
+      setLocationRequested(false);
+    }
   };
-  
 
   const fetchShopsWithPosition = async (lat, lng, page = 1) => {
     setIsLoading(true);
