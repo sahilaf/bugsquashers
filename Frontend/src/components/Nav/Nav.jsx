@@ -41,7 +41,9 @@ const CATEGORIES = [
   { name: "Clothing", link: "/categories/clothing" },
   { name: "Home & Garden", link: "/categories/home" },
 ];
-
+// **Nav Component**
+// This component handles the navigation bar for the application, including mobile and desktop views.
+// It also manages the theme toggle functionality and user authentication state.
 // **ThemeToggle Component**
 const ThemeToggle = ({ showText = false }) => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
