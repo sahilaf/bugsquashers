@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import PropTypes from "prop-types";
 import { AuthProvider, useAuth } from "./pages/auth/Authcontext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Nav from "./components/nav/Nav";
+import Nav from "./components/Nav/Nav";
 import Home from "./pages/home/Home";
 import { LoginForm } from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
