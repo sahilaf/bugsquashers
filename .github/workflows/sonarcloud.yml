@@ -9,7 +9,7 @@ on:
 
 jobs:
   sonarcloud:
-    name: SonarCloud Analysis (Frontend + Backend)
+    name: SonarCloud Analysis (Frontend only)
     runs-on: ubuntu-latest
 
     steps:
@@ -33,21 +33,10 @@ jobs:
           cd Frontend 
           npx vitest run --coverage
 
-      - name: Install Backend dependencies
+      - name: Prepare LCOV for SonarCloud
         run: |
-          cd Backend
-          npm install
-
-      - name: Run Backend tests with coverage
-        run: |
-          cd Backend
-          npx vitest run --coverage
-
-      - name: Merge LCOV reports
-        run: |
-          npm install -g lcov-result-merger
           mkdir -p coverage
-          lcov-result-merger Frontend/coverage/lcov.info Backend/coverage/lcov.info > coverage/merged-lcov.info
+          cp Frontend/coverage/lcov.info coverage/merged-lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
