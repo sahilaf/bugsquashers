@@ -139,13 +139,14 @@ describe("App Routing", () => {
     expect(screen.queryByTestId("nav")).toBeNull();
   });
 
-  it('renders Product Detail page at "/product"', async () => {
-    window.history.pushState({}, "Test", "/product");
+  it('renders Product Detail page at "/product/:productId"', async () => {
+    window.history.pushState({}, "Test", "/product/123");
     const { default: App } = await import("./App");
     render(<App />);
     expect(screen.getByTestId("product-detail")).toBeInTheDocument();
     expect(screen.getByTestId("nav")).toBeInTheDocument();
   });
+  
 
   it('renders Marketplace page at "/market"', async () => {
     window.history.pushState({}, "Test", "/market");
