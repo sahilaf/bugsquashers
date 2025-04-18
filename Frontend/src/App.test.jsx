@@ -26,7 +26,7 @@ vi.mock("./pages/auth/Authcontext", () => {
 // ---------------------------------------------------
 // MOCK COMPONENTS
 // Replace implementations with simple identifiable elements.
-vi.mock("./components/nav/Nav", () => ({
+vi.mock("./components/Nav/Nav", () => ({
   default: () => <div data-testid="nav">Nav</div>,
 }));
 
