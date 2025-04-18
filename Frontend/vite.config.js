@@ -8,5 +8,9 @@ export default defineConfig({
     globals: true,           // Allows using `test`, `expect` without imports
     environment: 'jsdom',   // Simulates a browser DOM for React testing
     setupFiles: ['./vitest.setup.js'], // Loads the setup file
+    coverage: {
+      reporter: ['text', 'lcov'], // Generates both text and lcov reports
+      reportsDirectory: 'coverage', // Output folder for coverage reports
+    },
   },
 })
