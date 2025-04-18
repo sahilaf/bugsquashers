@@ -23,31 +23,31 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install frontend dependencies
+      - name: Install Frontend dependencies
         run: |
-          cd frontend
+          cd Frontend
           npm install
 
-      - name: Run frontend tests with coverage
+      - name: Run Frontend tests with coverage
         run: |
-          cd frontend
+          cd Frontend 
           npx vitest run --coverage
 
-      - name: Install backend dependencies
+      - name: Install Backend dependencies
         run: |
-          cd backend
+          cd Backend
           npm install
 
-      - name: Run backend tests with coverage
+      - name: Run Backend tests with coverage
         run: |
-          cd backend
+          cd Backend
           npx vitest run --coverage
 
       - name: Merge LCOV reports
         run: |
           npm install -g lcov-result-merger
           mkdir -p coverage
-          lcov-result-merger frontend/coverage/lcov.info backend/coverage/lcov.info > coverage/merged-lcov.info
+          lcov-result-merger Frontend/coverage/lcov.info Backend/coverage/lcov.info > coverage/merged-lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v4
