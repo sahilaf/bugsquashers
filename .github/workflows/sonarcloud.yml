@@ -1,0 +1,55 @@
+name: SonarCloud Full Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Analysis (Frontend + Backend)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run frontend tests with coverage
+        run: |
+          cd frontend
+          npx vitest run --coverage
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Run backend tests with coverage
+        run: |
+          cd backend
+          npx vitest run --coverage
+
+      - name: Merge LCOV reports
+        run: |
+          npm install -g lcov-result-merger
+          mkdir -p coverage
+          lcov-result-merger frontend/coverage/lcov.info backend/coverage/lcov.info > coverage/merged-lcov.info
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
