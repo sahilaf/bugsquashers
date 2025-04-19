@@ -17,7 +17,7 @@ import { ProductDetail } from "./pages/marketplace/ProductDetail";
 import { Toaster } from "react-hot-toast";
 import Marketplace from "./pages/marketplace/Marketplace";
 import FarmerMarket from "./pages/marketplace/FarmerMarket"; // You'll need to create this component
-
+import ForgotPassword from "./pages/auth/ForgetPassword";
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
   switch (userRole) {
@@ -101,6 +101,8 @@ const App = () => (
           <Route path="/farmerdash" element={<ProtectedRoute allowedRoles={["Farmer"]}><FarmerDash /></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute allowedRoles={["User"]}><Cart/> </ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/forgetpassword" element={<ForgotPassword/>} />
+          
         </Routes>
       </Layout>
     </Router>

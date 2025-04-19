@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaFacebook } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { FormControl, FormItem, FormLabel, FormMessage } from "../../components/ui/form";
@@ -21,12 +19,10 @@ export function LoginForm() {
 
   const { handleSubmit } = formMethods;
 
-  // Handle token refresh and user state changes
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const token = await user.getIdToken();
-        console.log(token)
         localStorage.setItem("authToken", token);
       } else {
         localStorage.removeItem("authToken");
@@ -50,15 +46,12 @@ export function LoginForm() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Fetch user role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
 
       if (userDoc.exists()) {
         const userRole = userDoc.data().role;
         toast.success("Login successful!");
-        console.log("User logged in:", user, "Role:", userRole);
-
-        // Redirect based on role
+        
         switch (userRole) {
           case "Admin":
             navigate("/admin");
@@ -127,6 +120,7 @@ export function LoginForm() {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
+
                 <FormItem>
                   <FormLabel className="sr-only" htmlFor="password">Password</FormLabel>
                   <FormControl>
@@ -142,43 +136,35 @@ export function LoginForm() {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
+
+                {/* Forgot Password Link */}
+                <div className="text-right text-sm">
+                  <Link 
+                    to="/forgetpassword" 
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
                 <Button disabled={isLoading} className="w-full">
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </div>
             </form>
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="w-full bg-accent">
-                <FcGoogle className="mr-2 h-4 w-4" />
-                Google
-              </Button>
-              <Button variant="outline" className="w-full bg-accent">
-                <FaApple className="mr-2 h-4 w-4" />
-                Apple
-              </Button>
-              <Button variant="outline" className="w-full bg-accent">
-                <FaFacebook className="mr-2 h-4 w-4" />
-                Facebook
-              </Button>
+
+            {/* Removed social login section */}
+
+            <div className="text-center mt-6">
+              <p className="text-sm text-muted-foreground">
+                Don&apos;t have an account?{" "}
+                <Link to="/signup" className="font-medium text-primary hover:underline">
+                  Sign up
+                </Link>
+              </p>
             </div>
           </FormProvider>
-          <div className="text-center mt-6">
-            <p className="text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="font-medium text-primary hover:underline">
-                Sign up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>
