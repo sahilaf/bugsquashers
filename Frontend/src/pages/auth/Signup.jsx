@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaFacebook } from "react-icons/fa";
 import { createUserWithEmailAndPassword,getIdToken } from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -264,20 +262,7 @@ function Signup() {
           </div>
 
           {/* Social Login Buttons */}
-          <div className="flex gap-2">
-            <Button variant="outline" className="w-full bg-accent">
-              <FcGoogle className="mr-2 h-4 w-4" />
-              Google
-            </Button>
-            <Button variant="outline" className="w-full bg-accent">
-              <FaApple className="mr-2 h-4 w-4" />
-              Apple
-            </Button>
-            <Button variant="outline" className="w-full bg-accent">
-              <FaFacebook className="mr-2 h-4 w-4" />
-              Facebook
-            </Button>
-          </div>
+          
 
           {/* Link to Login Page */}
           <div className="text-center mt-6">
