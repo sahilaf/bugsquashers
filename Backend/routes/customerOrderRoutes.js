@@ -181,27 +181,29 @@ router.put(
       order.status = "Cancelled";
       await order.save();
 
-      const retailerOrder = await RetailerOrder.findOne({ shopId: mongoose.Types.ObjectId(order.shopId) });
+      const retailerOrder = await RetailerOrder.findOne({ shopId: order.shopId });
 
       if (retailerOrder) {
-        const orderTotal = parseFloat(order.total.replace("$", ""));
-        retailerOrder.total = `$${(
-          parseFloat(retailerOrder.total.replace("$", "")) - orderTotal
-        ).toFixed(2)}`;
+        const orderTotal = parseFloat(order.total?.replace("$", "") || 0);
+        const retailerTotal = parseFloat(retailerOrder.total?.replace("$", "") || 0);
 
-        if (retailerOrder.total === "$0.00") {
+        const updatedTotal = Math.max(0, retailerTotal - orderTotal); // prevent negative total
+        retailerOrder.total = `$${updatedTotal.toFixed(2)}`;
+
+        if (updatedTotal === 0) {
           await RetailerOrder.deleteOne({ _id: retailerOrder._id });
         } else {
           await retailerOrder.save();
         }
       }
 
-      res.json(order);
+      res.json({ message: "Order cancelled successfully", order });
     } catch (error) {
-      console.error("Error cancelling customer order:", error);
+      console.error("Error cancelling customer order:", error.message, error.stack);
       res.status(500).json({ error: "Failed to cancel customer order" });
     }
   }
 );
+
 
 module.exports = router;

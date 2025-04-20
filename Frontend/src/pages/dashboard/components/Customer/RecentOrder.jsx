@@ -38,7 +38,7 @@ OrderStatus.propTypes = {
   status: PropTypes.oneOf(["Delivered", "Processing", "Shipped", "Cancelled"]).isRequired,
 };
 
-const RecentOrders = ({ fullList = false, customerId }) => {
+const RecentOrders = ({ fullList = false, customerId = null }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -70,19 +70,21 @@ const RecentOrders = ({ fullList = false, customerId }) => {
   }, [customerId]);
 
   // Handle order cancellation
-  const handleCancelOrder = async (orderId) => {
-    try {
-      await axios.put(`http://localhost:3000/api/customer-orders/${orderId}/cancel`);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: "Cancelled" } : order
-        )
-      );
-    } catch (err) {
-      const message = handleApiError(err, "Failed to cancel order");
-      alert(message);
-    }
-  };
+  // Handle order cancellation
+const handleCancelOrder = async (orderId) => {
+  try {
+    await axios.put(`http://localhost:3000/api/customer-orders/${orderId}/cancel`);
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order._id === orderId ? { ...order, status: "Cancelled" } : order
+      )
+    );
+  } catch (err) {
+    const message = handleApiError(err, "Failed to cancel order");
+    alert(message);
+  }
+};
+
 
   const displayOrders = fullList ? orders : orders.slice(0, 3);
 
@@ -117,12 +119,23 @@ const RecentOrders = ({ fullList = false, customerId }) => {
                 <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                 <TableCell>{order.shopName}</TableCell>
                 <TableCell>
-                  {order.items.map((item) => `${item.name} (x${item.quantity})`).join(", ")}
+                  {order.items?.map((item) => `${item.name} (x${item.quantity})`).join(", ") || "No items"}
                 </TableCell>
-                <TableCell>${order.total.toFixed(2)}</TableCell>
-                <TableCell>{order.payment}</TableCell>
                 <TableCell>
-                  <OrderStatus status={order.status} />
+  {(() => {
+    const cleanTotal = typeof order.total === "string"
+      ? order.total.replace(/[^0-9.]/g, "")
+      : order.total;
+    return isNaN(parseFloat(cleanTotal))
+      ? "N/A"
+      : `$${parseFloat(cleanTotal).toFixed(2)}`;
+  })()}
+</TableCell>
+
+
+                <TableCell>{order.payment || "N/A"}</TableCell>
+                <TableCell>
+                  <OrderStatus status={order.status || "Processing"} />
                 </TableCell>
                 <TableCell>
                   <Button
@@ -146,11 +159,6 @@ const RecentOrders = ({ fullList = false, customerId }) => {
 RecentOrders.propTypes = {
   fullList: PropTypes.bool,
   customerId: PropTypes.string,
-};
-
-RecentOrders.defaultProps = {
-  fullList: false,
-  customerId: null,
 };
 
 export default RecentOrders;
