@@ -6,7 +6,10 @@ const mongoose = require("mongoose");
 const Crop = require("../models/Crop");
 
 // 📌 Function to sanitize input (prevents script injection)
-const sanitizeInput = (input) => input.replace(/[<>]/g, "");
+const sanitizeInput = (input) => {
+  if (typeof input !== "string") return "";
+  return input.replace(/[<>]/g, "");
+};
 
 // 📌 Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -38,12 +41,10 @@ router.post("/crops", upload.single("image"), async (req, res) => {
     const { name, category, price, stock, supplier, harvestDate, expirationDate } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : null;
 
-    // Validate required fields
     if (!name || !category || !price || !stock) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Sanitize user input
     const newCrop = new Crop({
       name: sanitizeInput(name),
       category: sanitizeInput(category),
@@ -63,16 +64,17 @@ router.post("/crops", upload.single("image"), async (req, res) => {
   }
 });
 
-// 📌 GET /api/crops - Fetch all crops (with query parameter whitelist)
+// 📌 GET /api/crops - Fetch all crops with safe filtering
 router.get("/crops", async (req, res) => {
   try {
-    const allowedFilters = ["name", "category"]; // Only allow these fields for queries
-    const filters = Object.keys(req.query).reduce((acc, key) => {
-      if (allowedFilters.includes(key)) {
-        acc[key] = req.query[key]; // Only allow safe fields
+    const allowedFilters = ["name", "category"];
+    const filters = {};
+
+    for (const key of allowedFilters) {
+      if (req.query[key]) {
+        filters[key] = sanitizeInput(req.query[key]);
       }
-      return acc;
-    }, {});
+    }
 
     const crops = await Crop.find(filters);
     res.status(200).json(crops);
@@ -82,10 +84,12 @@ router.get("/crops", async (req, res) => {
   }
 });
 
-// 📌 PUT /api/crops/:id - Update a crop securely
+// 📌 PUT /api/crops/:id - Update crop securely
 router.put("/crops/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid crop ID" });
     }
@@ -93,18 +97,22 @@ router.put("/crops/:id", upload.single("image"), async (req, res) => {
     const { name, category, price, stock, supplier, harvestDate, expirationDate } = req.body;
     const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
-    const updatedCrop = await Crop.findByIdAndUpdate(
-      { _id: { $eq: id } }, // Secure against NoSQL injection
-      {
-        name: sanitizeInput(name),
-        category: sanitizeInput(category),
-        price: Number(price),
-        stock: Number(stock),
-        supplier: sanitizeInput(supplier),
-        harvestDate,
-        expirationDate,
-        ...(image && { image }), // Only update image if provided
-      },
+    // Build update object safely
+    const updateData = {
+      name: sanitizeInput(name),
+      category: sanitizeInput(category),
+      price: Number(price),
+      stock: Number(stock),
+      supplier: sanitizeInput(supplier),
+      harvestDate,
+      expirationDate,
+    };
+
+    if (image) updateData.image = image;
+
+    const updatedCrop = await Crop.findOneAndUpdate(
+      { _id: { $eq: id } }, // Prevent NoSQL injection
+      updateData,
       { new: true }
     );
 
@@ -119,15 +127,16 @@ router.put("/crops/:id", upload.single("image"), async (req, res) => {
   }
 });
 
-// 📌 DELETE /api/crops/:id - Securely delete a crop
+// 📌 DELETE /api/crops/:id - Delete securely
 router.delete("/crops/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid crop ID" });
     }
 
-    const deletedCrop = await Crop.findByIdAndDelete({ _id: { $eq: id } }); // Prevents NoSQL injection
+    const deletedCrop = await Crop.findOneAndDelete({ _id: { $eq: id } }); // Safe query
     if (!deletedCrop) {
       return res.status(404).json({ message: "Crop not found" });
     }
