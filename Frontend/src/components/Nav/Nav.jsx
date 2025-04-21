@@ -32,7 +32,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import PropTypes from "prop-types";
-import { useAuth } from "../../pages/auth/Authcontext";
+import { useAuth } from "../../pages/auth/AuthContext";
 
 // **Constants**
 const MOBILE_NAV_ITEMS = ["Market", "Products", "About", "Contact"];
