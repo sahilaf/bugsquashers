@@ -1,4 +1,3 @@
-// index.js
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -10,14 +9,16 @@ const retailerOrderRoutes = require("./routes/retailerOrderRoutes");
 const customerOrderRoutes = require("./routes/customerOrderRoutes");
 const shopRoutes = require("./routes/shops");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes"); // Added cart routes
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 const fs = require("fs");
 
 // Register models
-require("./models/shopModel"); // Add this line
+require("./models/shopModel");
 require("./models/customerOrderModel");
 require("./models/retailerOrderModel");
+require("./models/Cart"); // Added Cart model
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -82,9 +83,12 @@ mongoose
 // API Routes
 app.use("/api", userRoutes);
 app.use("/api", cropRoutes);
+app.use("/api", cartRoutes); // Added cart routes
 app.use("/api/orders", orderRoutes);
 app.use("/api/retailer-orders", retailerOrderRoutes);
 app.use("/api/customer-orders", customerOrderRoutes);
+app.use("/api/shops", shopRoutes);
+app.use("/api/products", productRoutes);
 
 const staticLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -112,7 +116,3 @@ server.on("error", (err) => {
     console.error(" Server error:", err);
   }
 });
-
-app.use("/api/shops", shopRoutes);
-app.use("/api/products", productRoutes);
-
