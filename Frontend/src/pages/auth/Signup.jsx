@@ -15,7 +15,7 @@ import {
 } from "../../components/ui/select";
 import Lottie from "react-lottie-player";
 import welcomeback from "./assets/savetime";
-import { useAuth } from "./Authcontext"; // Import useAuth
+import { useAuth } from "./AuthContext"; // Import useAuth
 import { setDoc, doc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 function Signup() {
