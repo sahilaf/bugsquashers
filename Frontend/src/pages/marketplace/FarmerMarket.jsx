@@ -3,28 +3,27 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../..
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import axios from 'axios';
+import { useCart } from '../cart/context/CartContex'; // Adjust the import path as necessary
 
 function FarmerMarket() {
   const [crops, setCrops] = useState([]);
-  const [cart, setCart] = useState([]);
+  const { addToCart } = useCart();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = "1234567890abcdef12345678"; // Hardcoded for demo; replace with auth
-
   // Fetch crops and cart from backend
   useEffect(() => {
     const fetchCrops = async () => {
       try {
         const response = await axios.get('http://localhost:3000/api/crops');
-        // Group crops by supplier (assuming supplier is the "farmer")
         const groupedCrops = response.data.reduce((acc, crop) => {
           const supplier = crop.supplier || 'Unknown Farm';
           if (!acc[supplier]) {
             acc[supplier] = {
               id: crop._id,
               name: supplier,
-              location: 'Unknown Location', // Add real location if available
-              description: 'Fresh produce', // Add real description if available
+              location: 'Unknown Location', // Replace with actual data if available
+              description: 'Fresh produce', // Replace with actual data if available
               products: [],
             };
           }
@@ -32,16 +31,17 @@ function FarmerMarket() {
             id: crop._id,
             name: crop.name,
             price: crop.price,
-            unit: 'unit', // Adjust based on backend data
-            organic: true, // Adjust based on backend data
+            unit: 'unit', // Adjust if needed
+            organic: true, // Adjust if needed
           });
           return acc;
         }, {});
         setCrops(Object.values(groupedCrops));
-        setLoading(false);
       } catch (err) {
+        console.error("Error fetching crops:", err); // ✅ meaningful logging
         setError('Failed to fetch crops');
-        setLoading(false);
+      } finally {
+        setLoading(false); // ✅ always hide loading regardless of success/failure
       }
     };
 
@@ -59,35 +59,9 @@ function FarmerMarket() {
     fetchCart();
   }, []);
 
-  // Add to cart
-  const addToCart = async (cropId) => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/cart', {
-        userId,
-        cropId,
-        quantity: 1,
-      });
-      setCart(response.data.items);
-    } catch (err) {
-      console.error('Failed to add to cart:', err.message);
-    }
-  };
+  
 
-  // Remove from cart
-  const removeFromCart = async (cropId) => {
-    if (!cropId) {
-      console.error('Attempted to remove undefined cropId from cart');
-      return;
-    }
-    try {
-      await axios.delete(`http://localhost:3000/api/cart/${userId}/item/${cropId}`);
-      setCart(cart.filter(item => item.cropId._id !== cropId && item.cropId !== cropId));
-    } catch (err) {
-      console.error('Failed to remove from cart:', err.message);
-    }
-  };
-
-  if (loading) return <div className="text-white text-center">Loading...</div>;
+  if (loading) return <div className="text-foreground text-center">Loading...</div>;
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
@@ -102,37 +76,12 @@ function FarmerMarket() {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-12 relative">
+      <div className="container mx-auto px-4 py-12 mt-10 relative">
         <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-md">Local Farmers Market</h1>
-          <p className="text-white/80 mt-3 text-lg">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground drop-shadow-md">Local Farmers Market</h1>
+          <p className="text-foreground/80 mt-3 text-lg">
             Discover fresh products directly from local farmers
           </p>
-        </div>
-
-        {/* Cart Section */}
-        <div className="mb-8 bg-orange/90 p-6 rounded-lg shadow-xl">
-          <h2 className="text-2xl font-bold mb-4">Your Cart</h2>
-          {cart.length === 0 ? (
-            <p>Your cart is empty</p>
-          ) : (
-            <ul>
-              {cart.map((item, index) => (
-                <li key={item.cropId._id || item.cropId || index} className="flex justify-between items-center mb-2">
-                  <span>
-                    {(item.cropId?.name || 'Unknown Item')} - ${item.cropId?.price || 'N/A'} x {item.quantity}
-                  </span>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => removeFromCart(item.cropId._id || item.cropId)}
-                  >
-                    Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
 
         {/* Farmers and Products */}
@@ -144,8 +93,8 @@ function FarmerMarket() {
                   <div className="w-full">
                     <div className="flex justify-between items-end">
                       <div>
-                        <CardTitle className="text-3xl text-white">{farmer.name}</CardTitle>
-                        <CardDescription className="text-white/80 text-lg">
+                        <CardTitle className="text-3xl text-foreground">{farmer.name}</CardTitle>
+                        <CardDescription className="text-foreground/80 text-lg">
                           {farmer.location} • {farmer.description}
                         </CardDescription>
                       </div>
@@ -162,7 +111,7 @@ function FarmerMarket() {
                 />
               </CardHeader>
               
-              <CardContent className="p-8 bg-white/90 backdrop-blur-sm">
+              <CardContent className="p-8 bg-foretext-foreground/90 backdrop-blur-sm">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {farmer.products.map(product => (
                     <Card key={product.id} className="hover:shadow-lg transition-all duration-300 h-full">

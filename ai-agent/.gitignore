@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.env
+
+# VSCode settings
+.vscode/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Chroma vector store files
+chroma_store/
+
+# Python egg info
+*.egg-info/
+dist/
+build/
+
+# Jupyter notebooks (if added later)
+.ipynb_checkpoints/
+
+# OS junk files
+Thumbs.db
+ehthumbs.db

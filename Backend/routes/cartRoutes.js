@@ -1,14 +1,15 @@
+// Fixed API route
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Cart = require("../models/Cart");
 
-// POST /api/cart - Add item to cart
+// POST /api/cart - Add or update item in cart
 router.post("/cart", async (req, res) => {
   try {
     const { userId, cropId, quantity } = req.body;
 
-    // Validate required fields we can add more categorization but complexing the database relation 
+    // Validate required fields
     if (!userId || !cropId || !quantity) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -22,7 +23,8 @@ router.post("/cart", async (req, res) => {
     // Check if crop already in cart
     const itemIndex = cart.items.findIndex(item => item.cropId.toString() === cropId);
     if (itemIndex > -1) {
-      cart.items[itemIndex].quantity += quantity;
+      // FIXED: Replace the quantity instead of adding to it
+      cart.items[itemIndex].quantity = quantity;
     } else {
       cart.items.push({ cropId, quantity });
     }

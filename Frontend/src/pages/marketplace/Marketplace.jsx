@@ -71,14 +71,6 @@ function MarketPlace() {
               >
                 Find Nearby shops
               </Button>
-              <Button
-                onClick={() =>
-                  setManualLocation({ lat: 40.7128, lng: -74.006 })
-                }
-                variant="outline"
-              >
-                Browse All shops
-              </Button>
             </div>
           </div>
         </div>
