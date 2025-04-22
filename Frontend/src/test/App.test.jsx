@@ -4,25 +4,35 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import PropTypes from "prop-types";
 
 // ---------------------------------------------------
+// MOCK FIREBASE MODULE
+// Prevents the real `initializeApp` / `getAuth` calls.
+vi.mock("../pages/auth/Firebase", () => ({
+  auth: {},
+  db: {},
+  default: {},
+}));
+
+// ---------------------------------------------------
 // Global variable for the current user role in tests.
-// ProtectedRoute and Authcontext mocks will use this value.
+// ProtectedRoute and AuthContext mocks will use this value.
 let mockedUserRole = "User";
 
 // ---------------------------------------------------
 // MOCK AUTH CONTEXT
 // Instead of importing the real auth module, we create a mock
 // that returns the current value of `mockedUserRole`.
-vi.mock("../pages/auth/Authcontext", () => {
+vi.mock("../pages/auth/AuthContext", () => {
   const MockAuthProvider = ({ children }) => <>{children}</>;
   MockAuthProvider.propTypes = {
     children: PropTypes.node.isRequired,
   };
-  
+
   return {
     AuthProvider: MockAuthProvider,
     useAuth: () => ({ userRole: mockedUserRole }),
   };
 });
+
 // ---------------------------------------------------
 // MOCK COMPONENTS
 // Replace implementations with simple identifiable elements.
@@ -83,7 +93,6 @@ vi.mock("../components/NotFound", () => ({
 // Our mock ProtectedRoute uses the already mocked auth context via the global variable.
 vi.mock("../components/ProtectedRoute", () => ({
   default: ({ allowedRoles, children }) => {
-    // Use the mockedUserRole variable directly.
     return allowedRoles.includes(mockedUserRole)
       ? children
       : <div>Access Denied</div>;
@@ -94,11 +103,8 @@ vi.mock("../components/ProtectedRoute", () => ({
 // HELPER FUNCTION
 // This helper sets the desired role and route in the browser history before importing App.
 const renderWithRole = async ({ route = "/", userRole = "User" } = {}) => {
-  // Set the global mocked role.
   mockedUserRole = userRole;
-  // Set the current route.
   window.history.pushState({}, "Test", route);
-  // Reset modules to ensure mocks are applied fresh.
   vi.resetModules();
   const { default: App } = await import("../App");
   return render(<App />);
@@ -109,9 +115,7 @@ const renderWithRole = async ({ route = "/", userRole = "User" } = {}) => {
 describe("App Routing", () => {
   afterEach(() => {
     cleanup();
-    // Reset modules to avoid cross-test contamination.
     vi.resetModules();
-    // Reset the role to default "User" after each test.
     mockedUserRole = "User";
   });
 
@@ -146,7 +150,6 @@ describe("App Routing", () => {
     expect(screen.getByTestId("product-detail")).toBeInTheDocument();
     expect(screen.getByTestId("nav")).toBeInTheDocument();
   });
-  
 
   it('renders Marketplace page at "/market"', async () => {
     window.history.pushState({}, "Test", "/market");
@@ -176,7 +179,7 @@ describe("App Routing", () => {
   });
 
   it('navigates to the proper dashboard via "/dashboard" based on userRole', async () => {
-    // For role "Shopkeeper", the DashboardRedirect should navigate to the retailer dashboard.
+    // For role "Shopkeeper", DashboardRedirect → /retailer
     await renderWithRole({ route: "/dashboard", userRole: "Shopkeeper" });
     expect(screen.getByTestId("retailer")).toBeInTheDocument();
   });
