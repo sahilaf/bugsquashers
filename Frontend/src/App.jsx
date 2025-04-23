@@ -24,7 +24,7 @@ import { Toaster } from "react-hot-toast";
 import Marketplace from "./pages/marketplace/Marketplace";
 import FarmerMarket from "./pages/marketplace/FarmerMarket"; // You'll need to create this component
 import ForgotPassword from "./pages/auth/ForgetPassword";
-import Recommendation from "./pages/recommendation/recommendation";
+import Recommendation from "./pages/recommendation/Recommendation";
 import { CartProvider } from './pages/cart/context/CartContex';
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
