@@ -1,94 +1,110 @@
 // context/CartContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 
 const CartContext = createContext();
 
+// Demo product data matching your Product schema
+const DEMO_PRODUCTS = {
+  'prod_organicTomato': {
+    _id: 'prod_organicTomato',
+    name: 'Organic Tomato',
+    price: 4.99,
+    originalPrice: 6.99,
+    images: ['https://via.placeholder.com/200x200.png?text=Tomato'],
+    isOrganic: true,
+    category: 'Vegetables',
+    keyFeatures: ['Heirloom variety', 'Vine-ripened', 'Chemical-free']
+  },
+  'prod_freshSpinach': {
+    _id: 'prod_freshSpinach',
+    name: 'Fresh Spinach',
+    price: 3.49,
+    images: ['https://via.placeholder.com/200x200.png?text=Spinach'],
+    category: 'Leafy Greens',
+    keyFeatures: ['Baby leaves', 'Triple-washed', 'Ready-to-eat']
+  }
+};
+
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Demo doesn't need loading
   const [error, setError] = useState(null);
-  const userId = "1234567890abcdef12345678";
 
+  // Simplified demo mode implementation
   const fetchCart = useCallback(async () => {
     try {
-      setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/cart/${userId}`);
-      setCartItems(response.data.items || []);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch cart');
-      console.error('Failed to fetch cart:', err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  const addToCart = useCallback(async (cropId) => {
-    try {
-      // Find if item already exists in cart to determine quantity
-      const existingItem = cartItems.find(item => item.cropId._id === cropId);
-      const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      await axios.post('http://localhost:3000/api/cart', {
-        userId,
-        cropId,
-        quantity: newQuantity,
-      });
-      await fetchCart();
+      // Set initial demo cart
+      setCartItems([
+        { productId: DEMO_PRODUCTS.prod_organicTomato, quantity: 2 },
+        { productId: DEMO_PRODUCTS.prod_freshSpinach, quantity: 1 }
+      ]);
     } catch (err) {
-      console.error('Failed to add to cart:', err.message);
+      setError('Failed to load demo cart');
     }
-  }, [fetchCart, userId, cartItems]);
+  }, []);
 
-  const removeFromCart = useCallback(async (cropId) => {
+  const addToCart = useCallback(async (productId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/${userId}/item/${cropId}`);
-      setCartItems(prev => prev.filter(item => item.cropId._id !== cropId));
+      const product = DEMO_PRODUCTS[productId];
+      if (!product) throw new Error('Invalid product');
+      
+      setCartItems(prev => {
+        const exists = prev.find(item => item.productId._id === productId);
+        if (exists) {
+          return prev.map(item => 
+            item.productId._id === productId
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...prev, { productId: product, quantity: 1 }];
+      });
     } catch (err) {
-      console.error('Failed to remove from cart:', err.message);
+      console.error('Add to cart failed:', err.message);
+      setError('Failed to add item');
     }
-  }, [userId]);
+  }, []);
 
-  const updateQuantity = useCallback(async (cropId, newQuantity) => {
+  const removeFromCart = useCallback(async (productId) => {
+    setCartItems(prev => 
+      prev.filter(item => item.productId._id !== productId)
+    );
+  }, []);
+
+  const updateQuantity = useCallback(async (productId, newQuantity) => {
     if (newQuantity < 1) return;
-    try {
-      await axios.post('http://localhost:3000/api/cart', {
-        userId,
-        cropId,
-        quantity: newQuantity, // Sending the exact new quantity
-      });
-      
-      // Optimistically update the UI without waiting for fetchCart
-      setCartItems(prev => 
-        prev.map(item => 
-          item.cropId._id === cropId 
-            ? { ...item, quantity: newQuantity } 
-            : item
-        )
-      );
-    } catch (err) {
-      console.error('Failed to update quantity:', err.message);
-      // If the API call fails, refresh the cart to get the accurate state
-      fetchCart();
-    }
-  }, [fetchCart, userId]);
+    
+    setCartItems(prev => 
+      prev.map(item => 
+        item.productId._id === productId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  }, []);
 
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
   return (
-    <CartContext.Provider value={{
-      cartItems,
-      loading,
-      error,
-      fetchCart,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      cartCount: cartItems.reduce((total, item) => total + item.quantity, 0)
-    }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        loading,
+        error,
+        fetchCart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        cartCount: cartItems.reduce((total, item) => total + item.quantity, 0),
+        cartTotal: cartItems.reduce((total, item) => 
+          total + (item.productId.price * item.quantity), 0)
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

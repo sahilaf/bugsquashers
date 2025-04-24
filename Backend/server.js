@@ -28,7 +28,7 @@ app.disable("x-powered-by");
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? ["https://your-production-domain.com"]
-    : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5175", "http://localhost:5174"];
+    : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5175", "http://localhost:5174","http://127.0.0.1:5000/api/query"];
 
 app.use(
   cors({

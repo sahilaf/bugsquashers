@@ -3,9 +3,10 @@
 import React, { useEffect } from "react";
 import { 
   Trash2, ShoppingBag, CreditCard, ArrowLeft, Plus, 
-  Minus, Truck, Clock, Tag, Leaf, Box, RefreshCw 
+  Minus, Truck, Tag, Leaf, RefreshCw 
 } from "lucide-react";
 import { useCart } from './context/CartContex';
+import { toast } from 'react-hot-toast';
 
 // Import shadcn components
 import { Button } from "../../components/ui/button";
@@ -13,7 +14,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../comp
 import { Separator } from "../../components/ui/separator";
 import { Badge } from "../../components/ui/badge";
 import { Skeleton } from "../../components/ui/skeleton";
-import { Toaster } from "../../components/ui/toaster";
 
 const Cart = () => {
   const {
@@ -25,25 +25,16 @@ const Cart = () => {
     fetchCart
   } = useCart();
   
-  useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
+  useEffect(() => { fetchCart(); }, [fetchCart]);
 
-  const subtotal = cartItems.reduce((total, item) => total + item.cropId.price * item.quantity, 0);
+  const subtotal = cartItems.reduce((total, item) => total + item.productId.price * item.quantity, 0);
   const shipping = subtotal > 35 ? 0 : 5.99;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
-  // Function to handle quantity decrease
-  const handleDecrease = (itemId, currentQuantity) => {
-    if (currentQuantity > 1) {
-      updateQuantity(itemId, currentQuantity - 1);
-    }
-  };
-
-  // Function to handle quantity increase
-  const handleIncrease = (itemId, currentQuantity) => {
-    updateQuantity(itemId, currentQuantity + 1);
+  const handleQuantityChange = (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    updateQuantity(productId, newQuantity);
   };
 
   if (loading) {
@@ -155,18 +146,14 @@ const Cart = () => {
                   onClick={async () => {
                     try {
                       await Promise.all(
-                        cartItems.map(item => removeFromCart(item.cropId._id))
+                        cartItems.map(item => removeFromCart(item.productId._id))
                       );
-                      Toaster({
-                        title: "Cart Cleared",
+                      toast.success("Cart Cleared", {
                         description: "All items have been removed from your cart",
                       });
                     } catch (err) {
-                      console.error("Failed to clear cart:", err.message);
-                      Toaster({
-                        title: "Error",
+                      toast.error("Error Clearing Cart", {
                         description: "Failed to clear cart. Please try again.",
-                        variant: "destructive",
                       });
                     }
                   }}
@@ -178,16 +165,16 @@ const Cart = () => {
             </CardHeader>
             <CardContent className="p-6">
               {cartItems.map((item, index) => (
-                <React.Fragment key={item.cropId._id}>
+                <React.Fragment key={item.productId._id}>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-shrink-0">
                       <div className="relative">
                         <img
-                          src={item.cropId.image || "https://placehold.co/200x200?text=Product"}
-                          alt={item.cropId.name}
+                          src={item.productId.images[0] || "https://placehold.co/200x200?text=Product"}
+                          alt={item.productId.name}
                           className="w-24 h-24 object-cover rounded-md border"
                         />
-                        {item.cropId.isOrganic && (
+                        {item.productId.isOrganic && (
                           <Badge variant="secondary" className="absolute -top-2 -right-2">
                             <Leaf className="h-3 w-3 mr-1" />
                             Organic
@@ -198,52 +185,40 @@ const Cart = () => {
                     <div className="flex-grow">
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <div>
-                          <h3 className="font-medium text-lg">{item.cropId.name}</h3>
+                          <h3 className="font-medium text-lg">{item.productId.name}</h3>
                           <div className="flex flex-wrap gap-2 mt-1">
                             <Badge variant="outline" className="text-xs">
-                              {item.cropId.category || "Uncategorized"}
+                              {item.productId.category}
                             </Badge>
-                            {item.cropId.supplier && (
-                              <Badge variant="outline" className="text-xs">
-                                Supplier: {item.cropId.supplier}
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className="text-xs">
+                              SKU: {item.productId.sku || 'N/A'}
+                            </Badge>
                           </div>
                           
-                          {/* Additional info with icons */}
                           <div className="mt-2 flex flex-col text-xs text-muted-foreground">
-                            {item.cropId.harvestDate && item.cropId.harvestDate !== "N/A" && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>Harvested: {item.cropId.harvestDate}</span>
-                              </div>
-                            )}
-                            {item.cropId.expirationDate && item.cropId.expirationDate !== "N/A" && (
-                              <div className="flex items-center gap-1">
+                            {item.productId.keyFeatures?.map((feature, idx) => (
+                              <div key={idx} className="flex items-center gap-1">
                                 <Tag className="h-3 w-3" />
-                                <span>Best before: {item.cropId.expirationDate}</span>
+                                <span>{feature}</span>
                               </div>
-                            )}
-                            {item.cropId.stock && (
-                              <div className="flex items-center gap-1">
-                                <Box className="h-3 w-3" />
-                                <span>In stock: {item.cropId.stock}</span>
-                              </div>
-                            )}
+                            ))}
                           </div>
                         </div>
                         <div className="text-right mt-2 sm:mt-0">
-                          <p className="font-medium text-lg">${(item.cropId.price * item.quantity).toFixed(2)}</p>
-                          <p className="text-sm text-muted-foreground">${item.cropId.price.toFixed(2)} each</p>
+                          <p className="font-medium text-lg">
+                            ${(item.productId.price * item.quantity).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            ${item.productId.price.toFixed(2)} each
+                          </p>
                           
-                          {/* Original price if exists and discounted */}
-                          {item.cropId.originalPrice && item.cropId.originalPrice > item.cropId.price && (
+                          {item.productId.originalPrice > item.productId.price && (
                             <div className="flex items-center justify-end mt-1">
                               <span className="text-xs line-through text-muted-foreground mr-2">
-                                ${item.cropId.originalPrice.toFixed(2)}
+                                ${item.productId.originalPrice.toFixed(2)}
                               </span>
                               <Badge variant="destructive" className="text-xs">
-                                {Math.round(((item.cropId.originalPrice - item.cropId.price) / item.cropId.originalPrice) * 100)}% OFF
+                                {item.productId.discountPercentage}% OFF
                               </Badge>
                             </div>
                           )}
@@ -255,8 +230,7 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 rounded-full"
-                            onClick={() => handleDecrease(item.cropId._id, item.quantity)}
-                            disabled={item.quantity <= 1}
+                            onClick={() => handleQuantityChange(item.productId._id, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -265,8 +239,7 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8 rounded-full"
-                            onClick={() => handleIncrease(item.cropId._id, item.quantity)}
-                            disabled={item.cropId.stock && item.quantity >= item.cropId.stock}
+                            onClick={() => handleQuantityChange(item.productId._id, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -276,10 +249,9 @@ const Cart = () => {
                           size="sm"
                           className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
                           onClick={() => {
-                            removeFromCart(item.cropId._id);
-                            Toaster({
-                              title: "Item Removed",
-                              description: `${item.cropId.name} has been removed from your cart`,
+                            removeFromCart(item.productId._id);
+                            toast.info("Item Removed", {
+                              description: `${item.productId.name} removed from cart`,
                             });
                           }}
                         >
@@ -293,25 +265,6 @@ const Cart = () => {
                 </React.Fragment>
               ))}
             </CardContent>
-            <CardFooter className="bg-muted/50 p-6 flex flex-col sm:flex-row justify-between gap-4">
-              <Button variant="outline" onClick={() => window.history.back()}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Continue Shopping
-              </Button>
-              <div className="text-sm text-muted-foreground">
-                {shipping === 0 ? (
-                  <div className="flex items-center">
-                    <Truck className="mr-2 h-4 w-4 text-green-500" />
-                    <span>Free shipping applied</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <Truck className="mr-2 h-4 w-4" />
-                    <span>Free shipping on orders over $35</span>
-                  </div>
-                )}
-              </div>
-            </CardFooter>
           </Card>
         </div>
 

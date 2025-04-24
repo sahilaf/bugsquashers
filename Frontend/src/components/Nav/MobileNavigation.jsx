@@ -55,8 +55,8 @@ const MobileNavigation = ({
             <BotMessageSquare className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[75%] rounded-md">
-        <div className="flex flex-col pt-5 h-[95%]">
+        <SheetContent side="bottom" className="h-[75%] rounded-md bg-[#e9e9e950] backdrop-blur-sm dark:bg-[#817d7d44]">
+        <div className="flex flex-col pt-10 h-[95%]">
             <div className="flex-1 overflow-y-auto p-2 space-y-2 border rounded-md bg-muted">
               {messages.map((msg, index) => (
                 <div

@@ -27,6 +27,33 @@ function MarketPlace() {
   const [useLocation, setUseLocation] = useState(false);
   const [manualLocation, setManualLocation] = useState(null);
   const [locationRequested, setLocationRequested] = useState(false);
+  const [locationPermissionGranted, setLocationPermissionGranted] = useState(false);
+
+  // Check for stored location permission when component mounts
+  useEffect(() => {
+    // Check if location permission was previously granted in this session
+    const storedLocationConsent = localStorage.getItem('locationPermissionGranted');
+    
+    if (storedLocationConsent === 'true') {
+      setLocationPermissionGranted(true);
+      setLocationRequested(true);
+      
+      // Try to use the stored location if available
+      const storedLocation = localStorage.getItem('userLocation');
+      if (storedLocation) {
+        try {
+          const location = JSON.parse(storedLocation);
+          setManualLocation(location);
+          setUseLocation(true);
+        } catch (err) {
+          console.error("Failed to parse stored location", err);
+        }
+      } else {
+        // If no stored location but permission was granted, try to get location again
+        handleUseLocation();
+      }
+    }
+  }, []);
 
   const renderContent = () => {
     if (error) {
@@ -42,7 +69,8 @@ function MarketPlace() {
       return <div className="text-center py-8">Loading shops...</div>;
     }
 
-    if (!locationRequested && !manualLocation) {
+    // Only show the permission section if location was neither requested nor granted
+    if (!locationRequested && !locationPermissionGranted && !manualLocation) {
       return (
         <div className="flex flex-col items-center justify-center py-12 gap-4">
           <div className="bg-background p-6 rounded-lg max-w-md w-full text-center">
@@ -86,15 +114,16 @@ function MarketPlace() {
       />
     );
   };
+  
   /**
- * Geolocation Usage Justification:
- * - Core feature: Finding nearby farms based on user location
- * - Privacy considerations: 
- *   1. Location rounded to city-level precision (~3 decimal places)
- *   2. Coordinates never stored on server
- *   3. Alternative manual location input provided
- *   4. Clear user consent with explanation before requesting
- */
+   * Geolocation Usage Justification:
+   * - Core feature: Finding nearby farms based on user location
+   * - Privacy considerations: 
+   *   1. Location rounded to city-level precision (~3 decimal places)
+   *   2. Coordinates never stored on server
+   *   3. Alternative manual location input provided
+   *   4. Clear user consent with explanation before requesting
+   */
   // Centralized function to check permissions before requesting location
   const getLocationWithPermissionCheck = async () => {
     // First check if APIs are available
@@ -133,7 +162,18 @@ function MarketPlace() {
       // Use the centralized function to check permission and get location
       const position = await getLocationWithPermissionCheck();
 
+      // Store that permission was granted for this session
+      localStorage.setItem('locationPermissionGranted', 'true');
+      setLocationPermissionGranted(true);
       setUseLocation(true);
+      
+      // Store the location in localStorage
+      const locationData = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      localStorage.setItem('userLocation', JSON.stringify(locationData));
+      
       fetchShopsWithPosition(
         position.coords.latitude,
         position.coords.longitude
@@ -159,7 +199,19 @@ function MarketPlace() {
       try {
         // Always use the centralized function to get location
         const position = await getLocationWithPermissionCheck();
+        
+        // Store that permission was granted for this session
+        localStorage.setItem('locationPermissionGranted', 'true');
+        setLocationPermissionGranted(true);
         setUseLocation(true);
+        
+        // Store the location in localStorage
+        const locationData = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        localStorage.setItem('userLocation', JSON.stringify(locationData));
+        
         fetchShopsWithPosition(
           position.coords.latitude,
           position.coords.longitude
@@ -169,6 +221,9 @@ function MarketPlace() {
       }
     } else if (permissionStatus.state === "denied") {
       // User denied permission after initially granting it
+      localStorage.removeItem('locationPermissionGranted');
+      localStorage.removeItem('userLocation');
+      setLocationPermissionGranted(false);
       setError("Location access was denied. Showing all farms instead.");
       setUseLocation(false);
       setManualLocation({ lat: 40.7128, lng: -74.006 });
@@ -182,6 +237,9 @@ function MarketPlace() {
 
     if (error.code === 1) {
       // PERMISSION_DENIED
+      localStorage.removeItem('locationPermissionGranted');
+      localStorage.removeItem('userLocation');
+      setLocationPermissionGranted(false);
       errorMessage = "Location access was denied. Showing all farms instead.";
     } else if (error.code === 2) {
       // POSITION_UNAVAILABLE
@@ -298,21 +356,6 @@ function MarketPlace() {
                 <Filters filters={filters} setFilters={setFilters} mobile />
               </DrawerContent>
             </Drawer>
-
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" className="text-sm">
-                Categories <ChevronDown className="ml-1 h-4 w-4" />
-              </Button>
-              <Button variant="ghost" className="text-sm hidden lg:flex">
-                Ready to ship
-              </Button>
-              <Button variant="ghost" className="text-sm hidden lg:flex">
-                Organic
-              </Button>
-              <Button variant="ghost" className="text-sm hidden xl:flex">
-                Local Farms
-              </Button>
-            </div>
           </div>
         </div>
 

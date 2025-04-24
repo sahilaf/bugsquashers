@@ -118,4 +118,19 @@ router.get("/users", async (req, res) => {
   }
 });
 
+
+// GET /api/user/mongo-id/:firebaseId
+router.get('/mongo-id/:firebaseId', async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseId: req.params.firebaseId });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({ mongoId: user._id });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching MongoDB ID' });
+  }
+});
+
+
 module.exports = router;

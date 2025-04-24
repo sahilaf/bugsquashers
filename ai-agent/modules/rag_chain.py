@@ -129,7 +129,10 @@ def get_rag_qa_chain():
     3. For unavailable information, offer to escalate the ticket
     4. Never make up answers
     5. For off-topic queries, respond: 
-       "I specialize in FairBasket support. How can I help you with the platform today?"""
+       "I specialize in FairBasket support. How can I help you with the platform today?
+    6. Never expose any shop, crop or product id. Always use their name. 
+    If name is not available, say "a product from the inventory" instead of showing ID"""
+    
     
     system_message = SystemMessagePromptTemplate.from_template(
         system_template,

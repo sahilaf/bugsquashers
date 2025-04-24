@@ -2,7 +2,7 @@ import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ScrollArea, ScrollBar } from "../../../../components/ui/scroll-area";
+import { ScrollArea } from "../../../../components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -113,7 +113,6 @@ function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
                     </div>
                   ))}
                 </div>
-                <ScrollBar orientation="horizontal" />
               </ScrollArea>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
