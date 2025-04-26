@@ -2,19 +2,19 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-// Reload module each test to reset memory state
-const loadToastModule = () => {
+// Dynamically import the ES module to reset state between tests
+async function loadToastModule() {
   vi.resetModules();
-  return require('../../../src/hooks/use-toast');
-};
+  return await import('../../../src/hooks/use-toast.js');
+}
 
 describe('useToast hook and toast', () => {
   let useToast;
   let toast;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.useFakeTimers();
-    const mod = loadToastModule();
+    const mod = await loadToastModule();
     useToast = mod.useToast;
     toast = mod.toast;
   });
@@ -39,37 +39,33 @@ describe('useToast hook and toast', () => {
 
   it('adds a new toast and respects TOAST_LIMIT', () => {
     let hook;
-    let t1;
-    let t2;
+    let id1, id2;
 
     function Test() {
       hook = useToast();
       return null;
     }
 
-    // Mount and subscribe
     act(() => {
       render(React.createElement(Test));
     });
 
-    // Add first toast
     act(() => {
-      t1 = hook.toast({ title: 'First' });
+      id1 = hook.toast({ title: 'First' }).id;
     });
     expect(hook.toasts).toHaveLength(1);
     expect(hook.toasts[0].open).toBe(true);
 
-    // Add second toast, but limit is 1
     act(() => {
-      t2 = hook.toast({ title: 'Second' });
+      id2 = hook.toast({ title: 'Second' }).id;
     });
     expect(hook.toasts).toHaveLength(1);
-    expect(hook.toasts[0].id).toBe(t2.id);
+    expect(hook.toasts[0].id).toBe(id2);
   });
 
   it('updates an existing toast', () => {
     let hook;
-    let toastHandle;
+    let handle;
 
     function Test() {
       hook = useToast();
@@ -81,11 +77,11 @@ describe('useToast hook and toast', () => {
     });
 
     act(() => {
-      toastHandle = hook.toast({ title: 'Original' });
+      handle = hook.toast({ title: 'Original' });
     });
 
     act(() => {
-      toastHandle.update({ title: 'Updated' });
+      handle.update({ title: 'Updated' });
     });
 
     expect(hook.toasts[0].title).toBe('Updated');
@@ -93,7 +89,7 @@ describe('useToast hook and toast', () => {
 
   it('dismisses a toast and removes after delay', () => {
     let hook;
-    let toastHandle;
+    let handle;
 
     function Test() {
       hook = useToast();
@@ -105,11 +101,11 @@ describe('useToast hook and toast', () => {
     });
 
     act(() => {
-      toastHandle = hook.toast({ title: 'ToDismiss' });
+      handle = hook.toast({ title: 'ToDismiss' });
     });
 
     act(() => {
-      toastHandle.dismiss();
+      handle.dismiss();
     });
     expect(hook.toasts[0].open).toBe(false);
 
