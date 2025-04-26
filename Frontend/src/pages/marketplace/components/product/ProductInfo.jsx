@@ -3,20 +3,38 @@ import { Star, ShoppingCart } from "lucide-react";
 import { Button } from "../../../../components/ui/button";
 import { Input } from "../../../../components/ui/input";
 import PropTypes from "prop-types";
-
-export const ProductInfo = ({ product, onAddToCart, onBuyNow }) => {
+import { useCart } from "../../../cart/context/CartContex";
+import { ProductTabs } from "./ProductTabs";
+export const ProductInfo = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart, confirmPayment } = useCart();
 
   const handleQuantityChange = (e) => {
     setQuantity(Math.max(1, parseInt(e.target.value) || 1));
   };
 
-  const handleAddToCart = () => {
-    onAddToCart(quantity, selectedVariant);
+  const handleAddToCart = async () => {
+    try {
+      for (let i = 0; i < quantity; i++) {
+        await addToCart(product._id);
+      }
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+    }
   };
 
-  const handleBuyNow = () => {
-    onBuyNow(quantity, selectedVariant);
+  const handleBuyNow = async () => {
+    try {
+      for (let i = 0; i < quantity; i++) {
+        await addToCart(product._id);
+      }
+      const paymentSuccess = await confirmPayment();
+      if (paymentSuccess) {
+        window.location.href = "/order-confirmation";
+      }
+    } catch (err) {
+      console.error("Buy now failed:", err);
+    }
   };
 
   return (
@@ -61,8 +79,6 @@ export const ProductInfo = ({ product, onAddToCart, onBuyNow }) => {
       )}
 
       <div className="space-y-4">
-        
-
         <div>
           <label htmlFor="quantity" className="text-sm font-medium mb-1 block">
             Quantity:
@@ -98,6 +114,7 @@ export const ProductInfo = ({ product, onAddToCart, onBuyNow }) => {
             </p>
           )}
         </div>
+        <ProductTabs />
       </div>
     </div>
   );
@@ -105,6 +122,7 @@ export const ProductInfo = ({ product, onAddToCart, onBuyNow }) => {
 
 ProductInfo.propTypes = {
   product: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     description: PropTypes.string,
     price: PropTypes.number.isRequired,
@@ -113,6 +131,4 @@ ProductInfo.propTypes = {
     soldCount: PropTypes.number,
     isOrganic: PropTypes.bool,
   }).isRequired,
-  onAddToCart: PropTypes.func.isRequired,
-  onBuyNow: PropTypes.func.isRequired,
 };

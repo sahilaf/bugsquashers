@@ -2,7 +2,7 @@ const express = require("express");
 const Shop = require("../models/shopModel.js");
 const Product = require("../models/product.js");
 const router = express.Router();
-
+const mongoose = require("mongoose");
 // Helper function for sanitizing and validating numeric input
 function parseCoordinate(value, min, max) {
   const num = parseFloat(value);
@@ -34,7 +34,7 @@ router.get("/nearby", async (req, res) => {
     const pageNumber = parsePositiveInt(req.query.page, 1);
     const limitNumber = parsePositiveInt(req.query.limit, 20);
     const skip = (pageNumber - 1) * limitNumber;
-
+    console.log('Parsed coordinates:', { lat, lng });
     // Build a safe filter. Only include allowed properties.
     const filter = {
       location: {
@@ -117,6 +117,64 @@ router.get("/nearby", async (req, res) => {
       error:
         process.env.NODE_ENV === "development" ? err.message : "Server error",
     });
+  }
+});
+
+
+
+
+router.post("/", async (req, res) => {
+  try {
+    const {
+      name,
+      latitude,
+      longitude,
+      category,
+      rating,
+      isOrganicCertified,
+      isLocalFarm,
+      owner, // must be a valid user _id
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !latitude || !longitude || !owner) {
+      return res.status(400).json({ error: "Name, latitude, longitude, and owner are required" });
+    }
+
+    // Parse coordinates
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+
+    if (
+      isNaN(lat) || lat < -90 || lat > 90 ||
+      isNaN(lng) || lng < -180 || lng > 180
+    ) {
+      return res.status(400).json({ error: "Invalid latitude or longitude" });
+    }
+
+    // Validate owner ID
+    if (!mongoose.Types.ObjectId.isValid(owner)) {
+      return res.status(400).json({ error: "Invalid owner ID" });
+    }
+
+    const newShop = new Shop({
+      name,
+      location: {
+        type: "Point",
+        coordinates: [lng, lat],
+      },
+      category,
+      rating,
+      isOrganicCertified: !!isOrganicCertified,
+      isLocalFarm: !!isLocalFarm,
+      owner,
+    });
+
+    const savedShop = await newShop.save();
+    res.status(201).json({ success: true, data: savedShop });
+  } catch (err) {
+    console.error("Error creating shop:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 

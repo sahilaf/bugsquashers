@@ -18,6 +18,7 @@ import {
 } from "../../../../components/ui/table";
 import { Badge } from "../../../../components/ui/badge";
 import { Button } from "../../../../components/ui/button";
+import { useAuth } from "../../../auth/AuthContext";
 
 const OrderStatus = ({ status }) => {
   const statusStyles = {
@@ -35,17 +36,20 @@ const OrderStatus = ({ status }) => {
 };
 
 OrderStatus.propTypes = {
-  status: PropTypes.oneOf(["Delivered", "Processing", "Shipped", "Cancelled"]).isRequired,
+  status: PropTypes.oneOf(["Delivered", "Processing", "Shipped", "Cancelled"])
+    .isRequired,
 };
 
-const RecentOrders = ({ fullList = false, customerId = null }) => {
+const RecentOrders = ({ fullList = false }) => {
+  const { userId: customerId } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const handleApiError = (err, defaultMessage) => {
     console.error(err);
-    const errorMessage = err.response?.data?.error || err.message || defaultMessage;
+    const errorMessage =
+      err.response?.data?.error || err.message || defaultMessage;
     setError(errorMessage);
     return errorMessage;
   };
@@ -54,7 +58,9 @@ const RecentOrders = ({ fullList = false, customerId = null }) => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const { data } = await axios.get("http://localhost:3000/api/customer-orders");
+        const { data } = await axios.get(
+          "http://localhost:3000/api/customer-orders"
+        );
         // Filter orders by customerId if provided
         const filteredOrders = customerId
           ? data.filter((order) => order.customerId === customerId)
@@ -71,20 +77,21 @@ const RecentOrders = ({ fullList = false, customerId = null }) => {
 
   // Handle order cancellation
   // Handle order cancellation
-const handleCancelOrder = async (orderId) => {
-  try {
-    await axios.put(`http://localhost:3000/api/customer-orders/${orderId}/cancel`);
-    setOrders((prevOrders) =>
-      prevOrders.map((order) =>
-        order._id === orderId ? { ...order, status: "Cancelled" } : order
-      )
-    );
-  } catch (err) {
-    const message = handleApiError(err, "Failed to cancel order");
-    alert(message);
-  }
-};
-
+  const handleCancelOrder = async (orderId) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/customer-orders/${orderId}/cancel`
+      );
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, status: "Cancelled" } : order
+        )
+      );
+    } catch (err) {
+      const message = handleApiError(err, "Failed to cancel order");
+      alert(message);
+    }
+  };
 
   const displayOrders = fullList ? orders : orders.slice(0, 3);
 
@@ -116,22 +123,26 @@ const handleCancelOrder = async (orderId) => {
             {displayOrders.map((order) => (
               <TableRow key={order._id}>
                 <TableCell>{order.orderId}</TableCell>
-                <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(order.date).toLocaleDateString()}
+                </TableCell>
                 <TableCell>{order.shopName}</TableCell>
                 <TableCell>
-                  {order.items?.map((item) => `${item.name} (x${item.quantity})`).join(", ") || "No items"}
+                  {order.items
+                    ?.map((item) => `${item.name} (x${item.quantity})`)
+                    .join(", ") || "No items"}
                 </TableCell>
                 <TableCell>
-  {(() => {
-    const cleanTotal = typeof order.total === "string"
-      ? order.total.replace(/[^0-9.]/g, "")
-      : order.total;
-    return isNaN(parseFloat(cleanTotal))
-      ? "N/A"
-      : `$${parseFloat(cleanTotal).toFixed(2)}`;
-  })()}
-</TableCell>
-
+                  {(() => {
+                    const cleanTotal =
+                      typeof order.total === "string"
+                        ? order.total.replace(/[^0-9.]/g, "")
+                        : order.total;
+                    return isNaN(parseFloat(cleanTotal))
+                      ? "N/A"
+                      : `$${parseFloat(cleanTotal).toFixed(2)}`;
+                  })()}
+                </TableCell>
 
                 <TableCell>{order.payment || "N/A"}</TableCell>
                 <TableCell>
@@ -142,7 +153,10 @@ const handleCancelOrder = async (orderId) => {
                     variant="destructive"
                     className="rounded-sm"
                     onClick={() => handleCancelOrder(order._id)}
-                    disabled={order.status === "Cancelled" || order.status === "Delivered"}
+                    disabled={
+                      order.status === "Cancelled" ||
+                      order.status === "Delivered"
+                    }
                   >
                     Cancel
                   </Button>

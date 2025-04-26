@@ -10,10 +10,13 @@ router.post("/", async (req, res) => {
     const product = new Product(req.body);
     await product.save();
 
-    // 👉 After saving product, add product._id to its shop's products array
-    await Shop.findByIdAndUpdate(product.shop, {
-      $push: { products: product._id },
-    });
+    const updatedShop = await Shop.findByIdAndUpdate(
+      product.shop,
+      { $push: { products: product._id } },
+      { new: true }
+    );
+    console.log("Updated Shop:", updatedShop);
+    
 
     res.status(201).json(product);
   } catch (error) {

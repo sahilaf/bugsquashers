@@ -75,6 +75,12 @@ const productSchema = new mongoose.Schema({
     ref: "Shop",
     required: true
   },
+  quantity: {
+    type: Number,
+    required: true,
+    min: 0,  // Ensure the quantity is never negative
+    default: 0 // Default to 0 if not provided
+  },
   createdAt: {
     type: Date,
     default: Date.now

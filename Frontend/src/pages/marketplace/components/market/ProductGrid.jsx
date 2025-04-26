@@ -10,11 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../../components/ui/select";
-import PropTypes from 'prop-types';
-function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
-  // We don't need to slice the shops again since the API already handles pagination
-  const currentShops = shops;
+import PropTypes from "prop-types";
+import { useCart } from "../../../cart/context/CartContex";
 
+function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
+  const currentShops = shops;
+  const { addToCart } = useCart();
+  
   return (
     <div className="space-y-6">
       {/* Results and Sort Header */}
@@ -64,52 +66,63 @@ function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
                       key={product._id}
                       className="w-[200px] sm:w-[220px] shrink-0 flex flex-col rounded-lg border dark:border-none bg-card overflow-hidden transition-shadow hover:shadow-md"
                     >
-                        <Link to={`/product/${product._id}`} className="block h-full">
-                      <div className="relative h-64 sm:h-80">
-                        <img
-                          src={product?.images?.[0] || product?.image || "https://via.placeholder.com/200x150?text=Product+Image"}
-                          alt={product.name}
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-[#1b1b1b50] backdrop-blur-sm border-t border-t-[#ffffff33]">
-                          <div className="flex justify-between items-start">
-                            <p className="text-sm font-semibold text-white drop-shadow">
-                              ${product.price.toFixed(2)}
-                              {product.originalPrice > 0 && (
-                                <span className="ml-1 text-xs line-through text-white">
-                                  ${product.originalPrice.toFixed(2)}
-                                </span>
+                      <Link
+                        to={`/product/${product._id}`}
+                        className="block h-full"
+                      >
+                        <div className="relative h-64 sm:h-80">
+                          <img
+                            src={
+                              product?.images?.[0] ||
+                              product?.image ||
+                              "https://via.placeholder.com/200x150?text=Product+Image"
+                            }
+                            alt={product.name}
+                            className="object-cover w-full h-full"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 p-2 bg-[#1b1b1b50] backdrop-blur-sm border-t border-t-[#ffffff33]">
+                            <div className="flex justify-between items-start">
+                              <p className="text-sm font-semibold text-white drop-shadow">
+                                ${product.price.toFixed(2)}
+                                {product.originalPrice > 0 && (
+                                  <span className="ml-1 text-xs line-through text-white">
+                                    ${product.originalPrice.toFixed(2)}
+                                  </span>
+                                )}
+                              </p>
+                              {product.isOrganic && (
+                                <Badge className="bg-green-500/90 text-white text-[10px]">
+                                  Organic
+                                </Badge>
                               )}
-                            </p>
-                            {product.isOrganic && (
-                              <Badge className="bg-green-500/90 text-white text-[10px]">
-                                Organic
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="p-2 space-y-2 flex-1 flex flex-col">
-                            <div className="space-y-1">
-                              <h3 className="line-clamp-2 text-sm font-bold text-white">
-                                {product.name}
-                              </h3>
                             </div>
-                            <div className="flex items-center justify-between pt-2 mt-auto">
-                              <span className="text-xs text-white">
-                                Sold {product.soldCount || 0}
-                              </span>
-                              <Button
-                                size="icon"
-                                variant="outline"
-                                className="h-10 w-10 rounded-full text-white"
-                              >
-                                <ShoppingCart className="h-5 w-5" />
-                                <span className="sr-only">Add to cart</span>
-                              </Button>
+                            <div className="p-2 space-y-2 flex-1 flex flex-col">
+                              <div className="space-y-1">
+                                <h3 className="line-clamp-2 text-sm font-bold text-white">
+                                  {product.name}
+                                </h3>
+                              </div>
+                              <div className="flex items-center justify-between pt-2 mt-auto">
+                                <span className="text-xs text-white">
+                                  Sold {product.soldCount || 0}
+                                </span>
+                                <Button
+                                  size="icon"
+                                  variant="outline"
+                                  className="h-10 w-10 rounded-full text-white"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    addToCart(product._id); // Send product ID instead of entire product
+                                  }}
+                                >
+                                  <ShoppingCart className="h-5 w-5" />
+                                  <span className="sr-only">Add to cart</span>
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
+                      </Link>
                     </div>
                   ))}
                 </div>
@@ -122,7 +135,9 @@ function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
           </div>
         ))
       ) : (
-        <p className="text-center py-8">No shops found matching your criteria</p>
+        <p className="text-center py-8">
+          No shops found matching your criteria
+        </p>
       )}
 
       {/* Pagination */}
@@ -163,7 +178,6 @@ function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
     </div>
   );
 }
-
 
 ProductGrid.propTypes = {
   shops: PropTypes.arrayOf(

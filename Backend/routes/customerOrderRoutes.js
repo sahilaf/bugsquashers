@@ -23,11 +23,11 @@ const validateObjectId = (value) => {
 const sanitizeObjectId = (value) => {
   return mongoose.Types.ObjectId(value);
 };
-
-// Fetch all customer orders
+// Fetch all customer orders (modified)
 router.get("/", async (req, res) => {
   try {
-    const orders = await CustomerOrder.find().populate("customerId shopId");
+    // Remove customerId from populate since it's a string UID
+    const orders = await CustomerOrder.find().populate("shopId");
     res.json(orders);
   } catch (error) {
     console.error("Error fetching customer orders:", error);
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Fetch customer orders by shop ID
+// Fetch customer orders by shop ID (modified)
 router.get(
   "/shop/:shopId",
   [
@@ -51,7 +51,8 @@ router.get(
     }
     try {
       const shopId = req.params.shopId;
-      const orders = await CustomerOrder.find({ shopId: mongoose.Types.ObjectId(shopId) }).populate("customerId shopId");
+      // Remove customerId from populate
+      const orders = await CustomerOrder.find({ shopId }).populate("shopId");
       res.json(orders);
     } catch (error) {
       console.error("Error fetching shop orders:", error);
@@ -65,9 +66,11 @@ router.post(
   "/",
   [
     body("customerId")
-      .custom(validateObjectId)
-      .withMessage("Invalid customerId")
-      .customSanitizer(sanitizeObjectId),
+      .trim()
+      .notEmpty()
+      .withMessage("customerId is required")
+      .isString()
+      .withMessage("customerId must be a string"),
     body("shopId")
       .custom(validateObjectId)
       .withMessage("Invalid shopId")
@@ -90,14 +93,16 @@ router.post(
       .withMessage("Item price must be a non-negative number")
       .toFloat(),
     body("items.*.name")
-      .optional()
+      .trim()
+      .notEmpty()
+      .withMessage("Item name is required")
       .isString()
-      .withMessage("Item name must be a string")
-      .trim(),
+      .withMessage("Item name must be a string"),
     body("payment")
       .optional()
-      .isObject()
-      .withMessage("Payment must be an object"),
+      .isString()
+      .isIn(["Paid", "Pending", "Failed"])
+      .withMessage("Invalid payment status"),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -108,7 +113,6 @@ router.post(
     try {
       const { customerId, shopId, shopName, items, payment } = req.body;
       const totalAmount = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
-      const total = `$${totalAmount.toFixed(2)}`;
       const orderId = await generateOrderId();
 
       const newOrder = new CustomerOrder({
@@ -117,27 +121,26 @@ router.post(
         shopId,
         shopName,
         items,
-        total,
-        payment,
+        total: totalAmount,
+        payment: payment || "Pending", // Default to "Pending" if not provided
         status: "Processing",
       });
 
       await newOrder.save();
 
-      let retailerOrder = await RetailerOrder.findOne({ shopId: mongoose.Types.ObjectId(shopId) });
+      // Update Retailer Order
+      let retailerOrder = await RetailerOrder.findOne({ shopId });
 
       if (retailerOrder) {
-        retailerOrder.items = retailerOrder.items.concat(items);
-        retailerOrder.total = `$${(
-          parseFloat(retailerOrder.total.replace("$", "")) + totalAmount
-        ).toFixed(2)}`;
+        retailerOrder.items.push(...items);
+        retailerOrder.total += totalAmount;
         await retailerOrder.save();
       } else {
         retailerOrder = new RetailerOrder({
           shopId,
           shopName,
           items,
-          total,
+          total: totalAmount,
           status: "Processing",
         });
         await retailerOrder.save();
@@ -184,13 +187,14 @@ router.put(
       const retailerOrder = await RetailerOrder.findOne({ shopId: order.shopId });
 
       if (retailerOrder) {
-        const orderTotal = parseFloat(order.total?.replace("$", "") || 0);
-        const retailerTotal = parseFloat(retailerOrder.total?.replace("$", "") || 0);
+        const orderTotal = order.total || 0;
+        retailerOrder.total -= orderTotal;
 
-        const updatedTotal = Math.max(0, retailerTotal - orderTotal); // prevent negative total
-        retailerOrder.total = `$${updatedTotal.toFixed(2)}`;
+        // Ensure total doesn't go negative
+        if (retailerOrder.total < 0) retailerOrder.total = 0;
 
-        if (updatedTotal === 0) {
+        // Remove retailer order if total is zero
+        if (retailerOrder.total === 0) {
           await RetailerOrder.deleteOne({ _id: retailerOrder._id });
         } else {
           await retailerOrder.save();
@@ -204,6 +208,5 @@ router.put(
     }
   }
 );
-
 
 module.exports = router;

@@ -7,14 +7,6 @@ import { useCart } from "../../pages/cart/context/CartContex";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "../ui/navigation-menu";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -100,40 +92,7 @@ const DesktopNavigation = ({
           Market
         </Button>
       </div>
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="">Products</NavigationMenuTrigger>
-            <NavigationMenuContent className="text-muted-foreground">
-              <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                <li className="row-span-3">
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/"
-                      className="block p-6 bg-gradient-to-b from-muted/50 to-muted rounded-md"
-                    >
-                      <div className="mb-2 mt-4 text-lg font-medium">
-                        Featured Products
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Check out our latest items
-                      </p>
-                    </Link>
-                  </NavigationMenuLink>
-                </li>
-                {CATEGORIES.map(({ name, link }) => (
-                  <li key={name}>
-                    <NavigationMenuLink asChild>
-                      <Link to={link}>{name}</Link>
-                    </NavigationMenuLink>
-                  </li>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-
+      
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" aria-label="AI">

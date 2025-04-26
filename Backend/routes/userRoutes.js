@@ -119,18 +119,47 @@ router.get("/users", async (req, res) => {
 });
 
 
-// GET /api/user/mongo-id/:firebaseId
-router.get('/mongo-id/:firebaseId', async (req, res) => {
+router.get("/user/:uid", async (req, res) => {
   try {
-    const user = await User.findOne({ firebaseId: req.params.firebaseId });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const { uid } = req.params;
+    
+    if (!uid) {
+      return res.status(400).json({
+        success: false,
+        error: "User UID is required"
+      });
     }
-    res.json({ mongoId: user._id });
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching MongoDB ID' });
+
+    // First find the user by Firebase UID
+    const user = await User.findOne({ uid });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found"
+      });
+    }
+
+    // Now find the shop associated with this user's MongoDB _id
+    const shop = await Shop.findOne({ owner: user._id }).lean();
+    
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: "No shop found for this user"
+      });
+    }
+
+    return res.json({
+      success: true,
+      shop
+    });
+  } catch (err) {
+    console.error("Error fetching user's shop:", err);
+    return res.status(500).json({
+      success: false,
+      error: process.env.NODE_ENV === "development" ? err.message : "Server error"
+    });
   }
 });
-
-
 module.exports = router;

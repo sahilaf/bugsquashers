@@ -26,6 +26,7 @@ import FarmerMarket from "./pages/marketplace/FarmerMarket"; // You'll need to c
 import ForgotPassword from "./pages/auth/ForgetPassword";
 import Recommendation from "./pages/recommendation/Recommendation";
 import { CartProvider } from './pages/cart/context/CartContex';
+import Checkout from "./pages/cart/Checkout";
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
   switch (userRole) {
@@ -193,6 +194,7 @@ const App = () => (
           />
           <Route path="*" element={<NotFound />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
+          <Route path="/checkout" element={<Checkout/>} />
         </Routes>
       </Layout>
     </Router>

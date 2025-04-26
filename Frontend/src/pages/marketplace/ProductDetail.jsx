@@ -1,6 +1,5 @@
 import { ProductGallery } from "./components/product/ProductGallery";
 import { ProductInfo } from "./components/product/ProductInfo";
-import { ProductTabs } from "./components/product/ProductTabs";
 import { ProductReviews } from "./components/product/ProductReviews";
 import { SuggestedProducts } from "./components/product/SuggestedProducts";
 import { useEffect, useState } from "react";
@@ -142,7 +141,7 @@ export const ProductDetail = () => {
         />
       </div>
 
-      <ProductTabs />
+      
       <ProductReviews reviews={reviews} onWriteReview={handleWriteReview} />
       <SuggestedProducts products={suggestedProducts} />
     </div>

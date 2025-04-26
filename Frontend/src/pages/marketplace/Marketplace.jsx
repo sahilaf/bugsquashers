@@ -210,6 +210,7 @@ function MarketPlace() {
           lat: position.coords.latitude,
           lng: position.coords.longitude
         };
+        console.log("Location data:", locationData);
         localStorage.setItem('userLocation', JSON.stringify(locationData));
         
         fetchShopsWithPosition(
