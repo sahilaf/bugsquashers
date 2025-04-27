@@ -10,7 +10,7 @@ export function TodaysHeroes() {
   ];
 
   return (
-    <Card className="border border-muted">
+    <Card className="border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">Today&apos;s Heroes</CardTitle>
       </CardHeader>

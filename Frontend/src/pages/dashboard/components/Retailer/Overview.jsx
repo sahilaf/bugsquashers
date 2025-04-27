@@ -6,17 +6,11 @@ import { NewCustomersChart } from "./new-customers";
 import { TodaysHeroes } from "./todays-heroes";
 import { RecentOrders } from "./recent-orders";
 import { DiscountedSalesChart } from "./discounted-sales";
-import { BarChart3, ShoppingCart, Star, TrendingUp,MapPin, Tag, CheckCircle2, XCircle } from "lucide-react";
+import { BarChart3, ShoppingCart, Star, TrendingUp,MapPin, Tag, CheckCircle2, XCircle,Store  } from "lucide-react";
 import { Card, CardContent } from "../../../../components/ui/card";
 import ProductInventory from "./ProductInventory";
-
-const demoShop = {
-  name: "GreenLeaf Organics",
-  location: "Bhondve Vasti, Pune",
-  category: "Organic",
-  rating: 4.5,
-  isCertified: true,
-};
+import useShopDetails from "../../../../hooks/use-shop";
+import { useAuth } from "../../../../pages/auth/AuthContext";
 
 // Demo Data for Statistics
 const demoStats = {
@@ -82,20 +76,54 @@ StatCard.propTypes = {
 };
 
 function Overview() {
+  const { userId } = useAuth();
+  const { shop, loading, error } = useShopDetails(userId);
+
+  if (loading) {
+    return <div>Loading shop details...</div>;
+  }
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
+
+  if (!shop) {
+    return (
+      <div className="flex-1 bg-background m-0 overflow-x-hidden">
+        <main className="px-4 lg:px-6 space-y-6">
+          <Card className="shadow-md">
+            <CardContent className="p-6 text-center">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <Store className="w-12 h-12 text-gray-400" />
+                <h2 className="text-2xl font-bold text-gray-900">
+                  No Shop Found
+                </h2>
+                <p className="text-gray-600 max-w-md">
+                  You don't have a shop yet. Create one to start selling your
+                  products and manage your business.
+                </p>
+                
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 bg-background m-0 overflow-x-hidden">
       <main className="px-4 lg:px-6 space-y-6">
-        <Card className="shadow-md ">
+        <Card className="shadow-md">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
               <div className="space-y-2">
                 <div className="mb-2">
                   <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-                    {demoShop.name}
+                    {shop.name}
                   </h2>
                   <p className="text-sm text-gray-500 font-medium">
                     <MapPin className="inline-block w-4 h-4 mr-1 -mt-1" />
-                    {demoShop.location}
+                    {shop.location}
                   </p>
                 </div>
 
@@ -103,14 +131,14 @@ function Overview() {
                   <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
                     <Tag className="w-4 h-4 mr-2 text-primary" />
                     <span className="font-medium text-gray-700">
-                      {demoShop.category}
+                      {shop.category}
                     </span>
                   </div>
 
                   <div className="flex items-center">
                     <Star className="w-4 h-4 mr-1 text-amber-500 fill-amber-500" />
                     <span className="font-semibold text-gray-900">
-                      {demoShop.rating}
+                      {shop.rating}
                     </span>
                     <span className="text-gray-500 ml-1">/5.0</span>
                   </div>
@@ -118,7 +146,7 @@ function Overview() {
               </div>
 
               <div className="sm:self-start flex-shrink-0">
-                {demoShop.isCertified ? (
+                {shop.isCertified ? (
                   <div className="flex items-center bg-emerald-50/80 px-4 py-2 rounded-full border border-emerald-100">
                     <CheckCircle2 className="w-5 h-5 mr-2 text-emerald-600" />
                     <span className="text-sm font-semibold text-emerald-700">
@@ -195,5 +223,4 @@ function Overview() {
     </div>
   );
 }
-
 export default Overview;

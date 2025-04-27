@@ -38,7 +38,7 @@ const chartConfig = {
 
 export function DailySalesChart() {
   return (
-    <Card className="border border-muted">
+    <Card className="border">
       <CardHeader>
         <CardTitle>Daily Sales</CardTitle>
         <CardDescription>Tracking daily sales for the last 10 days</CardDescription>

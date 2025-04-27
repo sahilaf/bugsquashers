@@ -10,21 +10,28 @@ export const AddressCard = ({ address, onEdit, onDelete }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{address}</CardTitle>
+        <CardTitle>{address.name}</CardTitle>
       </CardHeader>
-      <CardContent>
-        {/* Address details */}
-        <div className="mt-4 space-x-2">
-          <EditAddressDialog 
-            address={address}
-            open={isDialogOpen}
-            onOpenChange={setIsDialogOpen}
-            onSave={onEdit}
-          />
-          <Button variant="outline" size="sm" onClick={onDelete}>
+      <CardContent className="space-y-2">
+        <div>{address.street}</div>
+        <div>{address.city}, {address.state} {address.zip}</div>
+        <div>{address.country}</div>
+
+        <div className="mt-4 flex space-x-2">
+          <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(true)}>
+            Edit
+          </Button>
+          <Button variant="destructive" size="sm" onClick={onDelete}>
             Delete
           </Button>
         </div>
+
+        <EditAddressDialog 
+          address={address}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          onSave={onEdit}
+        />
       </CardContent>
     </Card>
   );

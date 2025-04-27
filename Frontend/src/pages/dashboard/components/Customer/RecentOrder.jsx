@@ -17,7 +17,6 @@ import {
   TableRow,
 } from "../../../../components/ui/table";
 import { Badge } from "../../../../components/ui/badge";
-import { Button } from "../../../../components/ui/button";
 import { useAuth } from "../../../auth/AuthContext";
 
 const OrderStatus = ({ status }) => {
@@ -75,24 +74,6 @@ const RecentOrders = ({ fullList = false }) => {
     fetchOrders();
   }, [customerId]);
 
-  // Handle order cancellation
-  // Handle order cancellation
-  const handleCancelOrder = async (orderId) => {
-    try {
-      await axios.put(
-        `http://localhost:3000/api/customer-orders/${orderId}/cancel`
-      );
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status: "Cancelled" } : order
-        )
-      );
-    } catch (err) {
-      const message = handleApiError(err, "Failed to cancel order");
-      alert(message);
-    }
-  };
-
   const displayOrders = fullList ? orders : orders.slice(0, 3);
 
   if (loading) return <div className="p-4 text-center">Loading orders...</div>;
@@ -149,17 +130,7 @@ const RecentOrders = ({ fullList = false }) => {
                   <OrderStatus status={order.status || "Processing"} />
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="destructive"
-                    className="rounded-sm"
-                    onClick={() => handleCancelOrder(order._id)}
-                    disabled={
-                      order.status === "Cancelled" ||
-                      order.status === "Delivered"
-                    }
-                  >
-                    Cancel
-                  </Button>
+                  
                 </TableCell>
               </TableRow>
             ))}
@@ -171,8 +142,7 @@ const RecentOrders = ({ fullList = false }) => {
 };
 
 RecentOrders.propTypes = {
-  fullList: PropTypes.bool,
-  customerId: PropTypes.string,
+  fullList: PropTypes.bool
 };
 
 export default RecentOrders;

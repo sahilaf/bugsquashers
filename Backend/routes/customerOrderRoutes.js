@@ -209,4 +209,24 @@ router.put(
   }
 );
 
+
+router.get("/showshopsorders", async (req, res) => {
+  try {
+    const { shop } = req.query;
+
+    if (!shop) {
+      return res.status(400).json({ error: "Missing shop ID in query" });
+    }
+
+    const orders = await CustomerOrder.find({ shopId: shop })
+      .sort({ date: -1 })
+      .limit(20);
+
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching shop orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
 module.exports = router;

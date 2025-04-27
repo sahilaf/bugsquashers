@@ -3,6 +3,7 @@ const router = express.Router();
 const { verifyToken } = require("../middleware/authMiddleware");
 const { User, Admin, Shopkeeper, Deliveryman, Farmer } = require("../models/User");
 const { body, validationResult } = require("express-validator");
+const CustomerOrder = require("../models/customerOrderModel"); 
 const rateLimit = require("express-rate-limit");
 
 // Define rate limiters
@@ -119,7 +120,7 @@ router.get("/users", async (req, res) => {
 });
 
 
-router.get("/user/:uid", async (req, res) => {
+router.get("/getuserid/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
     
@@ -130,8 +131,8 @@ router.get("/user/:uid", async (req, res) => {
       });
     }
 
-    // First find the user by Firebase UID
-    const user = await User.findOne({ uid });
+    // Find the user by Firebase UID and return just the MongoDB _id
+    const user = await User.findOne({ uid }).select('_id');
     
     if (!user) {
       return res.status(404).json({
@@ -140,26 +141,143 @@ router.get("/user/:uid", async (req, res) => {
       });
     }
 
-    // Now find the shop associated with this user's MongoDB _id
-    const shop = await Shop.findOne({ owner: user._id }).lean();
-    
-    if (!shop) {
-      return res.status(404).json({
-        success: false,
-        message: "No shop found for this user"
-      });
-    }
-
     return res.json({
       success: true,
-      shop
+      userId: user._id
     });
   } catch (err) {
-    console.error("Error fetching user's shop:", err);
+    console.error("Error fetching user ID:", err);
     return res.status(500).json({
       success: false,
       error: process.env.NODE_ENV === "development" ? err.message : "Server error"
     });
   }
 });
+
+
+
+// Existing GET route
+router.get('/getuser/:uid', async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    const user = await User.findOne({ uid }).lean();
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({
+      uid: user.uid,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone || '',
+      role: user.role,
+      ...(user.role === 'Admin' && { permissions: user.permissions }),
+      ...(user.role === 'Shopkeeper' && {
+        shopName: user.shopName,
+        shopLocation: user.shopLocation,
+      }),
+      ...(user.role === 'Deliveryman' && {
+        vehicleType: user.vehicleType,
+        assignedArea: user.assignedArea,
+      }),
+      ...(user.role === 'Farmer' && {
+        farmName: user.farmName,
+        farmLocation: user.farmLocation,
+        crops: user.crops,
+      }),
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+//  PUT route 
+router.put('/updateuser/:uid', async (req, res) => {
+  const { uid } = req.params;
+  const { fullName, email, phone } = req.body;
+
+  try {
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update fields
+    user.fullName = fullName || user.fullName;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'Account updated successfully',
+      user: {
+        uid: user.uid,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get("/customer-orders/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    
+    if (!uid) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer UID is required"
+      });
+    }
+
+    // Find all orders for this customer sorted by date (newest first)
+    const orders = await CustomerOrder.find({ customerId: uid })
+      .sort({ date: -1 })
+      .populate("shopId", "name location") // Populate shop details if needed
+      .lean();
+    
+    // Format the orders to include readable dates and status
+    const formattedOrders = orders.map(order => ({
+      ...order,
+      formattedDate: new Date(order.date).toLocaleDateString(),
+      statusClass: getStatusClass(order.status)
+    }));
+
+    return res.status(200).json({
+      success: true,
+      orders: formattedOrders
+    });
+  } catch (err) {
+    console.error("Error fetching customer orders:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server error"
+    });
+  }
+});
+
+// Helper function to assign status classes for the frontend
+function getStatusClass(status) {
+  switch (status) {
+    case "Delivered":
+      return "bg-green-100 text-green-800";
+    case "Processing":
+      return "bg-blue-100 text-blue-800";
+    case "Shipped":
+      return "bg-purple-100 text-purple-800";
+    case "Cancelled":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
 module.exports = router;

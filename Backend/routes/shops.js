@@ -127,8 +127,7 @@ router.post("/", async (req, res) => {
   try {
     const {
       name,
-      latitude,
-      longitude,
+      location, // Expect GeoJSON { type: "Point", coordinates: [lng, lat] }
       category,
       rating,
       isOrganicCertified,
@@ -137,14 +136,21 @@ router.post("/", async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!name || !latitude || !longitude || !owner) {
-      return res.status(400).json({ error: "Name, latitude, longitude, and owner are required" });
+    if (!name || !location || !owner) {
+      return res.status(400).json({ error: "Name, location, and owner are required" });
     }
 
-    // Parse coordinates
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
+    // Validate location (GeoJSON format)
+    if (
+      !location.type ||
+      location.type !== "Point" ||
+      !Array.isArray(location.coordinates) ||
+      location.coordinates.length !== 2
+    ) {
+      return res.status(400).json({ error: "Invalid location format. Must be GeoJSON Point" });
+    }
 
+    const [lng, lat] = location.coordinates;
     if (
       isNaN(lat) || lat < -90 || lat > 90 ||
       isNaN(lng) || lng < -180 || lng > 180
@@ -177,5 +183,75 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// Add to shopRoutes.js
+router.get("/owner/:ownerId", async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+    
+    // Validate owner ID
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      return res.status(400).json({ success: false, error: "Invalid owner ID" });
+    }
+    
+    const shop = await Shop.findOne({ owner: ownerId });
+    
+    if (!shop) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "No shop found for this owner" 
+      });
+    }
+    
+    return res.json({
+      success: true,
+      data: shop
+    });
+  } catch (err) {
+    console.error("Error fetching shop by owner:", err);
+    return res.status(500).json({
+      success: false,
+      error: process.env.NODE_ENV === "development" ? err.message : "Server error"
+    });
+  }
+});
+
+
+
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Validate location if present
+    if (updates.location) {
+      const [lng, lat] = updates.location.coordinates;
+      if (
+        isNaN(lat) || lat < -90 || lat > 90 ||
+        isNaN(lng) || lng < -180 || lng > 180
+      ) {
+        return res.status(400).json({ error: "Invalid coordinates" });
+      }
+    }
+
+    const updatedShop = await Shop.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedShop) {
+      return res.status(404).json({ error: "Shop not found" });
+    }
+
+    res.json({ success: true, data: updatedShop });
+  } catch (err) {
+    console.error("Error updating shop:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 
 module.exports = router;

@@ -49,9 +49,9 @@ export function PurchaseHistory() {
   ];
 
   return (
-    <Card className="border border-muted">
+    <Card className="border ">
       <CardHeader>
-        <CardTitle className="text-lg font-medium">Farm Purchases History</CardTitle>
+        <CardTitle className="text-lg font-medium">Purchase History</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-y-auto max-h-[400px]">

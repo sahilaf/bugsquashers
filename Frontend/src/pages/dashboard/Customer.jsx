@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import {
   Tabs,
   TabsContent,
@@ -22,8 +22,10 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Package, CreditCard, MapPin, User } from "lucide-react";
 import RecentOrders from "./components/Customer/RecentOrder";
-import {SavedAddresses} from "./components/Customer/SavedAddresses";
-
+import { SavedAddresses } from "./components/Customer/SavedAddresses";
+import { useAuth } from "../../pages/auth/AuthContext";
+import { useEffect, useState } from "react";
+import axios from "axios";
 const DashboardCard = ({ title, value, description, icon }) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -41,42 +43,135 @@ DashboardCard.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   description: PropTypes.string.isRequired,
-  icon: PropTypes.element.isRequired
+  icon: PropTypes.element.isRequired,
 };
 
-const AccountOverview = () => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Account Information</CardTitle>
-      <CardDescription>Update your account details here</CardDescription>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <div className="flex items-center space-x-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src="/placeholder.svg" alt="User" />
-          <AvatarFallback>JD</AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="text-lg font-semibold">John Doe</h3>
-          <p className="text-sm text-muted-foreground">john.doe@example.com</p>
+const AccountOverview = () => {
+  const { userId: uid } = useAuth();
+  const [userData, setUserData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Fetch user data based on Firebase UID
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!uid) {
+        setLoading(false);
+        return;
+      }
+  
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Updated to match the new endpoint pattern
+        const response = await fetch(`http://localhost:3000/api/getuser/${uid}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Removed Authorization header since we're not verifying tokens
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+  
+        const data = await response.json();
+        setUserData({
+          fullName: data.fullName || '',
+          email: data.email || '',
+          phone: data.phone || '',
+        });
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setError(error.message || 'Failed to fetch user data');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchUserData();
+  }, [uid]);
+  // Handle input changes
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setUserData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  // Handle form submission
+  const handleUpdate = async () => {
+    try {
+      setIsUpdating(true);
+      setError(null);
+      await axios.put(
+        `http://localhost:3000/api/updateuser/${uid}`, // Updated to include UID in URL for consistency
+        {
+          fullName: userData.fullName,
+          email: userData.email,
+          phone: userData.phone,
+        }
+      );
+      alert('Account updated successfully');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update account');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Account Information</CardTitle>
+        <CardDescription>Update your account details here</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage
+              src={'/placeholder.svg'}
+            />
+            <AvatarFallback>
+              {userData.fullName ? userData.fullName[0].toUpperCase() : 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="text-lg font-semibold">{userData.fullName}</h3>
+            <p className="text-sm text-muted-foreground">{userData.email}</p>
+          </div>
         </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" defaultValue="John Doe" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" defaultValue="john.doe@example.com" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
-        <Input id="phone" defaultValue="+1 (555) 123-4567" />
-      </div>
-      <Button>Update Account</Button>
-    </CardContent>
-  </Card>
-);
+        <div className="space-y-2">
+          <Label htmlFor="fullName">Name</Label>
+          <Input
+            id="fullName"
+            value={userData.fullName}
+            onChange={handleInputChange}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            value={userData.email}
+            onChange={handleInputChange}
+          />
+        </div>
+        <Button onClick={handleUpdate} disabled={isUpdating}>
+          {isUpdating ? 'Updating...' : 'Update Account'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
 
 const CustomerDashboard = () => {
   return (

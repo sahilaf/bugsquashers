@@ -7,16 +7,27 @@ const router = express.Router();
 // Create a new product
 router.post("/", async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const { shop, ...productData } = req.body;
+    
+    // Validate shop exists
+    const shopExists = await Shop.findById(shop);
+    if (!shopExists) {
+      return res.status(400).json({ error: "Shop not found" });
+    }
+
+    const product = new Product({
+      ...productData,
+      shop
+    });
+    
     await product.save();
 
-    const updatedShop = await Shop.findByIdAndUpdate(
-      product.shop,
-      { $push: { products: product._id } },
+    // Update the shop's products array
+    await Shop.findByIdAndUpdate(
+      shop,
+      { $addToSet: { products: product._id } },
       { new: true }
     );
-    console.log("Updated Shop:", updatedShop);
-    
 
     res.status(201).json(product);
   } catch (error) {
@@ -24,11 +35,13 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-// Get all products
+// Get all products with optional shop filter
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().populate("shop");
+    const { shop } = req.query;
+    const filter = shop ? { shop } : {};
+    
+    const products = await Product.find(filter).populate("shop", "name");
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -38,7 +51,7 @@ router.get("/", async (req, res) => {
 // Get a single product by ID
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("shop");
+    const product = await Product.findById(req.params.id).populate("shop", "name");
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (error) {
@@ -49,7 +62,11 @@ router.get("/:id", async (req, res) => {
 // Update a product
 router.put("/:id", async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (error) {
@@ -62,6 +79,13 @@ router.delete("/:id", async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
+    
+    // Remove product reference from shop
+    await Shop.findByIdAndUpdate(
+      product.shop,
+      { $pull: { products: product._id } }
+    );
+    
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

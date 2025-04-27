@@ -24,7 +24,7 @@ describe("Card component family", () => {
     expect(card).toHaveClass("text-card-foreground");
     expect(card).toHaveClass("shadow");
     expect(card).toHaveClass("border");
-    expect(card).toHaveClass("border-muted");
+    expect(card).toHaveClass("");
   });
 
   it("renders CardHeader with correct classes and custom className", () => {

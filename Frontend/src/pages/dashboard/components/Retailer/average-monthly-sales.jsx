@@ -32,7 +32,7 @@ const salesData = [
 
 export function AvgMonthlySales() {
   return (
-    <Card className="border border-muted">
+    <Card className="border">
       <CardHeader>
         <CardTitle>Average Monthly Sales</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

@@ -39,7 +39,7 @@
     --chart-5: 355, 84%, 57%; /* Bright red */
 }
 .dark {
-    --background: 240, 100%, 1%; 
+    --background: 240, 10%, 6%; 
     --foreground: 150, 10%, 95%; 
 
     --primary: 133, 53%, 41%; 
@@ -59,12 +59,12 @@
     --destructive: 0, 85%, 45%; 
     --destructive-foreground: 0, 0%, 100%; 
 
-    --border: 41, 87%, 45%; 
+    --border: 130, 0%, 16%; 
     --input: 41, 87%, 45%; 
     --ring: 41, 87%, 45%; 
     --radius: .75rem;
 
-    --card: 240, 100%, 1%; 
+    --card: 240, 6%, 10%; 
     --card-foreground: 220, 14%, 95%;
 
     --chart-1: 197, 83%, 54%;

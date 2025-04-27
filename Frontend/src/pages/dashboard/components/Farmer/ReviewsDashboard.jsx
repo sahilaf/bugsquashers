@@ -46,7 +46,7 @@ function ReviewsDashboard() {
       return (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <Card key={review.id} className="border border-muted">
+            <Card key={review.id} className="border">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start">
                   <div>

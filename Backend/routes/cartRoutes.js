@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Cart = require("../models/Cart");
-const Product = require("../models/Product");
+const Product = require("../models/product");
 const CustomerOrder = require("../models/customerOrderModel");
 const { v4: uuidv4 } = require("uuid");
 
@@ -194,135 +194,6 @@ router.put("/cart/:uid/item/:productId", async (req, res) => {
   }
 });
 
-router.post("/cart/confirm", async (req, res) => {
-  try {
-    const { uid, items } = req.body;
-
-    if (!uid || typeof uid !== "string") {
-      return res.status(400).json({ message: "Invalid user ID" });
-    }
-    if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: "Invalid or empty cart items" });
-    }
-
-    console.log(`Confirming payment for uid=${uid}, items=`, items);
-
-    let total = 0;
-    const orderItems = [];
-    const productUpdates = [];
-    for (const item of items) {
-      if (!mongoose.Types.ObjectId.isValid(item.productId)) {
-        return res.status(400).json({ message: `Invalid product ID: ${item.productId}` });
-      }
-      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-        return res.status(400).json({ message: `Invalid quantity for product ${item.productId}` });
-      }
-
-      const product = await Product.findById(item.productId);
-      if (!product) {
-        return res.status(404).json({ message: `Product not found: ${item.productId}` });
-      }
-      if (product.quantity < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${product.name}: ${product.quantity} available` });
-      }
-
-      total += product.price * item.quantity;
-      orderItems.push({
-        name: product.name,
-        quantity: item.quantity,
-        price: product.price,
-      });
-      productUpdates.push({ productId: item.productId, quantity: item.quantity });
-    }
-
-    const shipping = total > 35 ? 0 : 5.99;
-    const tax = total * 0.08;
-    const finalTotal = total + shipping + tax;
-
-    try {
-      for (const update of productUpdates) {
-        await Product.findByIdAndUpdate(
-          update.productId,
-          {
-            $inc: { quantity: -update.quantity, soldCount: update.quantity },
-            $set: { updatedAt: new Date() },
-          },
-          { runValidators: true }
-        );
-      }
-    } catch (error) {
-      console.error("Error updating products:", error.message);
-      return res.status(500).json({ message: "Failed to update product quantities", error: error.message });
-    }
-
-    let updatedCart;
-    try {
-      updatedCart = await Cart.findOneAndUpdate(
-        { uid },
-        { $set: { items: [] } },
-        { runValidators: true, new: true }
-      );
-      if (!updatedCart) {
-        throw new Error("Cart not found");
-      }
-    } catch (error) {
-      console.error("Error clearing cart:", error.message);
-      for (const update of productUpdates) {
-        await Product.findByIdAndUpdate(
-          update.productId,
-          {
-            $inc: { quantity: update.quantity, soldCount: -update.quantity },
-            $set: { updatedAt: new Date() },
-          },
-          { runValidators: true }
-        );
-      }
-      return res.status(500).json({ message: "Failed to clear cart", error: error.message });
-    }
-
-    let order;
-    try {
-      order = new CustomerOrder({
-        orderId: uuidv4(),
-        customerId: uid,
-        shopId: "66f8a4b2c3d5e7f9a1b2c3d4",
-        shopName: "Demo Shop",
-        items: orderItems,
-        total: finalTotal,
-        payment: "Paid",
-        status: "Processing",
-        transactionStatus: "Completed",
-        createdBy: uid,
-        date: new Date(),
-      });
-      await order.save();
-    } catch (error) {
-      console.error("Error creating order:", error.message);
-      for (const update of productUpdates) {
-        await Product.findByIdAndUpdate(
-          update.productId,
-          {
-            $inc: { quantity: update.quantity, soldCount: -update.quantity },
-            $set: { updatedAt: new Date() },
-          },
-          { runValidators: true }
-        );
-      }
-      await Cart.findOneAndUpdate(
-        { uid },
-        { $set: { items: items } },
-        { runValidators: true }
-      );
-      return res.status(500).json({ message: "Failed to create order", error: error.message });
-    }
-
-    console.log(`Order confirmed for uid=${uid}, orderId=${order.orderId}`);
-    res.status(200).json({ success: true, message: "Order confirmed", orderId: order.orderId });
-  } catch (error) {
-    console.error("Error confirming payment:", error.message);
-    res.status(500).json({ message: "Failed to confirm order", error: error.message });
-  }
-});
 
 router.delete("/cart/:uid", async (req, res) => {
   try {

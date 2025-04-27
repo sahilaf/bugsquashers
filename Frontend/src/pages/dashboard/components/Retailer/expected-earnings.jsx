@@ -88,7 +88,7 @@ export function ExpectedEarnings() {
   }, []);
 
   return (
-    <Card className="flex flex-col border border-muted">
+    <Card className="flex flex-col border">
       <CardHeader className="items-center pb-0">
         <CardTitle>Expected Earnings - Buyers Distribution</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

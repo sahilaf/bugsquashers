@@ -24,19 +24,19 @@ function RetailerDash() {
   // Sidebar menu items with labels and corresponding component mapping
   const menuItems = [
     { label: "Overview", icon: Home, component: <Overview /> },
-    { label: "Reviews", icon: Star, component: <ReviewsDashboard /> },
+    { label: "Shop detail", icon: History, component: <ShopDetails /> },
     { label: "Statistics", icon: BarChart3, component: <StatisticsDashboard /> },
     { label: "Products", icon: Package, component: <ProductInventory /> },
     { label: "Orders", icon: Settings, component: <RecentOrders /> },
     { label: "Purchase history", icon: History, component: <PurchaseHistory /> },
-    { label: "Shop detail", icon: History, component: <ShopDetails /> }
+    { label: "Reviews", icon: Star, component: <ReviewsDashboard /> },
   ]
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex mt-[68px] border-t border-muted overflow-x-hidden">
+      <div className="min-h-screen flex mt-[68px] border-t  overflow-x-hidden">
         {/* Desktop Sidebar */}
-        <Sidebar className="hidden md:flex border-r mt-[68px] border-t border-muted">
+        <Sidebar className="hidden md:flex border-r mt-[68px] border-t ">
           <SidebarContent className="p-4">
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -57,7 +57,7 @@ function RetailerDash() {
         </Sidebar>
 
         {/* Mobile Top Navigation */}
-        <div className="md:hidden fixed pt-[68px] py-2 top-0 left-0 right-0 bg-background border border-b border-muted z-40">
+        <div className="md:hidden fixed pt-[68px] py-2 top-0 left-0 right-0 bg-background border border-b  z-40">
           <div className="flex overflow-x-auto p-2 space-x-2">
             {menuItems.map((item) => (
               <Button

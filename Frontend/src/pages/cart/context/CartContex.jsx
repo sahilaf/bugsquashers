@@ -206,40 +206,7 @@ export const CartProvider = ({ children }) => {
     setError(message);
     toast.error(message);
   };
-  // Confirm payment
-  const confirmPayment = useCallback(async () => {
-    if (!uid) {
-      setError('User not authenticated');
-      toast.error('Please log in to checkout');
-      window.location.href = '/login'; // Redirect to login page
-      return false;
-    }
-
-    try {
-      const res = await axios.post(`http://localhost:3000/api/cart/confirm`, {
-        uid,
-        items: cartItems.map(item => ({
-          productId: item.productId._id,
-          quantity: item.quantity,
-        })),
-      });
-
-      if (res.data.success) {
-        setCartItems([]); // Clear cart locally
-        setError(null);
-        return true;
-      } else {
-        throw new Error('Order confirmation failed');
-      }
-    } catch (err) {
-      console.error('Confirm payment failed:', err);
-      const message = err.response?.data?.message || 'Failed to confirm order';
-      setError(message);
-      toast.error(message);
-      return false;
-    }
-  }, [uid, cartItems, setError, setCartItems]);
-
+  
   // Clear entire cart
   const clearCart = useCallback(async () => {
     if (!uid) {

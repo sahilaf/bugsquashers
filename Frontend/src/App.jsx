@@ -12,7 +12,6 @@ import Nav from "./components/Nav/Nav";
 import Home from "./pages/home/Home";
 import { LoginForm } from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
-import Admin from "./pages/admin/Admin";
 import Customer from "./pages/dashboard/Customer";
 import RetailerDash from "./pages/dashboard/RetailerDash";
 import DeliveryDash from "./pages/dashboard/DeliveryDash";
@@ -27,11 +26,10 @@ import ForgotPassword from "./pages/auth/ForgetPassword";
 import Recommendation from "./pages/recommendation/Recommendation";
 import { CartProvider } from './pages/cart/context/CartContex';
 import Checkout from "./pages/cart/Checkout";
+import OrderConfirmation from "./pages/cart/OrderConfirmation";
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
   switch (userRole) {
-    case "Admin":
-      return <Navigate to="/admin" replace />;
     case "User":
       return <Navigate to="/customerdash" replace />;
     case "Shopkeeper":
@@ -123,14 +121,6 @@ const App = () => (
           />
 
           <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["Admin"]}>
-                <Admin />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/customerdash"
             element={
               <ProtectedRoute allowedRoles={["User"]}>
@@ -195,6 +185,8 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
           <Route path="/forgetpassword" element={<ForgotPassword />} />
           <Route path="/checkout" element={<Checkout/>} />
+          <Route path="/orderconfirmation" element={<OrderConfirmation/>} />
+          
         </Routes>
       </Layout>
     </Router>
