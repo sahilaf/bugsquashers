@@ -24,8 +24,8 @@ vi.mock('../../../../../components/ui/checkbox', () => ({
 vi.mock('../../../../../components/ui/label', () => ({
   Label: ({ htmlFor, children }) => <label htmlFor={htmlFor}>{children}</label>,
 }));
-vi.mock('../../../../../components/ui/Button', () => ({
-  Button: ({ children, onClick, variant, size, className }) => (
+vi.mock('../../../../../components/ui/button', () => ({
+  Button: ({ children, onClick,  className }) => (
     <button data-testid="Button" onClick={onClick} className={className}>
       {children}
     </button>
