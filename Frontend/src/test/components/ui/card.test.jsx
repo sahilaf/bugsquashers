@@ -24,7 +24,7 @@ describe("Card component family", () => {
     expect(card).toHaveClass("text-card-foreground");
     expect(card).toHaveClass("shadow");
     expect(card).toHaveClass("border");
-    expect(card).toHaveClass("");
+    // Removed the empty class assertion that was causing the test to fail
   });
 
   it("renders CardHeader with correct classes and custom className", () => {
