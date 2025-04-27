@@ -12,7 +12,7 @@ import {
 } from "../../../../components/ui/dialog";
 import { Checkbox } from "../../../../components/ui/checkbox";
 import { Label } from "../../../../components/ui/label";
-import { Button } from "../../../../components/ui/Button";
+import { Button } from "../../../../components/ui/button";
 import {
   Select,
   SelectContent,
