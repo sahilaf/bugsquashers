@@ -25,13 +25,12 @@ vi.mock('../../../../../components/ui/label', () => ({
   Label: ({ htmlFor, children }) => <label htmlFor={htmlFor}>{children}</label>,
 }));
 vi.mock('../../../../../components/ui/button', () => ({
-  Button: ({ children, onClick,  className }) => (
+  Button: ({ children, onClick, className }) => (
     <button data-testid="Button" onClick={onClick} className={className}>
       {children}
     </button>
   ),
 }));
-// Mock select with all necessary exports for Filters component
 vi.mock('../../../../../components/ui/select', () => ({
   Select: ({ value, onValueChange, children }) => (
     <select
@@ -74,40 +73,36 @@ describe('Filters component', () => {
 
   it('renders the Filters button without badge when no filters applied', () => {
     render(<Filters filters={filters} setFilters={setFilters} />);
-    const triggerContainer = screen.getByTestId('DialogTrigger');
-    const triggerButton = within(triggerContainer).getByText('Filters');
-    expect(triggerButton).toBeInTheDocument();
-    // Ensure no badge number inside the button
-    expect(within(triggerButton).queryByText(/\d+/)).toBeNull();
+    const trigger = screen.getByTestId('DialogTrigger');
+    const button = within(trigger).getByText('Filters');
+    expect(button).toBeInTheDocument();
+    // No badge inside the trigger
+    expect(within(button).queryByText(/\d+/)).toBeNull();
   });
 
   it('calls setFilters with initial filters when Clear all is clicked', () => {
     render(<Filters filters={filters} setFilters={setFilters} />);
-    const clearBtn = screen.getByText('Clear all');
-    fireEvent.click(clearBtn);
+    fireEvent.click(screen.getByText('Clear all'));
     expect(setFilters).toHaveBeenCalledWith(getInitialFilters());
   });
 
   it('calls setFilters when a category checkbox is toggled', () => {
     filters = { ...getInitialFilters(), category: ['Fruits & Vegetables'] };
     render(<Filters filters={filters} setFilters={setFilters} />);
-    const checkbox = screen.getByTestId('cat-Fruits & Vegetables');
-    fireEvent.click(checkbox);
+    fireEvent.click(screen.getByTestId('cat-Fruits & Vegetables'));
     expect(setFilters).toHaveBeenCalled();
   });
 
   it('calls setFilters when a delivery checkbox is toggled', () => {
     filters = { ...getInitialFilters(), delivery: ['Same Day Delivery'] };
     render(<Filters filters={filters} setFilters={setFilters} />);
-    const checkbox = screen.getByTestId('del-Same Day Delivery');
-    fireEvent.click(checkbox);
+    fireEvent.click(screen.getByTestId('del-Same Day Delivery'));
     expect(setFilters).toHaveBeenCalled();
   });
 
   it('calls setFilters when rating is changed', () => {
     render(<Filters filters={filters} setFilters={setFilters} />);
-    const select = screen.getByTestId('Select');
-    fireEvent.change(select, { target: { value: '4' } });
+    fireEvent.change(screen.getByTestId('Select'), { target: { value: '4' } });
     expect(setFilters).toHaveBeenCalled();
   });
 
@@ -146,7 +141,6 @@ describe('AppliedFilters component', () => {
       local: true,
     };
     render(<AppliedFilters filters={filters} setFilters={setFilters} />);
-
     expect(screen.getByText('Bakery')).toBeInTheDocument();
     expect(screen.getByText('Pickup Available')).toBeInTheDocument();
     expect(screen.getByText('3+ Stars')).toBeInTheDocument();
@@ -156,8 +150,7 @@ describe('AppliedFilters component', () => {
     fireEvent.click(screen.getAllByTestId('Button')[0]);
     expect(setFilters).toHaveBeenCalled();
 
-    const clearAll = screen.getByText('Clear all');
-    fireEvent.click(clearAll);
+    fireEvent.click(screen.getByText('Clear all'));
     expect(setFilters).toHaveBeenCalledWith(getInitialFilters());
   });
 });
