@@ -102,11 +102,11 @@ const DesktopNavigation = ({
         </SheetTrigger>
         <SheetContent side="right" className="w-full max-w-md bg-[#e9e9e950] backdrop-blur-sm dark:bg-[#817d7d44] rounded-l-md">
           <SheetHeader>
-            <SheetTitle>Support Assistant</SheetTitle>
+            <SheetTitle className="text-white">Support Assistant</SheetTitle>
           </SheetHeader>
           {/* Chat system goes here */}
           <div className="flex flex-col pt-5 h-[95%] ">
-            <div className="flex-1 overflow-y-auto p-2 space-y-2 border rounded-md bg-muted">
+            <div className="flex-1 overflow-y-auto p-2 space-y-2 border border-[#494949] rounded-md bg-transparent">
               {messages.map((msg, index) => (
                 <div
                   key={index}
