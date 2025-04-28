@@ -82,9 +82,6 @@ function Overview() {
   if (loading) {
     return <div>Loading shop details...</div>;
   }
-  if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
-  }
 
   if (!shop) {
     return (
@@ -98,7 +95,7 @@ function Overview() {
                   No Shop Found
                 </h2>
                 <p className="text-gray-600 max-w-md">
-                  You don't have a shop yet. Create one to start selling your
+                  You don't have a shop yet. Create one from shop details in the left side to start selling your
                   products and manage your business.
                 </p>
                 
