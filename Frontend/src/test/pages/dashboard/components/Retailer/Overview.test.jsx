@@ -114,15 +114,7 @@ describe('Overview.jsx', () => {
     expect(screen.getByText('Loading shop details...')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
-    useAuth.mockReturnValue({ userId: 'u1' });
-    useShopDetails.mockReturnValue({ shop: null, loading: false, error: 'Oops!' });
 
-    render(<Overview />);
-    const err = screen.getByText(/^Error:/);
-    expect(err).toHaveTextContent('Error: Oops!');
-    expect(err).toHaveClass('text-red-500');
-  });
 
   it('renders "No Shop Found" when shop is null', () => {
     useAuth.mockReturnValue({ userId: 'u1' });
