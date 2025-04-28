@@ -115,7 +115,6 @@ describe('Overview.jsx', () => {
   });
 
 
-
   it('renders "No Shop Found" when shop is null', () => {
     useAuth.mockReturnValue({ userId: 'u1' });
     useShopDetails.mockReturnValue({ shop: null, loading: false, error: null });

@@ -338,7 +338,7 @@ function MarketPlace() {
   };
 
   return (
-    <div className="min-h-screen bg-background mt-20 lg:px-32 px-4">
+    <div className="min-h-screen bg-background pt-20 lg:px-32 px-4">
       <header className="border-b sticky top-0 bg-background z-10 py-2 md:py-0">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 w-full">
           <div className="flex items-center justify-between w-full md:w-auto">
@@ -360,7 +360,7 @@ function MarketPlace() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto md:max-w-md my-2">
+        <div className="flex items-center gap-2 w-full md:w-auto md:max-w-md my-2 ">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground rounded-full" />
             <Input

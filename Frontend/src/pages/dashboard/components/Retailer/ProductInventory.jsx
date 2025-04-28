@@ -131,79 +131,57 @@ export function ProductInventory() {
   if (!shop) return <div>No shop found</div>;
 
   return (
-    <Card className="border">
-      <CardHeader className="flex flex-row justify-between items-center">
-        <CardTitle className="text-lg font-semibold">
-          Inventory Overview
-        </CardTitle>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Product
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-medium">Product Inventory</CardTitle>
+        <Button onClick={() => setIsDialogOpen(true)} size="sm">
+          <Plus className="mr-2 h-4 w-4" /> Add Product
         </Button>
       </CardHeader>
-
+  
       <CardContent>
-        <div className="overflow-auto max-h-[500px]">
+        {isLoading ? (
+          <div className="text-center py-8">Loading products...</div>
+        ) : shopError ? (
+          <div className="text-center py-8 text-destructive">
+            Failed to load products.
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-8">No products found.</div>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="min-w-[200px]">Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Stock</TableHead>
-                <TableHead className="text-right">Unit Price (₹)</TableHead>
-                <TableHead className="text-right">Total Value (₹)</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Price (₹)</TableHead>
+                <TableHead>Quantity</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
-
             <TableBody>
-              {products.map((product) => {
-                const status = getProductStatus(product.quantity);
-                return (
-                  <TableRow key={product._id}>
-                    <TableCell className="font-medium">
-                      {product.name}
-                    </TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-right">
-                      {product.quantity}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {product.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {(product.price * product.quantity).toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariants[status]}>
-                        {status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {products.map((product) => (
+                <TableRow key={product._id}>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.price.toFixed(2)}</TableCell>
+                  <TableCell>{product.quantity}</TableCell>
+                  <TableCell>
+                    <Badge variant={statusVariants[getProductStatus(product.quantity)]}>
+                      {getProductStatus(product.quantity)}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
-        </div>
-
-        <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-          <div className="flex justify-between items-center font-medium text-base">
-            <span>Total Inventory Value:</span>
-            <span>
-              ₹{totalInventoryValue.toLocaleString(undefined, {
-                maximumFractionDigits: 2,
-              })}
-            </span>
-          </div>
-        </div>
-
-        <AddProductDialog
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-          onAddProduct={handleAddProduct}
-          shopId={shop._id}
-        />
+        )}
       </CardContent>
+  
+      <AddProductDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onAddProduct={handleAddProduct}
+        shopId={shop?._id}
+      />
     </Card>
   );
 }

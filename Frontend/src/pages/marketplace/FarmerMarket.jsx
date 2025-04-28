@@ -65,7 +65,7 @@ function FarmerMarket() {
   if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-background pt-20">
       {/* Background image with overlay */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-black/30"></div>
@@ -76,7 +76,7 @@ function FarmerMarket() {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-12 mt-10 relative">
+      <div className="container mx-auto px-4 py-12 relative">
         <div className="mb-12 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground drop-shadow-md">Local Farmers Market</h1>
           <p className="text-foreground/80 mt-3 text-lg">

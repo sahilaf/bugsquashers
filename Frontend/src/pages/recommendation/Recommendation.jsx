@@ -1,212 +1,168 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "../../components/ui/form";
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
+import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
-import { AlertCircle, Loader2, MapPin } from "lucide-react";
+import { Badge } from "../../components/ui/badge";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "../../pages/cart/context/CartContex";
 
-const formSchema = z.object({
-  budget: z.number().min(1, "Budget must be at least $1"),
-  prompt: z.string().min(5, "Description must be at least 5 characters"),
-  location: z.string().min(3, "Please provide a valid location"),
-});
+export default function Recommendation() {
+  const [query, setQuery] = useState("");
+  const [budget, setBudget] = useState("");
+  const [budgetUsed, setBudgetUsed] = useState("");
+  const [recommendations, setRecommendations] = useState("");
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-export default function RecommendationForm() {
-  const [results, setResults] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const { addToCart } = useCart();
 
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      budget: 0,
-      prompt: "",
-      location: "",
-    },
-  });
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setProducts([]);
+    setRecommendations("");
+    setLoading(true);
 
-  async function onSubmit(values) {
     try {
-      setIsLoading(true);
-      setResults({});
-
-      const response = await fetch('http://127.0.0.1:5000/api/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          budget: values.budget,
-          prompt: values.prompt,
-          location: values.location
-        }),
+      // 1) Call recommendation endpoint
+      const recRes = await fetch("http://127.0.0.1:5000/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, budget: parseFloat(budget) }),
       });
+      const recData = await recRes.json();
+      if (!recRes.ok) throw new Error(recData.error || "Recommendation failed");
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      setBudgetUsed(recData.budget_used);
+      setRecommendations(recData.recommendations);
 
-      const data = await response.json();
-      setResults(data);
-    } catch (error) {
-      setResults({
-        error: error instanceof Error ? error.message : "An unknown error occurred"
-      });
+      // 2) Deduplicate source IDs
+      const uniqueIds = Array.from(new Set(recData.sources.map(src => src.id)));
+
+      // 3) Fetch full product details for each unique ID
+      const productFetches = uniqueIds.map(id =>
+        fetch(`http://localhost:3000/api/products/${id}`)
+          .then(res => {
+            if (!res.ok) throw new Error(`Product ${id} not found`);
+            return res.json();
+          })
+      );
+      const prods = await Promise.all(productFetches);
+      setProducts(prods);
+    } catch (err) {
+      setError(err.message);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 mt-24">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">
-            Product Recommendations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="budget"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Budget</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Enter your budget"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Maximum amount you want to spend
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+    <div className="h-screen w-full bg-background pt-40 ">
+    <Card className="max-w-5xl mx-auto">
+      <CardHeader>
+        <CardTitle>Product Recommendations</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+          <div>
+            <Label htmlFor="query">What are you looking for?</Label>
+            <Input
+              id="query"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="e.g. organic fruits"
+            />
+          </div>
+          <div>
+            <Label htmlFor="budget">Budget (USD)</Label>
+            <Input
+              id="budget"
+              type="number"
+              min="0"
+              step="0.01"
+              value={budget}
+              onChange={e => setBudget(e.target.value)}
+              placeholder="e.g. 40"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={loading}>
+              {loading ? "Searching…" : "Find Recommendations"}
+            </Button>
+          </div>
+        </form>
+
+        {error && <p className="text-sm text-red-600 mb-4">⚠️ {error}</p>}
+
+        {recommendations && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold">Budget Used: {budgetUsed}</h3>
+            <pre className="whitespace-pre-wrap mt-2">{recommendations}</pre>
+          </div>
+        )}
+
+        {products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map(product => (
+              <Card key={product._id} className="relative h-64 sm:h-80 rounded-lg">
+                <img
+                  src={
+                    product.images?.[0] ||
+                    product.image ||
+                    "https://via.placeholder.com/200x150?text=Product+Image"
+                  }
+                  alt={product.name}
+                  className="object-cover w-full h-full rounded-lg"
                 />
-
-                <FormField
-                  control={form.control}
-                  name="prompt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>What are you looking for?</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Describe the products you need"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Example: "Organic fruits for a family of four"
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            placeholder="Enter your location"
-                            className="pl-8"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        City or postal code for local recommendations
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                {isLoading ? "Searching..." : "Get Recommendations"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {results.error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{results.error}</AlertDescription>
-        </Alert>
-      )}
-
-      {results.recommendations && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recommended Products</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="prose max-w-none">
-              {results.recommendations}
-            </div>
-
-            {results.products && results.products.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-medium">Matching Products</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {results.products.map((product) => (
-                    <Card key={product.id} className="hover:bg-accent/50">
-                      <CardContent className="p-4">
-                        <div className="space-y-2">
-                          <div className="font-medium">
-                            {product.content.split('\n')[0]?.replace('Name: ', '')}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {product.content.split('\n')[1]?.replace('Description: ', '')}
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-semibold">
-                              ${product.price}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              <span>{product.location}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="absolute bottom-0 left-0 right-0 p-2 bg-background backdrop-blur-sm border-t border-t-[#ffffff33]">
+                  <div className="flex justify-between items-start">
+                    <p className="text-sm font-semibold text-white drop-shadow">
+                      ${product.price.toFixed(2)}
+                      {product.originalPrice > 0 && (
+                        <span className="ml-1 text-xs line-through text-white">
+                          ${product.originalPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+                    {product.isOrganic && (
+                      <Badge className="bg-green-500/90 text-white text-[10px]">
+                        Organic
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="p-2 space-y-2 flex-1 flex flex-col">
+                    <div className="space-y-1">
+                      <h3 className="line-clamp-2 text-sm font-bold text-white">
+                        {product.name}
+                      </h3>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 mt-auto">
+                      <span className="text-xs text-white">
+                        Sold {product.soldCount || 0}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        className="h-10 w-10 rounded-full text-white"
+                        onClick={e => {
+                          e.preventDefault();
+                          addToCart(product._id);
+                        }}
+                      >
+                        <ShoppingCart className="h-5 w-5" />
+                        <span className="sr-only">Add to cart</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
     </div>
   );
 }
