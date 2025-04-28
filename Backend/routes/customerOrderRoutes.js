@@ -112,7 +112,10 @@ router.post(
 
     try {
       const { customerId, shopId, shopName, items, payment } = req.body;
-      const totalAmount = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+      const totalAmount = items.reduce(
+        (sum, item) => sum + item.quantity * item.price,
+        0
+      );
       const orderId = await generateOrderId();
 
       const newOrder = new CustomerOrder({
@@ -184,7 +187,9 @@ router.put(
       order.status = "Cancelled";
       await order.save();
 
-      const retailerOrder = await RetailerOrder.findOne({ shopId: order.shopId });
+      const retailerOrder = await RetailerOrder.findOne({
+        shopId: order.shopId,
+      });
 
       if (retailerOrder) {
         const orderTotal = order.total || 0;
@@ -203,30 +208,49 @@ router.put(
 
       res.json({ message: "Order cancelled successfully", order });
     } catch (error) {
-      console.error("Error cancelling customer order:", error.message, error.stack);
+      console.error(
+        "Error cancelling customer order:",
+        error.message,
+        error.stack
+      );
       res.status(500).json({ error: "Failed to cancel customer order" });
     }
   }
 );
 
-
 router.get("/showshopsorders", async (req, res) => {
   try {
-    const { shop } = req.query;
+    console.log("Received query parameters:", req.query);
 
-    if (!shop) {
-      return res.status(400).json({ error: "Missing shop ID in query" });
+    // Check if 'shop' parameter is provided
+    if (!req.query.shop) {
+      return res.status(400).json({ error: "Shop ID is required" });
     }
 
-    const orders = await CustomerOrder.find({ shopId: shop })
-      .sort({ date: -1 })
-      .limit(20);
+    let shopId;
+    // Check if the shopId in the database is stored as a String or ObjectId
+    // If String, use directly. If ObjectId, convert using mongoose.Types.ObjectId
+    if (isValidObjectId(req.query.shop)) {
+      shopId = mongoose.Types.ObjectId(req.query.shop);
+    } else {
+      shopId = req.query.shop; // Use as string if that's how it's stored
+    }
+
+    console.log("Querying with shopId:", shopId);
+
+    const orders = await CustomerOrder.find({ shopId });
+    console.log("Orders found:", orders);
 
     res.json(orders);
   } catch (error) {
-    console.error("Error fetching shop orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders" });
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to fetch orders", details: error.message });
   }
 });
+
+// Helper function to check if a string is a valid MongoDB ObjectId
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id) && (String)(new mongoose.Types.ObjectId(id)) === id;
+}
 
 module.exports = router;

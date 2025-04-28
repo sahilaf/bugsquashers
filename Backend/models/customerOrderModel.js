@@ -30,6 +30,15 @@ const customerOrderSchema = new mongoose.Schema({
   },
   createdBy: { type: String, ref: "User", required: true },
   date: { type: Date, default: Date.now },
+  shippingInfo: {
+    name: String,
+    email: String,
+    address: String,
+    city: String,
+    state: String,
+    zipCode: String,
+    phone: String
+  },
 });
 
 customerOrderSchema.index({ orderId: 1 });
