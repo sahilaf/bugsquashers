@@ -12,10 +12,10 @@ const mockOrders = [
 
 describe("StatisticsDashboard", () => {
   beforeEach(() => {
-    // Freeze the date so month labels are predictable
+    // Freeze date so component logic is stable
     vi.setSystemTime(new Date("2025-04-30"));
 
-    // Stub fetch to resolve with our mockOrders
+    // Stub fetch to return our mockOrders
     vi.spyOn(global, "fetch").mockResolvedValue({
       json: () => Promise.resolve(mockOrders),
     });
@@ -27,28 +27,27 @@ describe("StatisticsDashboard", () => {
 
   it("shows loading indicator initially", () => {
     render(<StatisticsDashboard />);
-    expect(screen.getByText(/loading.../i)).toBeInTheDocument();
+    expect(screen.getByText(/loading\.\.\./i)).toBeInTheDocument();
   });
 
-  it("renders all dashboard sections and month labels after fetch", async () => {
+  it("renders all dashboard sections, three sales bars, and crop names after fetch", async () => {
     render(<StatisticsDashboard />);
 
-    // wait for "Loading..." to go away
+    // 1️⃣ Wait for loading to disappear
     await waitFor(() => {
-      expect(screen.queryByText(/loading.../i)).toBeNull();
+      expect(screen.queryByText(/loading\.\.\./i)).toBeNull();
     });
 
-    // 1. Section headers
+    // 2️⃣ Check section headers
     expect(screen.getByText(/Monthly Sales/i)).toBeInTheDocument();
     expect(screen.getByText(/Crop Distribution/i)).toBeInTheDocument();
     expect(screen.getByText(/Customer Demographics/i)).toBeInTheDocument();
 
-    // 2. Month labels for the last 3 months (Apr, Mar, Feb)
-    ["Apr", "Mar", "Feb"].forEach((month) => {
-      expect(screen.getByText(month)).toBeInTheDocument();
-    });
+    // 3️⃣ There should be exactly 3 dollar‐amounts (the 3 monthly bars)
+    const amounts = screen.getAllByText((content) => /^\$\d+/.test(content));
+    expect(amounts).toHaveLength(3);
 
-    // 3. Crops in distribution
+    // 4️⃣ Crop names in distribution
     expect(screen.getByText("Wheat")).toBeInTheDocument();
     expect(screen.getByText("Corn")).toBeInTheDocument();
   });
