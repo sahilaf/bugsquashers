@@ -125,6 +125,46 @@ export function ProductInventory() {
   if (shopLoading || isLoading) return <div>Loading...</div>;
   if (shopError) return <div>Error loading shop: {shopError}</div>;
   if (!shop) return <div>No shop found</div>;
+  let content;
+
+if (isLoading) {
+  content = <div className="text-center py-8">Loading products...</div>;
+} else if (shopError) {
+  content = (
+    <div className="text-center py-8 text-destructive">
+      Failed to load products.
+    </div>
+  );
+} else if (products.length === 0) {
+  content = <div className="text-center py-8">No products found.</div>;
+} else {
+  content = (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Price (₹)</TableHead>
+          <TableHead>Quantity</TableHead>
+          <TableHead>Status</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {products.map((product) => (
+          <TableRow key={product._id}>
+            <TableCell className="font-medium">{product.name}</TableCell>
+            <TableCell>{product.price.toFixed(2)}</TableCell>
+            <TableCell>{product.quantity}</TableCell>
+            <TableCell>
+              <Badge variant={statusVariants[getProductStatus(product.quantity)]}>
+                {getProductStatus(product.quantity)}
+              </Badge>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
 
   return (
     <Card>
@@ -136,40 +176,7 @@ export function ProductInventory() {
       </CardHeader>
   
       <CardContent>
-        {isLoading ? (
-          <div className="text-center py-8">Loading products...</div>
-        ) : shopError ? (
-          <div className="text-center py-8 text-destructive">
-            Failed to load products.
-          </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-8">No products found.</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Price (₹)</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product._id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.price.toFixed(2)}</TableCell>
-                  <TableCell>{product.quantity}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariants[getProductStatus(product.quantity)]}>
-                      {getProductStatus(product.quantity)}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+        {content}
       </CardContent>
   
       <AddProductDialog
