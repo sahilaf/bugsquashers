@@ -175,7 +175,7 @@ const AccountOverview = () => {
 
 const CustomerDashboard = () => {
   return (
-    <div>
+    <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-4 space-y-6 pt-20">
         <h1 className="text-3xl font-bold">Customer Dashboard</h1>
 

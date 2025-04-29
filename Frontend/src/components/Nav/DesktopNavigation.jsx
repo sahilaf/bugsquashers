@@ -1,6 +1,5 @@
 import ThemeToggle from "./ThemeToggle";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button } from "../ui/button";
 import { useCart } from "../../pages/cart/context/CartContex";
@@ -21,6 +20,8 @@ import {
   ShoppingCart,
   Brain,
   BotMessageSquare,
+  House,
+  Store
 } from "lucide-react";
 import {
   Sheet,
@@ -42,6 +43,7 @@ const DesktopNavigation = ({
   handleLogout,
   handleDashboardClick,
   handleMarketClick,
+  handleHomeClick,
   loading,
 }) => {
   const { cartCount } = useCart();
@@ -81,15 +83,21 @@ const DesktopNavigation = ({
   return (
     <div className="hidden lg:flex justify-between items-center space-x-6 text-muted-foreground">
       <div>
-        <Link to="/">Home</Link>
+      <Button
+          variant="outline"
+          onClick={handleHomeClick}
+        >
+          Home
+          <House className="h-6 w-6 ml-2" />
+        </Button>
       </div>
       <div>
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={handleMarketClick}
-          className="bg-transparent hover:bg-transparent hover:text-muted-foreground text-base"
         >
           Market
+          <Store className="h-6 w-6 ml-2" />
         </Button>
       </div>
       
@@ -102,7 +110,7 @@ const DesktopNavigation = ({
         </SheetTrigger>
         <SheetContent side="right" className="w-full max-w-md bg-[#e9e9e950] backdrop-blur-sm dark:bg-[#817d7d44] rounded-l-md">
           <SheetHeader>
-            <SheetTitle className="text-white">Support Assistant</SheetTitle>
+            <SheetTitle className="text-white"><span className="dark:bg-gradient-to-r dark:from-green-400 dark:to-white bg-clip-text dark:text-transparent text-primary">Support Assistant </span></SheetTitle>
           </SheetHeader>
           {/* Chat system goes here */}
           <div className="flex flex-col pt-5 h-[95%] ">

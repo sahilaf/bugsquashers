@@ -28,7 +28,7 @@ const CallToActionSection = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-primary bg-secondary hover:bg-secondary-hover px-8 py-6 text-lg rounded-full"
+                className=" bg-secondary hover:bg-secondary-hover px-8 py-6 text-lg rounded-full"
               >
                 Learn More
               </Button>

@@ -17,7 +17,7 @@ import { Separator } from "../../../components/ui/separator";
 import PropTypes from "prop-types";
 
 const OrderSummary = ({ cartItems, subtotal, shipping, tax, total, handleCheckout }) => (
-    <Card className="sticky top-20">
+    <Card className="">
       <CardHeader className="border-b">
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>

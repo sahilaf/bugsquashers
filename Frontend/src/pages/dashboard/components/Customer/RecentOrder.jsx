@@ -97,7 +97,6 @@ const RecentOrders = ({ fullList = false }) => {
               <TableHead>Total</TableHead>
               <TableHead>Payment</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Cancel Order</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

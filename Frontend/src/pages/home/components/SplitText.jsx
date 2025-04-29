@@ -18,7 +18,7 @@ import PropTypes from "prop-types"; // For prop validation
  * @param {function} onLetterAnimationComplete - Callback when all letters finish animating.
  */
 const SplitText = ({
-  text = "AI-Powered Shopping: Scan, Compare, Save & Deliver",
+  text = "AI-Powered Shopping: Ai Budget Recommendation, Agent Support, Save & Deliver",
   className = "max-w-4xl text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight",
   delay = 50,
   animationFrom = { opacity: 0, transform: "translate3d(0,40px,0)" },
