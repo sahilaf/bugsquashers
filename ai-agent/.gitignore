@@ -31,5 +31,6 @@ build/
 Thumbs.db
 ehthumbs.db
 
-
+chroma_store
+chroma_fairbasket
 fair-basket-456515-c8f95aec3d73.json
