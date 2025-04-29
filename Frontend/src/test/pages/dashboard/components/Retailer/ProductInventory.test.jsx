@@ -43,12 +43,12 @@ describe('<ProductInventory />', () => {
     render(<ProductInventory />);
     expect(screen.getByText(/No shop found/i)).toBeInTheDocument();
   });
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   it('renders "No products found" when API returns empty array', async () => {
     useShopDetails.mockReturnValue({ shop: { _id: 'shop1' }, loading: false, error: null });
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] });
     render(<ProductInventory />);
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith('http://localhost:3000/api/products?shop=shop1'));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/products?shop=shop1`));
     expect(screen.getByText(/No products found/i)).toBeInTheDocument();
   });
 
