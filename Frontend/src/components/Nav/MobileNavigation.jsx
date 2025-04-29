@@ -24,7 +24,7 @@ const MobileNavigation = ({
     if (!query.trim()) return;
 
     // Show user message
-    const userMessage = { sender: "user", text: query };
+    const userMessage = { sender: "user", text: query, id: Date.now() };
     setMessages((prev) => [...prev, userMessage]);
     setQuery("");
 
@@ -38,7 +38,11 @@ const MobileNavigation = ({
       });
 
       const data = await response.json();
-      const botMessage = { sender: "bot", text: data.answer };
+      const botMessage = {
+        sender: "bot",
+        text: data.answer,
+        id: Date.now() + 1,
+      };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       setMessages((prev) => [
@@ -73,9 +77,9 @@ const MobileNavigation = ({
         >
           <div className="flex flex-col pt-10 h-[95%]">
             <div className="flex-1 overflow-y-auto p-2 space-y-2 border border-primary rounded-md bg-transparent">
-              {messages.map((msg, index) => (
+            {messages.map((msg) => (
                 <div
-                  key={index}
+                  key={msg.id}
                   className={`p-2 rounded shadow text-sm ${
                     msg.sender === "user"
                       ? "bg-primary text-primary-foreground self-end"
