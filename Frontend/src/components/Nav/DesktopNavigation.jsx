@@ -31,11 +31,6 @@ import {
   SheetTrigger,
 } from "../ui/sheet"; // update path as per your structure
 
-const CATEGORIES = [
-  { name: "Electronics", link: "/categories/electronics" },
-  { name: "Clothing", link: "/categories/clothing" },
-  { name: "Home & Garden", link: "/categories/home" },
-];
 const DesktopNavigation = ({
   user,
   userData,
@@ -56,7 +51,7 @@ const DesktopNavigation = ({
     if (!query.trim()) return;
 
     // Show user message
-    const userMessage = { sender: "user", text: query };
+    const userMessage = { sender: "user", text: query, id: Date.now() };
     setMessages((prev) => [...prev, userMessage]);
     setQuery("");
 
@@ -82,7 +77,11 @@ const DesktopNavigation = ({
         throw new Error("Invalid response format from server");
       }
 
-      const botMessage = { sender: "bot", text: data.answer };
+      const botMessage = {
+        sender: "bot",
+        text: data.answer,
+        id: Date.now() + 1,
+      };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("API request failed:", error);
@@ -134,9 +133,9 @@ const DesktopNavigation = ({
           {/* Chat system goes here */}
           <div className="flex flex-col pt-5 h-[95%] ">
             <div className="flex-1 overflow-y-auto p-2 space-y-2 border border-[#494949] rounded-md bg-transparent">
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <div
-                  key={index}
+                  key={msg.id}
                   className={`p-2 rounded shadow text-sm ${
                     msg.sender === "user"
                       ? "bg-primary text-primary-foreground self-end"
