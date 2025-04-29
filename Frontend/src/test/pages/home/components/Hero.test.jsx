@@ -16,7 +16,6 @@ vi.mock('../../../../pages/home/components/SplitText', () => ({
   default: () => <div data-testid="split-text">Split Text Component</div>,
 }));
 
-// Corrected mock for lucide-react
 vi.mock('lucide-react', () => ({
   ArrowRight: () => <svg data-testid="arrow-right-icon" />,
 }));
@@ -34,20 +33,14 @@ vi.mock('../../../../assets/Heroanimation.json', () => ({ // Ensure this path ma
   default: { key: 'mock-animation-data' },
 }));
 
-const fetchMock = vi.fn();
-global.fetch = fetchMock;
 
 let rafCallbacks = [];
 let currentTime = 0;
 
-const rafMock = vi.fn().mockImplementation((callback) => {
-  rafCallbacks.push(callback);
-  return rafCallbacks.length - 1;
-});
-global.requestAnimationFrame = rafMock;
-
-const performanceNowMock = vi.fn().mockImplementation(() => currentTime);
-global.performance.now = performanceNowMock;
+// Use vi.spyOn to mock performance.now and requestAnimationFrame
+const performanceNowSpy = vi.spyOn(global.performance, 'now');
+const requestAnimationFrameSpy = vi.spyOn(global, 'requestAnimationFrame');
+const fetchMock = vi.fn();
 
 
 describe('Hero', () => {
@@ -57,11 +50,13 @@ describe('Hero', () => {
     rafCallbacks = [];
     currentTime = 0;
 
-    rafMock.mockImplementation((callback) => {
+    // Mock implementations using the spies
+    requestAnimationFrameSpy.mockImplementation((callback) => {
         rafCallbacks.push(callback);
         return rafCallbacks.length - 1;
     });
-    performanceNowMock.mockImplementation(() => currentTime);
+    performanceNowSpy.mockImplementation(() => currentTime);
+    global.fetch = fetchMock; // Still need to assign the fetch mock
 
 
     Object.defineProperty(window, 'location', {
@@ -69,6 +64,13 @@ describe('Hero', () => {
       value: { href: '' },
     });
   });
+
+   afterEach(() => {
+      // Restore the original implementations after each test
+      performanceNowSpy.mockRestore();
+      requestAnimationFrameSpy.mockRestore();
+   });
+
 
   const triggerNextAnimationFrame = (timeAdvance = 100) => {
     currentTime += timeAdvance;
