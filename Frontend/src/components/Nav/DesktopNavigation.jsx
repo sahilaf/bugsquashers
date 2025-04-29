@@ -21,7 +21,7 @@ import {
   Brain,
   BotMessageSquare,
   House,
-  Store
+  Store,
 } from "lucide-react";
 import {
   Sheet,
@@ -69,38 +69,50 @@ const DesktopNavigation = ({
         body: JSON.stringify({ query }),
       });
 
+      // Check for HTTP errors (4xx/5xx responses)
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Parse JSON only if the response is OK
       const data = await response.json();
+
+      // Check if the expected data structure exists
+      if (!data.answer) {
+        throw new Error("Invalid response format from server");
+      }
+
       const botMessage = { sender: "bot", text: data.answer };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "⚠️ Failed to fetch support response." },
-      ]);
+      console.error("API request failed:", error);
+
+      let errorText = "⚠️ Failed to fetch support response.";
+      if (error.message.includes("HTTP error")) {
+        errorText = "⚠️ Service unavailable. Please try again later.";
+      } else if (error.message.includes("Invalid response format")) {
+        errorText = "⚠️ Unexpected response from the server.";
+      }
+
+      setMessages((prev) => [...prev, { sender: "bot", text: errorText }]);
     }
   };
 
   return (
     <div className="hidden lg:flex justify-between items-center space-x-6 text-muted-foreground">
       <div>
-      <Button
-          variant="outline"
-          onClick={handleHomeClick}
-        >
+        <Button variant="outline" onClick={handleHomeClick}>
           Home
           <House className="h-6 w-6 ml-2" />
         </Button>
       </div>
       <div>
-        <Button
-          variant="outline"
-          onClick={handleMarketClick}
-        >
+        <Button variant="outline" onClick={handleMarketClick}>
           Market
           <Store className="h-6 w-6 ml-2" />
         </Button>
       </div>
-      
+
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" aria-label="AI">
@@ -108,9 +120,16 @@ const DesktopNavigation = ({
             <BotMessageSquare className="h-6 w-6 ml-2" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-full max-w-md bg-[#e9e9e950] backdrop-blur-sm dark:bg-[#817d7d44] rounded-l-md">
+        <SheetContent
+          side="right"
+          className="w-full max-w-md bg-[#e9e9e950] backdrop-blur-sm dark:bg-[#817d7d44] rounded-l-md"
+        >
           <SheetHeader>
-            <SheetTitle className="text-white"><span className="dark:bg-gradient-to-r dark:from-green-400 dark:to-white bg-clip-text dark:text-transparent text-primary">Support Assistant </span></SheetTitle>
+            <SheetTitle className="text-white">
+              <span className="dark:bg-gradient-to-r dark:from-green-400 dark:to-white bg-clip-text dark:text-transparent text-primary">
+                Support Assistant{" "}
+              </span>
+            </SheetTitle>
           </SheetHeader>
           {/* Chat system goes here */}
           <div className="flex flex-col pt-5 h-[95%] ">
