@@ -22,18 +22,25 @@ function StatisticsDashboard() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/orders"); // Adjust URL as needed
+        const response = await fetch("http://localhost:3000/api/orders");
         const orders = await response.json();
 
         // Process data
-        const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.price || 0), 0);
+        const totalRevenue = orders.reduce(
+          (sum, order) => sum + parseFloat(order.price || 0),
+          0
+        ); // :contentReference[oaicite:0]{index=0}
         const totalOrders = orders.length;
 
         // Monthly sales (last 3 months)
         const monthlySales = [];
         const now = new Date();
         for (let i = 2; i >= 0; i--) {
-          const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const monthDate = new Date(
+            now.getFullYear(),
+            now.getMonth() - i,
+            1
+          );
           const monthOrders = orders.filter((order) => {
             const orderDate = new Date(order.date);
             return (
@@ -43,22 +50,32 @@ function StatisticsDashboard() {
           });
           monthlySales.push({
             month: monthDate.toLocaleString("default", { month: "short" }),
-            amount: monthOrders.reduce((sum, order) => sum + parseFloat(order.price || 0), 0),
+            amount: monthOrders.reduce(
+              (sum, order) => sum + parseFloat(order.price || 0),
+              0
+            ),
           });
         }
 
         // Crop distribution
+        // ──────────────────────────────────────────────────────
+        // Define totalCrops before using it in percentage calculation
+        const totalCrops = orders.length; // :contentReference[oaicite:1]{index=1}
+
         const cropCounts = orders.reduce((acc, order) => {
           acc[order.crop] = (acc[order.crop] || 0) + 1;
           return acc;
         }, {});
-        const cropDistribution = Object.entries(cropCounts).map(([crop, count]) => ({
-          crop,
-          percentage: Math.round((count / totalCrops) * 100),
-        }));
-        const sortedCropDistribution = cropDistribution.toSorted((a, b) => b.percentage - a.percentage);
+        const cropDistribution = Object.entries(cropCounts).map(
+          ([crop, count]) => ({
+            crop,
+            percentage: Math.round((count / totalCrops) * 100),
+          })
+        );
+        const sortedCropDistribution = cropDistribution.toSorted(
+          (a, b) => b.percentage - a.percentage
+        );
         const topCrop = sortedCropDistribution[0]?.crop || "";
-        
 
         setStats({
           totalRevenue: `$${totalRevenue.toLocaleString()}`,
@@ -75,7 +92,7 @@ function StatisticsDashboard() {
     };
 
     fetchOrders();
-  }, []);
+  }, []); // :contentReference[oaicite:2]{index=2}
 
   if (loading) {
     return <div>Loading...</div>;
@@ -83,6 +100,7 @@ function StatisticsDashboard() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
+      {/* Monthly Sales Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-bold">Monthly Sales</CardTitle>
@@ -91,13 +109,24 @@ function StatisticsDashboard() {
         <CardContent>
           <div className="h-[300px] flex items-end justify-between gap-2 pt-4">
             {stats.monthlySales.map((item) => {
-              const maxAmount = Math.max(...stats.monthlySales.map((sale) => sale.amount), 1000); // Avoid division by zero
-              const height = (item.amount / maxAmount) * 100; // Scale dynamically
+              const maxAmount = Math.max(
+                ...stats.monthlySales.map((sale) => sale.amount),
+                1000
+              );
+              const height = (item.amount / maxAmount) * 100;
               return (
-                <div key={item.month} className="flex flex-col items-center gap-2">
-                  <div className="w-16 bg-primary rounded-t-md" style={{ height: `${height}%` }}></div>
+                <div
+                  key={item.month}
+                  className="flex flex-col items-center gap-2"
+                >
+                  <div
+                    className="w-16 bg-primary rounded-t-md"
+                    style={{ height: `${height}%` }}
+                  ></div>
                   <div className="text-sm font-medium">{item.month}</div>
-                  <div className="text-sm text-muted-foreground">${item.amount.toLocaleString()}</div>
+                  <div className="text-sm text-muted-foreground">
+                    ${item.amount.toLocaleString()}
+                  </div>
                 </div>
               );
             })}
@@ -105,6 +134,7 @@ function StatisticsDashboard() {
         </CardContent>
       </Card>
 
+      {/* Crop Distribution Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-bold">Crop Distribution</CardTitle>
@@ -116,7 +146,9 @@ function StatisticsDashboard() {
               <div key={item.crop} className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm font-medium">{item.crop}</span>
-                  <span className="text-sm text-muted-foreground">{item.percentage}%</span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.percentage}%
+                  </span>
                 </div>
                 <Progress value={item.percentage} className="h-2" />
               </div>
@@ -125,18 +157,26 @@ function StatisticsDashboard() {
         </CardContent>
       </Card>
 
+      {/* Customer Demographics Card */}
       <Card className="md:col-span-2">
         <CardHeader>
-          <CardTitle className="text-xl font-bold">Customer Demographics</CardTitle>
-          <CardDescription>Information about your customer base</CardDescription>
+          <CardTitle className="text-xl font-bold">
+            Customer Demographics
+          </CardTitle>
+          <CardDescription>
+            Information about your customer base
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <Users className="h-16 w-16 mx-auto text-muted-foreground" />
-              <p className="mt-4 text-lg font-medium">Customer data visualization coming soon</p>
+              <p className="mt-4 text-lg font-medium">
+                Customer data visualization coming soon
+              </p>
               <p className="text-sm text-muted-foreground mt-1">
-                We're working on gathering more detailed customer insights for you.
+                We're working on gathering more detailed customer insights for
+                you.
               </p>
             </div>
           </div>
