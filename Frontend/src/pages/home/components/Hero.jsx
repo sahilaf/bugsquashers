@@ -9,6 +9,8 @@ import { Button } from "../../../components/ui/button";
 function Hero() {
   const [mounted, setMounted] = useState(false);
   const [activeUsers, setActiveUsers] = useState(0);
+  const [registeredShops, setRegisteredShops] = useState(0);
+  const [deliveryAgents, setDeliveryAgents] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -18,17 +20,22 @@ function Hero() {
         const response = await fetch("http://localhost:3000/api/users");
         const users = await response.json();
         const totalUsers = users.length;
-        animateUsers(totalUsers);
+
+        animateUsers(totalUsers, setActiveUsers);
+        animateUsers(3000, setRegisteredShops); // Simulated value
+        animateUsers(15000, setDeliveryAgents);  // Simulated value
       } catch (error) {
         console.error("Error fetching users:", error);
-        animateUsers(500000); // Fallback
+        animateUsers(50000, setActiveUsers);      // Fallback
+        animateUsers(3000, setRegisteredShops);  // Fallback
+        animateUsers(15000, setDeliveryAgents);   // Fallback
       }
     };
 
     fetchUserCount();
   }, []);
 
-  const animateUsers = (target) => {
+  const animateUsers = (target, setter) => {
     const startTime = performance.now();
     const duration = 1000;
 
@@ -37,7 +44,7 @@ function Hero() {
       const progress = Math.min(elapsed / duration, 1);
       const animatedValue = Math.floor(progress * target);
 
-      setActiveUsers(animatedValue);
+      setter(animatedValue);
 
       if (progress < 1) {
         requestAnimationFrame(update);
@@ -131,12 +138,9 @@ function Hero() {
             variants={containerVariants}
           >
             {[
-              {
-                value: `${activeUsers.toLocaleString()}+`,
-                label: "Active Users",
-              },
-              { value: "50,000+", label: "Registered Shops" },
-              { value: "20,000+", label: "Delivery Agents" },
+              { value: `${activeUsers.toLocaleString()}+`, label: "Active Users" },
+              { value: `${registeredShops.toLocaleString()}+`, label: "Registered Shops" },
+              { value: `${deliveryAgents.toLocaleString()}+`, label: "Delivery Agents" },
             ].map((stat) => (
               <div
                 key={stat.label}
