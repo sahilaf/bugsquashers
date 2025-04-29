@@ -16,7 +16,7 @@ vi.mock('../../../../pages/home/components/SplitText', () => ({
   default: () => <div data-testid="split-text">Split Text Component</div>,
 }));
 
-// CORRECTED MOCK: Simply return the element to be rendered
+// Corrected mock for lucide-react
 vi.mock('lucide-react', () => ({
   ArrowRight: () => <svg data-testid="arrow-right-icon" />,
 }));
@@ -29,7 +29,8 @@ vi.mock('../../../../../components/ui/button', () => ({
   ),
 }));
 
-vi.mock('../../../../assets/HeroAnimation', () => ({
+// Mock the animation data - Note: You also need to correct the import path in Hero.jsx
+vi.mock('../../../../assets/Heroanimation.json', () => ({ // Ensure this path matches the actual file name casing
   default: { key: 'mock-animation-data' },
 }));
 
