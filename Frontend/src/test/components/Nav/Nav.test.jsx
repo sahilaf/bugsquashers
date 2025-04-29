@@ -66,10 +66,10 @@ describe('Nav component', () => {
     });
 
     render(<Nav />);
-
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/user',
+        `${BASE_URL}/api/user`,
         expect.objectContaining({ headers: expect.any(Object) })
       )
     );
