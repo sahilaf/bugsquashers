@@ -11,16 +11,16 @@ function Hero() {
   const [activeUsers, setActiveUsers] = useState(0);
   const [registeredShops, setRegisteredShops] = useState(0);
   const [deliveryAgents, setDeliveryAgents] = useState(0);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     setMounted(true);
 
     const fetchUserCount = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/users");
+        const response = await fetch(`${BASE_URL}/users`);
         const users = await response.json();
         const totalUsers = users.length;
-
+    
         animateUsers(totalUsers, setActiveUsers);
         animateUsers(3000, setRegisteredShops); // Simulated value
         animateUsers(15000, setDeliveryAgents);  // Simulated value
@@ -31,7 +31,6 @@ function Hero() {
         animateUsers(15000, setDeliveryAgents);   // Fallback
       }
     };
-
     fetchUserCount();
   }, []);
 

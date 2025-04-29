@@ -4,7 +4,7 @@ const useShopDetails = (userId) => {
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchShopDetails = async () => {
       if (!userId) {
@@ -18,7 +18,7 @@ const useShopDetails = (userId) => {
       try {
         // 1. Get MongoDB ownerId from Firebase UID
         const userRes = await fetch(
-          `http://localhost:3000/api/getuserid/${userId}`
+          `${BASE_URL}/getuserid/${userId}`
         );
         const userJson = await userRes.json();
         if (!userRes.ok || !userJson.success) {
@@ -31,7 +31,7 @@ const useShopDetails = (userId) => {
 
         // 2. Fetch shop by ownerId
         const shopRes = await fetch(
-          `http://localhost:3000/api/shops/owner/${ownerId}`
+          `${BASE_URL}/shops/owner/${ownerId}`
         );
         const shopJson = await shopRes.json();
         if (!shopRes.ok || !shopJson.success) {

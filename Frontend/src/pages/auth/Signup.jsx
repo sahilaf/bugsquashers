@@ -28,7 +28,7 @@ function Signup() {
     confirmPassword: "",
     role: "User",
   });
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Use the environment variable for the base URL
   const { setUser, setUserRole } = useAuth(); // Access setUser and setUserRole from AuthContext
 
   const handleSubmit = async (e) => {
@@ -73,7 +73,7 @@ function Signup() {
       setUserRole(role);
 
       // Send user data to backend
-      const response = await fetch("http://localhost:3000/api/signup", {
+      const response = await fetch(`${BASE_URL}/signup`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

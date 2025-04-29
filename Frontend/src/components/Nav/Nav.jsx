@@ -10,7 +10,7 @@ const Nav = () => {
   const { user, loading } = useAuth();
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -18,7 +18,7 @@ const Nav = () => {
         localStorage.setItem("authToken", token);
 
         try {
-          const response = await fetch("http://localhost:3000/api/user", {
+          const response = await fetch(`${BASE_URL}/user`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
