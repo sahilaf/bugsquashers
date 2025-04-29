@@ -7,7 +7,12 @@ import { useCart } from "../../../pages/cart/context/CartContex";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { getAuth } from "firebase/auth";
-
+Object.defineProperty(import.meta, 'env', {
+  value: {
+    VITE_API_BASE_URL: 'http://localhost:3000',
+  },
+  writable: true,
+});
 // Mock external hooks & modules
 vi.mock("../../../pages/cart/context/CartContex", () => ({ useCart: vi.fn() }));
 vi.mock("react-router-dom", () => ({ useNavigate: vi.fn() }));

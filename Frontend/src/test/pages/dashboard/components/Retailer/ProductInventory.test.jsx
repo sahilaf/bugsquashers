@@ -8,7 +8,12 @@ import { useToast } from '../../../../../hooks/use-toast';
 import { useAuth } from '../../../../../pages/auth/AuthContext';
 import { AddProductDialog } from '../../../../../pages/dashboard/components/Retailer/AddProductDialog';
 import ProductInventory from '../../../../../pages/dashboard/components/Retailer/ProductInventory';
-
+Object.defineProperty(import.meta, 'env', {
+  value: {
+    VITE_API_BASE_URL: 'http://localhost:3000',
+  },
+  writable: true,
+});
 // Mock the Plus icon
 vi.mock('lucide-react', () => ({ Plus: () => <span data-testid="plus-icon" /> }));
 // Mock hooks and dialog
