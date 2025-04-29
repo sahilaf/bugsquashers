@@ -1,4 +1,3 @@
-// AddProductDialog.jsx
 import { useState } from "react";
 import {
   Dialog,
@@ -50,9 +49,18 @@ export const AddProductDialog = ({ open, onOpenChange, onAddProduct, shopId }) =
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let newValue;
+    if (type === "checkbox") {
+      newValue = checked;
+    } else if (type === "number") {
+      newValue = Number(value);
+    } else {
+      newValue = value;
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : type === "number" ? Number(value) : value,
+      [name]: newValue,
     }));
   };
 
@@ -223,7 +231,7 @@ export const AddProductDialog = ({ open, onOpenChange, onAddProduct, shopId }) =
             <div className="flex flex-wrap gap-2 mt-2">
               {formData.keyFeatures.map((feature, index) => (
                 <div
-                  key={index}
+                  key={`feature-${feature}-${index}`}
                   className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-sm"
                 >
                   <span>{feature}</span>
@@ -258,7 +266,7 @@ export const AddProductDialog = ({ open, onOpenChange, onAddProduct, shopId }) =
             </div>
             <div className="grid grid-cols-3 gap-2 mt-2">
               {formData.images.map((image, index) => (
-                <div key={index} className="relative group">
+                <div key={`image-${image}-${index}`} className="relative group">
                   <img
                     src={image}
                     alt={`Product preview ${index}`}
