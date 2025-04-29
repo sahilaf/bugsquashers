@@ -161,7 +161,7 @@ const MobileNavigation = ({
               </div>
 
               {user ? (
-                <>
+                <div>
                   
                   <Button
                     onClick={handleLogout}
@@ -170,7 +170,7 @@ const MobileNavigation = ({
                   >
                     Log out
                   </Button>
-                </>
+                </div>
               ) : (
                 <Button
                   onClick={() => navigate("/login")}
