@@ -44,8 +44,10 @@ describe("StatisticsDashboard", () => {
     expect(screen.getByText(/Customer Demographics/i)).toBeInTheDocument();
 
     // 3️⃣ There should be exactly 3 dollar‐amounts (the 3 monthly bars)
-    // loosened to match anywhere in the text
-    const amounts = screen.getAllByText(/\$\d+/);
+    const amounts = screen.getAllByText((_, element) => {
+      const text = element.textContent?.trim() || "";
+      return /^\$\d+$/.test(text);
+    });
     expect(amounts).toHaveLength(3);
 
     // 4️⃣ Crop names in distribution
