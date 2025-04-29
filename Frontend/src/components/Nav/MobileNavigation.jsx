@@ -22,12 +22,11 @@ const MobileNavigation = ({
 
   const sendMessage = async () => {
     if (!query.trim()) return;
-
-    // Show user message
-    const userMessage = { sender: "user", text: query, id: Date.now() };
+  
+    const userMessage = { sender: "user", text: query };
     setMessages((prev) => [...prev, userMessage]);
     setQuery("");
-
+  
     try {
       const response = await fetch("http://127.0.0.1:5000/api/query", {
         method: "POST",
@@ -36,18 +35,22 @@ const MobileNavigation = ({
         },
         body: JSON.stringify({ query }),
       });
-
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
       const data = await response.json();
-      const botMessage = {
-        sender: "bot",
-        text: data.answer,
-        id: Date.now() + 1,
-      };
+      const botMessage = { sender: "bot", text: data.answer };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
+      console.error("Error sending message:", error);
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "⚠️ Failed to fetch support response." },
+        { 
+          sender: "bot", 
+          text: "⚠️ Sorry, I'm having trouble connecting. Please try again later."
+        },
       ]);
     }
   };
