@@ -119,11 +119,7 @@ export function ProductInventory() {
     }
   };
 
-  // Calculate total inventory value
-  const totalInventoryValue = products.reduce(
-    (sum, product) => sum + product.quantity * product.price,
-    0
-  );
+  
 
   // Loading and error states
   if (shopLoading || isLoading) return <div>Loading...</div>;
