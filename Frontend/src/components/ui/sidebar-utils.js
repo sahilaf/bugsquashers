@@ -1,7 +1,6 @@
 import * as React from "react";
-import { SidebarContext } from "./sidebar"; // Adjust path if necessary
+import { SidebarContext } from "./sidebar";
 
-// Constants
 export const SIDEBAR_COOKIE_NAME = "sidebar_state";
 export const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 1 week in seconds
 export const SIDEBAR_WIDTH = "16rem";
