@@ -106,10 +106,10 @@ describe("Checkout Component", () => {
 
     const button = screen.getByRole("button", { name: /Place Order/i });
     await act(() => fireEvent.click(button));
-
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     expect(fakeUser.getIdToken).toHaveBeenCalled();
     expect(global.fetch).toHaveBeenCalledWith(
-      "http://localhost:3000/api/orders/create",
+      `${BASE_URL}/orders/create`,
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ Authorization: "Bearer tok" }),

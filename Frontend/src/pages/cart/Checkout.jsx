@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/button";
 import { getAuth } from "firebase/auth";
 
 const Checkout = () => {
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { cartItems, loading, clearCart } = useCart();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
@@ -65,7 +66,7 @@ const Checkout = () => {
         quantity: item.quantity
       }));
 
-      const response = await fetch("http://localhost:3000/api/orders/create", {
+      const response = await fetch(`${BASE_URL}/orders/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
