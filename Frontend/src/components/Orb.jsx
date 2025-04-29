@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle, Vec3 } from "ogl";
-
+import PropTypes from "prop-types";
 export default function Orb({
   hue = 130,
   hoverIntensity = 0.2,
@@ -281,3 +281,10 @@ export default function Orb({
 
   return <div ref={ctnDom} className="w-full h-full" />;
 }
+
+Orb.propTypes = {
+  hue: PropTypes.number,
+  hoverIntensity: PropTypes.number,
+  rotateOnHover: PropTypes.bool,
+  forceHoverState: PropTypes.bool,
+};
