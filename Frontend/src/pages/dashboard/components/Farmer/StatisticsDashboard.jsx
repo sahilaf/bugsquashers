@@ -52,12 +52,13 @@ function StatisticsDashboard() {
           acc[order.crop] = (acc[order.crop] || 0) + 1;
           return acc;
         }, {});
-        const totalCrops = Object.values(cropCounts).reduce((sum, count) => sum + count, 0);
         const cropDistribution = Object.entries(cropCounts).map(([crop, count]) => ({
           crop,
           percentage: Math.round((count / totalCrops) * 100),
         }));
-        const topCrop = cropDistribution.sort((a, b) => b.percentage - a.percentage)[0]?.crop || "";
+        const sortedCropDistribution = cropDistribution.toSorted((a, b) => b.percentage - a.percentage);
+        const topCrop = sortedCropDistribution[0]?.crop || "";
+        
 
         setStats({
           totalRevenue: `$${totalRevenue.toLocaleString()}`,
