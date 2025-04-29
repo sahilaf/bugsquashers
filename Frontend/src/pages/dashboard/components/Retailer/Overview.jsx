@@ -77,7 +77,7 @@ StatCard.propTypes = {
 
 function Overview() {
   const { userId } = useAuth();
-  const { shop, loading, error } = useShopDetails(userId);
+  const { shop, loading } = useShopDetails(userId);
 
   if (loading) {
     return <div>Loading shop details...</div>;
