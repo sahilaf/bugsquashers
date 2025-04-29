@@ -137,4 +137,5 @@ describe('useShopDetails hook', () => {
       isCertified: false,
     });
   });
+
 });
