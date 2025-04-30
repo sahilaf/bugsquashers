@@ -8,6 +8,7 @@ import { useCart } from "../../pages/cart/context/CartContex";
 import { Badge } from "../ui/badge";
 const MobileNavigation = ({
   user,
+  userData,
   navigate,
   handleLogout,
   handleDashboardClick,
@@ -22,24 +23,27 @@ const MobileNavigation = ({
 
   const sendMessage = async () => {
     if (!query.trim()) return;
-  
+
     const userMessage = { sender: "user", text: query };
     setMessages((prev) => [...prev, userMessage]);
     setQuery("");
-  
+
     try {
-      const response = await fetch("https://bugsquashers-ai-agent.onrender.com/api/query", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
-  
+      const response = await fetch(
+        "https://bugsquashers-ai-agent.onrender.com/api/query",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query }),
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       const botMessage = { sender: "bot", text: data.answer };
       setMessages((prev) => [...prev, botMessage]);
@@ -47,9 +51,9 @@ const MobileNavigation = ({
       console.error("Error sending message:", error);
       setMessages((prev) => [
         ...prev,
-        { 
-          sender: "bot", 
-          text: "⚠️ Sorry, I'm having trouble connecting. Please try again later."
+        {
+          sender: "bot",
+          text: "⚠️ Sorry, I'm having trouble connecting. Please try again later.",
         },
       ]);
     }
@@ -80,7 +84,7 @@ const MobileNavigation = ({
         >
           <div className="flex flex-col pt-10 h-[95%]">
             <div className="flex-1 overflow-y-auto p-2 space-y-2 border border-primary rounded-md bg-transparent">
-            {messages.map((msg) => (
+              {messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`p-2 rounded shadow text-sm ${
@@ -140,19 +144,25 @@ const MobileNavigation = ({
                   key="recommendation"
                   variant="ghost"
                   aria-label="AI"
-                  onClick={() => navigate("/recommendation")}
+                  onClick={() => {
+                    if (userData?.role === "User") {
+                      navigate("/recommendation");
+                    } else {
+                      navigate("/airedirect");
+                    }
+                  }}
                 >
                   Ai recommendations
                 </Button>
                 <Button
-                    onClick={handleDashboardClick}
-                    variant="ghost"
-                    aria-label="Dashboard"
-                    className="w-full justify-start"
-                    disabled={loading}
-                  >
-                    {loading ? "Loading..." : "Dashboard"}
-                  </Button>
+                  onClick={handleDashboardClick}
+                  variant="ghost"
+                  aria-label="Dashboard"
+                  className="w-full justify-start"
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "Dashboard"}
+                </Button>
               </nav>
             </div>
             <div className="border-t pt-4">
@@ -162,7 +172,6 @@ const MobileNavigation = ({
 
               {user ? (
                 <div>
-                  
                   <Button
                     onClick={handleLogout}
                     variant="destructive"
@@ -190,6 +199,7 @@ const MobileNavigation = ({
 
 MobileNavigation.propTypes = {
   user: PropTypes.object,
+  userData: PropTypes.object,
   navigate: PropTypes.func.isRequired,
   handleLogout: PropTypes.func.isRequired,
   handleDashboardClick: PropTypes.func.isRequired,

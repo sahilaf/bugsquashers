@@ -97,6 +97,7 @@ const Nav = () => {
 
       <MobileNavigation
         user={user}
+        userData={userData}
         navigate={navigate}
         handleLogout={handleLogout}
         handleDashboardClick={handleDashboardClick}

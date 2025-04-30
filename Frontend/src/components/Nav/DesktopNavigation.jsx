@@ -56,13 +56,16 @@ const DesktopNavigation = ({
     setQuery("");
 
     try {
-      const response = await fetch("https://bugsquashers-ai-agent.onrender.com/api/query", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
+      const response = await fetch(
+        "https://bugsquashers-ai-agent.onrender.com/api/query",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query }),
+        }
+      );
 
       // Check for HTTP errors (4xx/5xx responses)
       if (!response.ok) {
@@ -166,7 +169,13 @@ const DesktopNavigation = ({
       <Button
         variant="outline"
         aria-label="AI"
-        onClick={() => navigate("/recommendation")}
+        onClick={() => {
+          if (userData?.role === "User") {
+            navigate("/recommendation");
+          } else {
+            navigate("/airedirect");
+          }
+        }}
       >
         Ai recommendations
         <Brain className="h-6 w-6" />

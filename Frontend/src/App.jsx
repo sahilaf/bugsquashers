@@ -28,6 +28,7 @@ import { CartProvider } from "./pages/cart/context/CartContex";
 import OrderConfirmation from "./pages/cart/OrderComfirmation";
 import PaymentFailed from "./pages/cart/PaymentFailed";
 import Checkout from "./pages/cart/Checkout";
+import AiRedirect from "./components/AiRedirect";
 
 const DashboardRedirect = () => {
   const { userRole } = useAuth();
@@ -191,6 +192,8 @@ const App = () => (
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/orderconfirmation" element={<OrderConfirmation />} />
             <Route path="/payment-failed" element={<PaymentFailed />} />
+            <Route path="/airedirect" element={<AiRedirect />} />
+            
           </Routes>
         </Layout>
       </Router>
