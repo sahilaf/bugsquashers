@@ -142,7 +142,7 @@ export const testimonialsData = [
         "quote": "FairBasket's technology is a game-changer. It's amazing to see how they connect farmers directly with consumers, cutting out the middlemen.",
         "name": "Emily Davis",
         "title": "Sustainability Advocate",
-        "avatar": "https://i.pinimg.com/736x/d1/78/72/d17872ea78786123380ce9fa66b7c413.jpg",
+        "avatar": "https://media.istockphoto.com/id/1490764451/photo/headshot-portrait-of-confident-handsome-mature-middle-age-businessman-at-office.jpg?s=612x612&w=0&k=20&c=bIuouYY6uqzrXqFT9zAorjB3RKF38DirBavAahVfX38=",
         "rating": 5
       },
       {
