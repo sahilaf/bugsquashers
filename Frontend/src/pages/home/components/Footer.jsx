@@ -1,6 +1,6 @@
 // components/Footer.jsx
 import React from "react";
-import {footerData} from "../data/data"; // Adjust the path as needed
+import {footerData} from "../data/Data"; // Adjust the path as needed
 
 const Footer = () => {
   const { about, quickLinks, customerService, connect, copyright } = footerData;
