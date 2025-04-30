@@ -18,7 +18,7 @@ const useShopDetails = (userId) => {
       try {
         // 1. Get MongoDB ownerId from Firebase UID
         const userRes = await fetch(
-          `${BASE_URL}/getuserid/${userId}`
+          `${BASE_URL}/api/getuserid/${userId}`
         );
         const userJson = await userRes.json();
         if (!userRes.ok || !userJson.success) {
@@ -31,7 +31,7 @@ const useShopDetails = (userId) => {
 
         // 2. Fetch shop by ownerId
         const shopRes = await fetch(
-          `${BASE_URL}/shops/owner/${ownerId}`
+          `${BASE_URL}/api/shops/owner/${ownerId}`
         );
         const shopJson = await shopRes.json();
         if (!shopRes.ok || !shopJson.success) {

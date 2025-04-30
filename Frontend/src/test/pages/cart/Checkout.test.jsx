@@ -109,7 +109,7 @@ describe("Checkout Component", () => {
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     expect(fakeUser.getIdToken).toHaveBeenCalled();
     expect(global.fetch).toHaveBeenCalledWith(
-      `${BASE_URL}/orders/create`,
+      `${BASE_URL}/api/orders/create`,
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({ Authorization: "Bearer tok" }),

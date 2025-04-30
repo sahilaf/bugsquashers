@@ -18,7 +18,7 @@ const Nav = () => {
         localStorage.setItem("authToken", token);
 
         try {
-          const response = await fetch(`${BASE_URL}/user`, {
+          const response = await fetch(`${BASE_URL}/api/user`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

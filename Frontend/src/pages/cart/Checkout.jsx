@@ -66,7 +66,7 @@ const Checkout = () => {
         quantity: item.quantity
       }));
 
-      const response = await fetch(`${BASE_URL}/orders/create`, {
+      const response = await fetch(`${BASE_URL}/api/orders/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

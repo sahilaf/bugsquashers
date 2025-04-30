@@ -73,7 +73,7 @@ function Signup() {
       setUserRole(role);
 
       // Send user data to backend
-      const response = await fetch(`${BASE_URL}/signup`, {
+      const response = await fetch(`${BASE_URL}/api/signup`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

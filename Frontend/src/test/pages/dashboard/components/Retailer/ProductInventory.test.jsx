@@ -48,7 +48,7 @@ describe('<ProductInventory />', () => {
     useShopDetails.mockReturnValue({ shop: { _id: 'shop1' }, loading: false, error: null });
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] });
     render(<ProductInventory />);
-    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/products?shop=shop1`));
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/api/products?shop=shop1`));
     expect(screen.getByText(/No products found/i)).toBeInTheDocument();
   });
 

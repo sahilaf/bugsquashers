@@ -17,7 +17,7 @@ function Hero() {
 
     const fetchUserCount = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/users`);
+        const response = await fetch(`${BASE_URL}/api/users`);
         const users = await response.json();
         const totalUsers = users.length;
     
