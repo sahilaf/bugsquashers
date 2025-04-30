@@ -6,7 +6,7 @@ FairBasket is an innovative, open-source e-commerce platform designed to revolut
 
 ## 🌐 Live Demo
 
-🔗 **[FairBasket Demo (Coming Soon!)]()**
+🔗 **[https://bugsquashers.vercel.app/]()**
 
 ---
 
