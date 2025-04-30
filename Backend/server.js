@@ -29,7 +29,7 @@ app.disable("x-powered-by");
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
-    ? ["https://your-production-domain.com","http://localhost:5173","http://127.0.0.1:5000/api/query"]
+    ? ["https://bugsquashers.vercel.app/","http://localhost:5173","http://127.0.0.1:5000/api/query"]
     : ["http://localhost:3000", "http://localhost:5173", "http://localhost:5175", "http://localhost:5174","http://127.0.0.1:5000/api/query"];
 
 app.use(
