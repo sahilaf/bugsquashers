@@ -1,7 +1,7 @@
 import os
 from typing import List
 from dotenv import load_dotenv
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from google.genai.types import HarmCategory, HarmBlockThreshold
 
 from pymongo import MongoClient
 from langchain_core.documents import Document
