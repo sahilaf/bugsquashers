@@ -119,7 +119,7 @@ function Hero() {
             <Button
               size="sm"
               className="bg-primary text-primary-foreground hover:bg-primary-hover px-8 py-6 text-lg group rounded-full w-full md:w-48"
-              onClick={() => window.location.href = "/marketplace"}
+              onClick={() => window.location.href = "/market"}
             >
               Get Started
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
