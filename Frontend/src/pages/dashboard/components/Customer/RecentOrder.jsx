@@ -44,7 +44,7 @@ const RecentOrders = ({ fullList = false }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const handleApiError = (err, defaultMessage) => {
     console.error(err);
     const errorMessage =
@@ -58,7 +58,7 @@ const RecentOrders = ({ fullList = false }) => {
     const fetchOrders = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:3000/api/customer-orders"
+          `${BASE_URL}/api/customer-orders`
         );
         // Filter orders by customerId if provided
         const filteredOrders = customerId

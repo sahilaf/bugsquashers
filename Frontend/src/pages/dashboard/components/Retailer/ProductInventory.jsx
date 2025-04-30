@@ -31,7 +31,7 @@ const statusVariants = {
 export function ProductInventory() {
   const { userId } = useAuth();
   const { shop, loading: shopLoading, error: shopError } = useShopDetails(userId);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,7 +47,7 @@ export function ProductInventory() {
     const fetchProducts = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/products?shop=${shop._id}`
+          `${BASE_URL}/api/products?shop=${shop._id}`
         );
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -86,7 +86,7 @@ export function ProductInventory() {
         throw new Error("No shop associated");
       }
 
-      const response = await fetch("http://localhost:3000/api/products/", {
+      const response = await fetch(`${BASE_URL}/api/products/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -13,13 +13,13 @@ export function RecentOrders() {
   const [orders, setOrders] = useState([]);
   const { userId } = useAuth();
   const { shop, loading: shopLoading, error: shopError } = useShopDetails(userId);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchOrders = async () => {
       if (!shop?._id) return;
 
       try {
-        const response = await axios.get(`http://localhost:3000/api/customer-orders/showshopsorders?shop=${shop._id}`);
+        const response = await axios.get(`${BASE_URL}/api/customer-orders/showshopsorders?shop=${shop._id}`);
         console.log("API Response:", response.data); // Debugging line
         const ordersData = Array.isArray(response.data) ? response.data : [];
         setOrders(ordersData);

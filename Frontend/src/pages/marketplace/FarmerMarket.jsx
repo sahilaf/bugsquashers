@@ -11,11 +11,12 @@ function FarmerMarket() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const userId = "1234567890abcdef12345678"; // Hardcoded for demo; replace with auth
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // Fetch crops and cart from backend
   useEffect(() => {
     const fetchCrops = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/crops');
+        const response = await axios.get(`${BASE_URL}/api/crops`);
         const groupedCrops = response.data.reduce((acc, crop) => {
           const supplier = crop.supplier || 'Unknown Farm';
           if (!acc[supplier]) {
@@ -47,7 +48,7 @@ function FarmerMarket() {
 
     const fetchCart = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/cart/${userId}`);
+        const response = await axios.get(`${BASE_URL}/api/cart/${userId}`);
         console.log('Fetched cart data:', response.data); // Debug cart data
         setCart(response.data.items || []);
       } catch (err) {

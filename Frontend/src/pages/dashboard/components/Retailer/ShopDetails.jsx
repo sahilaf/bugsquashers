@@ -37,7 +37,7 @@ export function ShopDetails() {
   const [error, setError] = useState(null);
   const [shop, setShop] = useState(null);
   const [ownerId, setOwnerId] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const form = useForm({
     defaultValues: {
       name: "",
@@ -61,7 +61,7 @@ export function ShopDetails() {
 
         // Step 1: Fetch MongoDB userId from Firebase uid
         const userResponse = await fetch(
-          `http://localhost:3000/api/getuserid/${userId}`
+          `${BASE_URL}/api/getuserid/${userId}`
         );
         const userData = await userResponse.json();
 
@@ -82,7 +82,7 @@ export function ShopDetails() {
 
         // Step 2: Fetch shop data using ownerId
         const shopResponse = await fetch(
-          `http://localhost:3000/api/shops/owner/${fetchedOwnerId}`
+          `${BASE_URL}/api/shops/owner/${fetchedOwnerId}`
         );
         const shopData = await shopResponse.json();
 
@@ -145,14 +145,14 @@ export function ShopDetails() {
   
       if (isCreating) {
         // Create new shop
-        response = await fetch("http://localhost:3000/api/shops", {
+        response = await fetch(`${BASE_URL}/api/shops`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(shopData),
         });
       } else {
         // Update existing shop
-        response = await fetch(`http://localhost:3000/api/shops/${shop._id}`, {
+        response = await fetch(`${BASE_URL}/api/shops/${shop._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(shopData),

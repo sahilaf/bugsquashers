@@ -22,7 +22,7 @@ export default function Recommendation() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { addToCart } = useCart();
 
   async function handleSubmit(e) {
@@ -52,7 +52,7 @@ export default function Recommendation() {
 
       // 3) Fetch full product details for each unique ID
       const productFetches = uniqueIds.map((id) =>
-        fetch(`http://localhost:3000/api/products/${id}`).then((res) => {
+        fetch(`${BASE_URL}/api/products/${id}`).then((res) => {
           if (!res.ok) throw new Error(`Product ${id} not found`);
           return res.json();
         })

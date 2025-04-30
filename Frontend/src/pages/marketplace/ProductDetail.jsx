@@ -10,12 +10,12 @@ export const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/products/${productId}`
+          `${BASE_URL}/api/products/${productId}`
         );
         if (!response.ok) {
           throw new Error("Product not found");

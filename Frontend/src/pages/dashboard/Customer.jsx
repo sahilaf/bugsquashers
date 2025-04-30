@@ -47,6 +47,7 @@ DashboardCard.propTypes = {
 };
 
 const AccountOverview = () => {
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const { userId: uid } = useAuth();
   const [userData, setUserData] = useState({
     fullName: '',
@@ -70,7 +71,7 @@ const AccountOverview = () => {
         setError(null);
         
         // Updated to match the new endpoint pattern
-        const response = await fetch(`http://localhost:3000/api/getuser/${uid}`, {
+        const response = await fetch(`${BASE_URL}/api/getuser/${uid}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -110,7 +111,7 @@ const AccountOverview = () => {
       setIsUpdating(true);
       setError(null);
       await axios.put(
-        `http://localhost:3000/api/updateuser/${uid}`, // Updated to include UID in URL for consistency
+        `${BASE_URL}/api/updateuser/${uid}`, // Updated to include UID in URL for consistency
         {
           fullName: userData.fullName,
           email: userData.email,

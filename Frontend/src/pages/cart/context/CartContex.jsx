@@ -18,7 +18,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   // Fetch cart using Firebase UID
   const fetchCart = useCallback(async () => {
     if (!uid) {
@@ -29,7 +29,7 @@ export const CartProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:3000/api/cart/${uid}`);
+      const res = await axios.get(`${BASE_URL}/api/cart/${uid}`);
       setCartItems(res.data.items || []);
       setError(null);
     } catch (err) {
@@ -60,7 +60,7 @@ export const CartProvider = ({ children }) => {
 
       try {
         console.log("Adding to cart:", { uid, productId });
-        const res = await axios.post(`http://localhost:3000/api/cart`, {
+        const res = await axios.post(`${BASE_URL}/api/cart`, {
           uid,
           productId: productId.toString(),
           quantity: 1,
@@ -94,7 +94,7 @@ export const CartProvider = ({ children }) => {
 
       try {
         const res = await axios.delete(
-          `http://localhost:3000/api/cart/${uid}/item/${productId}`
+          `${BASE_URL}/api/cart/${uid}/item/${productId}`
         );
         setCartItems(res.data.cart.items || []);
         setError(null);
@@ -148,7 +148,7 @@ export const CartProvider = ({ children }) => {
 
   const sendUpdateRequest = async (uid, productId, quantity) => {
     return axios.put(
-      `http://localhost:3000/api/cart/${uid}/item/${productId}`,
+      `${BASE_URL}/api/cart/${uid}/item/${productId}`,
       {
         quantity,
       }
@@ -218,7 +218,7 @@ export const CartProvider = ({ children }) => {
 
   const handleMissingCart = async (productId) => {
     try {
-      await axios.get(`http://localhost:3000/api/cart/${uid}`);
+      await axios.get(`${BASE_URL}/api/cart/${uid}`);
       await addToCart(productId);
       toast.info("Cart created. Item added to cart.");
       return true;
@@ -242,7 +242,7 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:3000/api/cart/${uid}`);
+      const res = await axios.delete(`${BASE_URL}/api/cart/${uid}`);
       setCartItems(res.data.cart.items || []);
       setError(null);
       toast.success("Cart cleared");

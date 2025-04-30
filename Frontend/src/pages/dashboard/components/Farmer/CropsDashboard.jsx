@@ -46,6 +46,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   const [stockFilter, setStockFilter] = useState("all");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Renamed for clarity
   const [currentCrop, setCurrentCrop] = useState(null);
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [editForm, setEditForm] = useState({
     name: "",
     category: "",
@@ -87,7 +88,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   const fetchCrops = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/crops");
+      const response = await fetch(`${BASE_URL}/api/crops`);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       const data = await response.json();
       setCrops(validateCropData(data));
@@ -122,7 +123,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
   const handleDeleteCrop = async (id) => {
     if (window.confirm("Are you sure you want to delete this crop?")) {
       try {
-        const response = await fetch(`http://localhost:3000/api/crops/${id}`, {
+        const response = await fetch(`${BASE_URL}/api/crops/${id}`, {
           method: "DELETE",
         });
         if (!response.ok) throw new Error("Failed to delete crop");
@@ -156,7 +157,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/crops/${currentCrop.id}`, {
+      const response = await fetch(`${BASE_URL}/api/crops/${currentCrop.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editForm),
@@ -283,7 +284,7 @@ function CropsDashboard({ crops, setCrops, onViewAll }) {
                     <TableCell>
                       {crop.image ? (
                         <img
-                          src={`http://localhost:3000${crop.image}`}
+                          src={`${BASE_URL}${crop.image}`}
                           alt={crop.name}
                           className="h-10 w-10 object-cover"
                         />

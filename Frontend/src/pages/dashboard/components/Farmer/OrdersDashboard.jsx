@@ -23,12 +23,12 @@ function OrdersDashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(""); // proper state destructuring
-
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/api/orders");
+      const response = await fetch(`${BASE_URL}/api/orders`);
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
       setOrders(data);

@@ -60,6 +60,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit }) {
     expirationDate: "",
     image: null,
   });
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -90,7 +91,7 @@ function CropFormDialog({ isOpen, onClose, onSubmit }) {
     if (formData.image) formDataObj.append("image", formData.image);
 
     try {
-      const response = await fetch("http://localhost:3000/api/crops", {
+      const response = await fetch(`${BASE_URL}/api/crops`, {
         method: "POST",
         body: formDataObj,
       });

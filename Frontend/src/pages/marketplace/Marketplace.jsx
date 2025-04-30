@@ -266,7 +266,7 @@ function MarketPlace() {
   const fetchShopsWithPosition = async (lat, lng, page = 1) => {
     setIsLoading(true);
     setError("");
-
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
     try {
       // Round coordinates to lower precision (city-level rather than exact location)
       // 3 decimal places is roughly town/city level precision (~100m)
@@ -288,7 +288,7 @@ function MarketPlace() {
       };
 
       const res = await fetch(
-        `http://localhost:3000/api/shops/nearby?${new URLSearchParams(params)}`
+        `${BASE_URL}/api/shops/nearby?${new URLSearchParams(params)}`
       );
 
       if (!res.ok) {
