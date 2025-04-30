@@ -7,12 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { auth } from '../../../pages/auth/Firebase';
 import { signOut } from 'firebase/auth';
 
-Object.defineProperty(import.meta, 'env', {
-  value: {
-    VITE_API_BASE_URL: 'http://localhost:3000',
-  },
-  writable: true,
-});
 // Mock AuthContext
 vi.mock('../../../pages/auth/AuthContext', () => ({
   useAuth: vi.fn(),
