@@ -93,11 +93,7 @@ def get_rag_qa_chain():
         model="gemini-2.0-flash",
         temperature=0.3,
         google_api_key=os.getenv("GEMINI_API_KEY"),
-        max_output_tokens=2048,
-        safety_settings={
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT.value: HarmBlockThreshold.BLOCK_NONE.value,
-            HarmCategory.HARM_CATEGORY_HARASSMENT.value:       HarmBlockThreshold.BLOCK_NONE.value,
-        }
+        max_output_tokens=2048
     )
 
     qa_chain = RetrievalQA.from_chain_type(
