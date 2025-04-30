@@ -6,7 +6,7 @@ import HeroAnimation from "../assets/1"; // Adjust paths as needed
 import DeliveryAnimation from "../assets/2";
 import FarmersAnimation from "../assets/3";
 import SavingsAnimation from "../assets/4";
-import {featuresData} from "../data/data"; // Adjust the path as needed
+import {featuresData} from "../data/Data"; // Adjust the path as needed
 
 // Map animation names to their corresponding imports
 const animationMap = {
