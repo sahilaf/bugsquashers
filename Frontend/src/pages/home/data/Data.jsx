@@ -149,14 +149,14 @@ export const testimonialsData = [
         "quote": "I've never experienced such fast and reliable grocery delivery. FairBasket has made my life so much easier!",
         "name": "David Brown",
         "title": "Busy Professional",
-        "avatar": "https://i.pinimg.com/736x/d1/78/72/d17872ea78786123380ce9fa66b7c413.jpg",
+        "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTKjmAxzfn7M9QMR5NEAxQX_CkKx-_lSabSejFOaO8VKw&s&ec=72940544",
         "rating": 4
       },
       {
         "quote": "The quality of the produce is outstanding, and the prices are unbeatable. FairBasket is my go-to for all my grocery needs.",
         "name": "Linda Wilson",
         "title": "Health-Conscious Shopper",
-        "avatar": "https://i.pinimg.com/736x/d1/78/72/d17872ea78786123380ce9fa66b7c413.jpg",
+        "avatar": "https://www.headshotpro.com/_nuxt/img/2.fbf3b54.png",
         "rating": 5
       }
     ]
