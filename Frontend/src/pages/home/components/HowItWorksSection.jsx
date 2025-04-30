@@ -6,7 +6,7 @@ function HowItWorksSection() {
   return (
     <section className="py-16 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12 text-gray-300">
+        <h2 className="text-4xl font-bold text-center mb-12 text-foreground">
           Smarter Grocery Shopping with FairBasket
         </h2>
 
@@ -20,10 +20,10 @@ function HowItWorksSection() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col flex-grow">
-              <p className="text-gray-300 mb-4">
+              <p className="text-foreground mb-4">
                 Our AI helps you find the perfect grocery combinations within your budget:
               </p>
-              <ul className="space-y-3 list-disc pl-6 text-gray-300">
+              <ul className="space-y-3 list-disc pl-6 text-foreground">
                 <li>Get the best products without overspending</li>
                 <li>Prioritize organic and healthy options</li>
                 <li>Mix and match across multiple nearby shops</li>
@@ -41,13 +41,13 @@ function HowItWorksSection() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col flex-grow">
-              <p className="text-gray-300 mb-4">
+              <p className="text-foreground mb-4">
                 Need help while shopping? Our AI support is always ready:
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <ShieldCheckIcon className="w-5 h-5 text-green-300" />
-                  <span className="text-gray-300">Secure order assistance</span>
+                  <span className="text-foreground">Secure order assistance</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -56,14 +56,14 @@ function HowItWorksSection() {
                     <polyline points="3.29 7 12 12 20.71 7"></polyline>
                     <line x1="12" x2="12" y1="22" y2="12"></line>
                   </svg>
-                  <span className="text-gray-300">Instant AI chat help</span>
+                  <span className="text-foreground">Instant AI chat help</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                   </svg>
-                  <span className="text-gray-300">Order tracking assistance</span>
+                  <span className="text-foreground">Order tracking assistance</span>
                 </div>
               </div>
             </CardContent>
@@ -81,7 +81,7 @@ function HowItWorksSection() {
           >
             Get AI Budget Plan
           </Button>
-          <p className="mt-4 text-gray-300 text-sm">
+          <p className="mt-4 text-foreground text-sm">
             100% free, quick, and easy to start!
           </p>
         </div>

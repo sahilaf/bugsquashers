@@ -127,6 +127,7 @@ function Hero() {
             <Button
               size="sm"
               className="bg-secondary text-primary-foreground hover:bg-secondary-hover px-8 py-6 text-lg group rounded-full w-full md:w-48"
+              onClick={() => window.location.href = "https://github.com/Learnathon-By-Geeky-Solutions/bugsquashers/wiki"}
             >
               Learn More
             </Button>

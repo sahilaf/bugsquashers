@@ -254,20 +254,7 @@ const DesktopNavigation = ({
               <User className="h-4 w-4" />
               <span>{loading ? "Loading..." : "Dashboard"}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigate("/profile")}
-              className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
-            >
-              <Settings className="h-4 w-4" />
-              <span>Profile Settings</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigate("/orders")}
-              className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
-            >
-              <Package className="h-4 w-4" />
-              <span>My Orders</span>
-            </DropdownMenuItem>
+            
             <DropdownMenuSeparator className="my-2" />
             <DropdownMenuItem
               onClick={handleLogout}
