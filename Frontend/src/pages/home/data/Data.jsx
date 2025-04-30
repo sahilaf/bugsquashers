@@ -128,14 +128,14 @@ export const testimonialsData = [
         "quote": "FairBasket has completely transformed the way I shop for groceries. The direct-from-farm produce is fresher and more affordable than anything I've found elsewhere.",
         "name": "Sarah Johnson",
         "title": "Happy Customer",
-        "avatar": "https://i.pinimg.com/736x/d1/78/72/d17872ea78786123380ce9fa66b7c413.jpg",
+        "avatar": "https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aGVhZHNob3R8ZW58MHx8MHx8fDA%3D",
         "rating": 5
       },
       {
         "quote": "The easy ordering system and efficient delivery make grocery shopping a breeze. I love supporting local farmers while saving money!",
         "name": "Michael Smith",
         "title": "Local Food Enthusiast",
-        "avatar": "https://i.pinimg.com/736x/d1/78/72/d17872ea78786123380ce9fa66b7c413.jpg",
+        "avatar": "https://nealeyphoto.com/wp-content/uploads/2024/12/omaha-ne-professional-headshot-012.jpg",
         "rating": 4
       },
       {
