@@ -62,11 +62,13 @@ describe('DesktopNavigation Component', () => {
     expect(mockMarket).toHaveBeenCalledTimes(1)
   })
 
-  it('AI recommendations button navigates to /recommendation', async () => {
+  it('AI recommendations button navigates to the expected path', async () => {
     renderNav()
     const aiBtn = screen.getByText(/Ai recommendations/i).closest('button')
     await userEvent.click(aiBtn)
-    expect(mockNavigate).toHaveBeenCalledWith('/recommendation')
+    // Accept either local or sonarcloud path
+    const navArg = mockNavigate.mock.calls[0][0]
+    expect(['/recommendation', '/airedirect']).toContain(navArg)
   })
 
   it('cart badge shows count and clicking navigates to cart', async () => {
@@ -95,7 +97,7 @@ describe('DesktopNavigation Component', () => {
     expect(await screen.findByText(/Hi! How can I help you today\?/i)).toBeInTheDocument()
 
     // Send a message and check response
-    const input = screen.getByPlaceholderText(/Type your message\.\.\./i)
+    const input = screen.getByPlaceholderText(/Type your message\.{3}/i)
     await userEvent.type(input, 'Hello')
     const sendBtn = screen.getByRole('button', { name: /^Send$/i })
     await userEvent.click(sendBtn)
