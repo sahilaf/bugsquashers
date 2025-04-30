@@ -294,7 +294,7 @@ DesktopNavigation.propTypes = {
   handleLogout: PropTypes.func.isRequired,
   handleDashboardClick: PropTypes.func.isRequired,
   handleMarketClick: PropTypes.func.isRequired,
-  handleHomeClick: PropTypes.func.isRequired,
+  handleHomeaClick: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
 };
 

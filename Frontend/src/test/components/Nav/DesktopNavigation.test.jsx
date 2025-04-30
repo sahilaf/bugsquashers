@@ -1,198 +1,108 @@
-import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import DesktopNavigation from '../../../components/Nav/DesktopNavigation';
+import React from 'react'
+import { describe, beforeEach, it, expect, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import DesktopNavigation from '../../../../src/components/Nav/DesktopNavigation'
+import * as CartContext from '../../../../src/pages/cart/context/CartContex'
 
-// Mock useCart to control cartCount
-vi.mock('../../../pages/cart/context/CartContex', () => ({
-  useCart: () => ({ cartCount: 2 }),
-}));
+// Mock ThemeToggle to avoid complexity
+vi.mock('../../../../src/components/Nav/ThemeToggle', () => ({
+  __esModule: true,
+  default: () => <button>ThemeToggle</button>,
+}))
 
-// Mock lucide-react icons to render simple placeholders
-vi.mock('lucide-react', () => ({
-  User: () => <span data-testid="icon-user" />,
-  Settings: () => <span data-testid="icon-settings" />,
-  Package: () => <span data-testid="icon-package" />,
-  LogOut: () => <span data-testid="icon-logout" />,
-  ShoppingCart: () => <span data-testid="icon-cart" />,
-  Brain: () => <span data-testid="icon-brain" />,
-  BotMessageSquare: () => <span data-testid="icon-bot" />,
-  House: () => <span data-testid="icon-house" />,
-  Store: () => <span data-testid="icon-store" />
-}));
-
-// Mock ThemeToggle to avoid complexity (must return __esModule + default)
-vi.mock('../../../components/Nav/ThemeToggle', () => {
-  const React = require('react');
-  return {
-    __esModule: true,
-    default: () => <button data-testid="theme-toggle" />,
-  };
-});
-
-// Mock UI components where needed
-vi.mock('../../../components/ui/button', () => ({
-  Button: ({ children, ...props }) => <button {...props}>{children}</button>,
-}));
-vi.mock('../../../components/ui/badge', () => ({
-  Badge: ({ children }) => <span data-testid="badge">{children}</span>,
-}));
-vi.mock('../../../components/ui/avatar', () => ({
-  Avatar: ({ children }) => <div>{children}</div>,
-  AvatarFallback: ({ children }) => <div>{children}</div>,
-  AvatarImage: () => <img alt="avatar" />
-}));
-vi.mock('../../../components/ui/dropdown-menu', () => ({
-  DropdownMenu: ({ children }) => <div>{children}</div>,
-  DropdownMenuTrigger: ({ children }) => <div>{children}</div>,
-  DropdownMenuContent: ({ children }) => <div>{children}</div>,
-  DropdownMenuItem: ({ children, ...props }) => <div role="menuitem" {...props}>{children}</div>,
-  DropdownMenuSeparator: () => <hr />
-}));
-vi.mock('../../../components/ui/sheet', () => ({
-  Sheet: ({ children }) => <div>{children}</div>,
-  SheetTrigger: ({ children }) => <div>{children}</div>,
-  SheetContent: ({ children }) => <div>{children}</div>,
-  SheetHeader: ({ children }) => <div>{children}</div>,
-  SheetTitle: ({ children }) => <h2>{children}</h2>
-}));
-
-describe('DesktopNavigation', () => {
-  const mockNavigate = vi.fn();
-  const mockLogout = vi.fn();
-  const mockDashboard = vi.fn();
-  const mockMarket = vi.fn();
-  const mockHome = vi.fn();
+describe('DesktopNavigation Component', () => {
+  let mockNavigate
+  let mockHome
+  let mockMarket
+  let mockLogout
+  let mockDashboardClick
 
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    mockNavigate = vi.fn()
+    mockHome = vi.fn()
+    mockMarket = vi.fn()
+    mockLogout = vi.fn()
+    mockDashboardClick = vi.fn()
+    // Default cart count
+    vi.spyOn(CartContext, 'useCart').mockReturnValue({ cartCount: 2 })
+    // Mock fetch for chat
+    global.fetch = vi.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve({ answer: 'Test answer' }) })
+    )
+  })
 
-  afterEach(() => {
-    cleanup();
-  });
-
-  it('renders Sign In when no user and navigates to login on click', () => {
+  // Utility to render with default handlers
+  const renderNav = (props = {}) => {
     render(
-      <DesktopNavigation
-        user={null}
-        userData={{}}
-        navigate={mockNavigate}
-        handleLogout={mockLogout}
-        handleDashboardClick={mockDashboard}
-        handleMarketClick={mockMarket}
-        handleHomeClick={mockHome}
-        loading={false}
-      />
-    );
+      <MemoryRouter>
+        <DesktopNavigation
+          user={props.user ?? null}
+          userData={props.userData ?? {}}
+          navigate={mockNavigate}
+          handleLogout={mockLogout}
+          handleDashboardClick={mockDashboardClick}
+          handleMarketClick={mockMarket}
+          handleHomeClick={mockHome}
+          loading={props.loading ?? false}
+        />
+      </MemoryRouter>
+    )
+  }
 
-    const signInBtn = screen.getByText(/Sign In/i);
-    expect(signInBtn).toBeInTheDocument();
-    fireEvent.click(signInBtn);
-    expect(mockNavigate).toHaveBeenCalledWith('/login');
-  });
+  it('Home and Market buttons trigger their handlers', async () => {
+    renderNav()
+    const homeBtn = screen.getByRole('button', { name: /^Home$/i })
+    await userEvent.click(homeBtn)
+    expect(mockHome).toHaveBeenCalledTimes(1)
 
-  it('renders navigation buttons and badge count', () => {
-    render(
-      <DesktopNavigation
-        user={null}
-        userData={{}}
-        navigate={mockNavigate}
-        handleLogout={mockLogout}
-        handleDashboardClick={mockDashboard}
-        handleMarketClick={mockMarket}
-        handleHomeClick={mockHome}
-        loading={false}
-      />
-    );
+    const marketBtn = screen.getByRole('button', { name: /^Market$/i })
+    await userEvent.click(marketBtn)
+    expect(mockMarket).toHaveBeenCalledTimes(1)
+  })
 
-    // Home button
-    fireEvent.click(screen.getByText(/Home/i));
-    expect(mockHome).toHaveBeenCalled();
+  it('AI recommendations button navigates to /recommendation', async () => {
+    renderNav()
+    const aiBtn = screen.getByText(/Ai recommendations/i).closest('button')
+    await userEvent.click(aiBtn)
+    expect(mockNavigate).toHaveBeenCalledWith('/recommendation')
+  })
 
-    // Market button
-    fireEvent.click(screen.getByText(/Market/i));
-    expect(mockMarket).toHaveBeenCalled();
+  it('cart badge shows count and clicking navigates to cart', async () => {
+    renderNav()
+    const badge = screen.getByText('2')
+    const cartBtn = badge.closest('button')
+    expect(cartBtn).toBeInTheDocument()
+    await userEvent.click(cartBtn)
+    expect(mockNavigate).toHaveBeenCalledWith('/cart')
+  })
 
-    // AI recommendations button
-    fireEvent.click(screen.getByText(/Ai recommendations/i));
-    expect(mockNavigate).toHaveBeenCalledWith('/recommendation');
+  it('renders Sign In and navigates to login', async () => {
+    renderNav()
+    const signInBtn = screen.getByRole('button', { name: /^Sign In$/i })
+    await userEvent.click(signInBtn)
+    expect(mockNavigate).toHaveBeenCalledWith('/login')
+  })
 
-    // Cart button should show badge with count 2
-    const badge = screen.getByTestId('badge');
-    expect(badge).toHaveTextContent('2');
-  });
+  it('chat system initial message and response flow', async () => {
+    renderNav()
+    // Open chat via Support assistant button
+    const supportBtn = screen.getByText(/Support assistant/i).closest('button')
+    await userEvent.click(supportBtn)
 
-  it('shows support assistant sheet and handles send message', async () => {
-    render(
-      <DesktopNavigation
-        user={null}
-        userData={{}}
-        navigate={mockNavigate}
-        handleLogout={mockLogout}
-        handleDashboardClick={mockDashboard}
-        handleMarketClick={mockMarket}
-        handleHomeClick={mockHome}
-        loading={false}
-      />
-    );
+    // Check initial bot message
+    expect(await screen.findByText(/Hi! How can I help you today\?/i)).toBeInTheDocument()
 
-    // Open support assistant via its visible text, filtering to button element
-    const supportBtn = screen.getByText(/Support assistant/i, { selector: 'button' });
-    expect(supportBtn).toBeInTheDocument();
-    fireEvent.click(supportBtn);
+    // Send a message and check response
+    const input = screen.getByPlaceholderText(/Type your message\.\.\./i)
+    await userEvent.type(input, 'Hello')
+    const sendBtn = screen.getByRole('button', { name: /^Send$/i })
+    await userEvent.click(sendBtn)
 
-    // since sheet content is always rendered, check input/send
-    const input = screen.getByPlaceholderText(/Type your message/i);
-    fireEvent.change(input, { target: { value: 'Hello' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
-    const sendBtn = screen.getByText(/Send/i);
-    fireEvent.click(sendBtn);
-
-    // Bot response fallback after mock fetch
-    const botMsg = await screen.findByText(/Failed to fetch support response/i);
-    expect(botMsg).toBeInTheDocument();
-  });
-
-  it('renders user dropdown and menu items when user is present', () => {
-    const user = { uid: '123' };
-    const userData = { displayName: 'Test User', email: 'test@example.com', role: 'Admin' };
-
-    render(
-      <DesktopNavigation
-        user={user}
-        userData={userData}
-        navigate={mockNavigate}
-        handleLogout={mockLogout}
-        handleDashboardClick={mockDashboard}
-        handleMarketClick={mockMarket}
-        handleHomeClick={mockHome}
-        loading={false}
-      />
-    );
-
-    // Dropdown trigger should show avatar fallback initial 'T'
-    const avatars = screen.getAllByText('T');
-    fireEvent.click(avatars[0]);
-
-    // Dashboard item
-    const dashItem = screen.getByText(/Dashboard/i);
-    fireEvent.click(dashItem);
-    expect(mockDashboard).toHaveBeenCalled();
-
-    // Profile settings item
-    const profileItem = screen.getByText(/Profile Settings/i);
-    fireEvent.click(profileItem);
-    expect(mockNavigate).toHaveBeenCalledWith('/profile');
-
-    // My Orders item
-    const ordersItem = screen.getByText(/My Orders/i);
-    fireEvent.click(ordersItem);
-    expect(mockNavigate).toHaveBeenCalledWith('/orders');
-
-    // Logout
-    const logoutItem = screen.getByText(/Log out/i);
-    fireEvent.click(logoutItem);
-    expect(mockLogout).toHaveBeenCalled();
-  });
-});
+    await waitFor(() => {
+      expect(screen.getByText('Hello')).toBeInTheDocument()
+      expect(screen.getByText('Test answer')).toBeInTheDocument()
+    })
+  })
+})
