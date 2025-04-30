@@ -34,7 +34,7 @@ export default function Recommendation() {
 
     try {
       // 1) Call recommendation endpoint
-      const recRes = await fetch("http://127.0.0.1:5000/api/recommend", {
+      const recRes = await fetch("https://bugsquashers-ai-agent.onrender.com/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, budget: parseFloat(budget) }),
