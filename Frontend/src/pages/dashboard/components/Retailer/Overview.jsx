@@ -90,11 +90,11 @@ function Overview() {
           <Card className="shadow-md">
             <CardContent className="p-6 text-center">
               <div className="flex flex-col items-center justify-center space-y-4">
-                <Store className="w-12 h-12 text-gray-400" />
-                <h2 className="text-2xl font-bold text-gray-900">
+                <Store className="w-12 h-12 text-foreground" />
+                <h2 className="text-2xl font-bold text-foreground">
                   No Shop Found
                 </h2>
-                <p className="text-gray-600 max-w-md">
+                <p className="text-foreground max-w-md">
                   You don't have a shop yet. Create one from shop details in the left side to start selling your
                   products and manage your business.
                 </p>
@@ -115,10 +115,10 @@ function Overview() {
             <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
               <div className="space-y-2">
                 <div className="mb-2">
-                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">
                     {shop.name}
                   </h2>
-                  <p className="text-sm text-gray-500 font-medium">
+                  <p className="text-sm text-foreground font-medium">
                     <MapPin className="inline-block w-4 h-4 mr-1 -mt-1" />
                     {shop.location}
                   </p>
@@ -127,17 +127,17 @@ function Overview() {
                 <div className="flex gap-4 text-sm">
                   <div className="flex items-center bg-accent/20 px-3 py-1 rounded-full">
                     <Tag className="w-4 h-4 mr-2 text-primary" />
-                    <span className="font-medium text-gray-700">
+                    <span className="font-medium text-foreground">
                       {shop.category}
                     </span>
                   </div>
 
                   <div className="flex items-center">
                     <Star className="w-4 h-4 mr-1 text-amber-500 fill-amber-500" />
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-foreground">
                       {shop.rating}
                     </span>
-                    <span className="text-gray-500 ml-1">/5.0</span>
+                    <span className="text-foreground ml-1">/5.0</span>
                   </div>
                 </div>
               </div>
