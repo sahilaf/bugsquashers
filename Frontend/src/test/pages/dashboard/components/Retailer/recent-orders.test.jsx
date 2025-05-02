@@ -64,10 +64,10 @@ describe('RecentOrders Component', () => {
       expect(screen.getByText('Apple')).toBeInTheDocument();
       expect(screen.getByText(/Test Shop/i)).toBeInTheDocument();
       expect(screen.getByText('3')).toBeInTheDocument();
-      expect(screen.getByText(/₹50/)).toBeInTheDocument();
+      expect(screen.getByText(/Bdt 50/)).toBeInTheDocument();
       expect(screen.getByText(/Delivered/i)).toBeInTheDocument();
       expect(screen.getByText(/Paid/i)).toBeInTheDocument();
-      expect(screen.getByText(/₹150/)).toBeInTheDocument();
+      expect(screen.getByText(/Bdt 150/)).toBeInTheDocument();
     });
   });
 });

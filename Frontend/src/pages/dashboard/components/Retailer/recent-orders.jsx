@@ -61,10 +61,10 @@ export function RecentOrders() {
                       <TableCell className="font-medium">{item.name}</TableCell>
                       <TableCell>{order.shopName}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">₹{item.price}</TableCell>
+                      <TableCell className="text-right">Bdt{item.price}</TableCell>
                       <TableCell className="text-right">{order.status}</TableCell>
                       <TableCell className="text-right">{order.payment}</TableCell>
-                      <TableCell className="text-right">₹{order.total}</TableCell>
+                      <TableCell className="text-right">Bdt{order.total}</TableCell>
                     </TableRow>
                   )) ?? (
                     <TableRow key={order._id}>

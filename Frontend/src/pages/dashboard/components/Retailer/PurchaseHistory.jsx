@@ -77,10 +77,10 @@ export function PurchaseHistory() {
                   </TableCell>
                   <TableCell className="text-right">{purchase.quantity} kg</TableCell>
                   <TableCell className="text-right">
-                    ₹{purchase.pricePerKg.toLocaleString()}/kg
+                    Bdt{purchase.pricePerKg.toLocaleString()}/kg
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    ₹{purchase.totalAmount.toLocaleString()}
+                    Bdt{purchase.totalAmount.toLocaleString()}
                   </TableCell>
                   <TableCell>
                     <Badge variant={purchase.status === "Completed" ? "default" : "secondary"}>
@@ -97,7 +97,7 @@ export function PurchaseHistory() {
           <div className="flex justify-between font-medium">
             <span>Total Purchases:</span>
             <span>
-              ₹{demoData
+              Bdt{demoData
                 .reduce((sum, purchase) => sum + purchase.totalAmount, 0)
                 .toLocaleString()}
             </span>

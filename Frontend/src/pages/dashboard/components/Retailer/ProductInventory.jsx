@@ -143,7 +143,7 @@ if (isLoading) {
       <TableHeader>
         <TableRow>
           <TableHead>Name</TableHead>
-          <TableHead>Price (₹)</TableHead>
+          <TableHead>Price (Bdt)</TableHead>
           <TableHead>Quantity</TableHead>
           <TableHead>Status</TableHead>
         </TableRow>

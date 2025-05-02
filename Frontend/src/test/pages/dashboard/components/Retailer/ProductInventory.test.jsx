@@ -65,7 +65,7 @@ describe('<ProductInventory />', () => {
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
 
     // Table headers
-    ['Name', 'Price (₹)', 'Quantity', 'Status'].forEach(text => {
+    ['Name', 'Price (Bdt)', 'Quantity', 'Status'].forEach(text => {
       expect(screen.getByText(text)).toBeInTheDocument();
     });
 

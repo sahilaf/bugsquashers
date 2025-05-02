@@ -33,8 +33,8 @@ describe('<PurchaseHistory />', () => {
         farmerName: 'Ravi Kumar',
         purchaseDate: '15 Mar 2024',
         quantityText: '150 kg',
-        priceText: '₹25.5/kg',
-        totalText: '₹3,825',
+        priceText: 'bdt 25.5/kg',
+        totalText: 'bdt 3,825',
         status: 'Completed',
       },
       {
@@ -42,8 +42,8 @@ describe('<PurchaseHistory />', () => {
         farmerName: 'Priya Sharma',
         purchaseDate: '14 Mar 2024',
         quantityText: '200 kg',
-        priceText: '₹42.75/kg',
-        totalText: '₹8,550',
+        priceText: 'bdt 42.75/kg',
+        totalText: 'bdt 8,550',
         status: 'Pending',
       },
       {
@@ -51,8 +51,8 @@ describe('<PurchaseHistory />', () => {
         farmerName: 'Vijay Patil',
         purchaseDate: '13 Mar 2024',
         quantityText: '75 kg',
-        priceText: '₹120/kg',
-        totalText: '₹9,000',
+        priceText: 'bdt 120/kg',
+        totalText: 'bdt 9,000',
         status: 'Completed',
       },
       {
@@ -60,8 +60,8 @@ describe('<PurchaseHistory />', () => {
         farmerName: 'Anjali Mehta',
         purchaseDate: '12 Mar 2024',
         quantityText: '50 kg',
-        priceText: '₹18/kg',
-        totalText: '₹900',
+        priceText: 'bdt 18/kg',
+        totalText: 'bdt 900',
         status: 'Completed',
       },
     ];
@@ -82,10 +82,10 @@ describe('<PurchaseHistory />', () => {
   });
 
   it('renders the total purchases summary correctly', () => {
-    // Sum of [3825,8550,9000,900] = 22275 -> "₹22,275"
+    // Sum of [3825,8550,9000,900] = 22275 -> "bdt 22,275"
     const totalLabel = screen.getByText('Total Purchases:');
     expect(totalLabel).toBeInTheDocument();
-    const totalValue = screen.getByText('₹22,275');
+    const totalValue = screen.getByText('bdt 22,275');
     expect(totalValue).toBeInTheDocument();
   });
 });

@@ -86,8 +86,8 @@ describe('<AddProductDialog />', () => {
     expect(screen.getByLabelText('Description')).toBeInTheDocument()
 
     // Price / Original Price / Quantity
-    expect(screen.getByLabelText('Price (₹)*')).toBeInTheDocument()
-    expect(screen.getByLabelText('Original Price (₹)')).toBeInTheDocument()
+    expect(screen.getByLabelText('Price (Bdt)*')).toBeInTheDocument()
+    expect(screen.getByLabelText('Original Price (Bdt)')).toBeInTheDocument()
     expect(screen.getByLabelText('Quantity*')).toBeInTheDocument()
 
     // Feature input + icon
@@ -116,10 +116,10 @@ describe('<AddProductDialog />', () => {
     })
     expect(screen.getByLabelText('Product Name*')).toHaveValue('Apple')
 
-    fireEvent.change(screen.getByLabelText('Price (₹)*'), {
+    fireEvent.change(screen.getByLabelText('Price (Bdt)*'), {
       target: { name: 'price', value: '12.34', type: 'number' },
     })
-    expect(screen.getByLabelText('Price (₹)*')).toHaveValue(12.34)
+    expect(screen.getByLabelText('Price (Bdt)*')).toHaveValue(12.34)
 
     fireEvent.change(screen.getByLabelText('Quantity*'), {
       target: { name: 'quantity', value: '5', type: 'number' },
@@ -173,7 +173,7 @@ describe('<AddProductDialog />', () => {
     fireEvent.change(screen.getByLabelText('Product Name*'), {
       target: { name: 'name', value: 'Banana' },
     })
-    fireEvent.change(screen.getByLabelText('Price (₹)*'), {
+    fireEvent.change(screen.getByLabelText('Price (Bdt)*'), {
       target: { name: 'price', value: '10', type: 'number' },
     })
     fireEvent.change(screen.getByLabelText('Quantity*'), {

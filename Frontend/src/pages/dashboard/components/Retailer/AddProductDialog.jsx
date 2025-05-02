@@ -170,7 +170,7 @@ export const AddProductDialog = ({ open, onOpenChange, onAddProduct, shopId }) =
 
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price (₹)*</Label>
+              <Label htmlFor="price">Price (Bdt)*</Label>
               <Input
                 id="price"
                 name="price"
@@ -184,7 +184,7 @@ export const AddProductDialog = ({ open, onOpenChange, onAddProduct, shopId }) =
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="originalPrice">Original Price (₹)</Label>
+              <Label htmlFor="originalPrice">Original Price (Bdt)</Label>
               <Input
                 id="originalPrice"
                 name="originalPrice"

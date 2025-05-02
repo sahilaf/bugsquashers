@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/a
 
 export function TodaysHeroes() {
   const topProducts = [
-    { id: "earbuds", name: "Wireless Earbuds", sales: 42 },
-    { id: "watch", name: "Smart Watch", sales: 38 },
-    { id: "case", name: "Phone Case", sales: 27 },
+    { id: "milk", name: "Cow Milk", sales: 42 },
+    { id: "egg", name: "Eggs", sales: 38 },
+    { id: "chesse", name: "salted chesse", sales: 27 },
   ];
 
   return (

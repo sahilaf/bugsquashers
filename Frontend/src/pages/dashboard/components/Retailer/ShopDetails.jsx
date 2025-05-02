@@ -26,10 +26,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../../components/ui/select";
-import { Pencil, Save, XCircle, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  Pencil,
+  Save,
+  XCircle,
+  CheckCircle2,
+  Loader2,
+  MapPin,
+} from "lucide-react";
 import { useAuth } from "../../../auth/AuthContext";
 
 export function ShopDetails() {
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState(null);
   const { userId } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -60,9 +69,7 @@ export function ShopDetails() {
         setError(null);
 
         // Step 1: Fetch MongoDB userId from Firebase uid
-        const userResponse = await fetch(
-          `${BASE_URL}/api/getuserid/${userId}`
-        );
+        const userResponse = await fetch(`${BASE_URL}/api/getuserid/${userId}`);
         const userData = await userResponse.json();
 
         if (!userResponse.ok || !userData.success) {
@@ -120,14 +127,14 @@ export function ShopDetails() {
     try {
       setLoading(true);
       setError(null);
-  
+
       // Ensure name is not empty
       if (!data.name || data.name.trim() === "") {
         setError("Shop name is required.");
         setLoading(false);
         return;
       }
-  
+
       const shopData = {
         name: data.name,
         location: {
@@ -140,9 +147,9 @@ export function ShopDetails() {
         isLocalFarm: data.isLocalFarm || false,
         owner: ownerId, // MongoDB ObjectId
       };
-  
+
       let response;
-  
+
       if (isCreating) {
         // Create new shop
         response = await fetch(`${BASE_URL}/api/shops`, {
@@ -158,9 +165,9 @@ export function ShopDetails() {
           body: JSON.stringify(shopData),
         });
       }
-  
+
       const result = await response.json();
-  
+
       if (response.ok && result.success) {
         // Update local state with the returned shop data
         const updatedShop = result.data;
@@ -169,7 +176,7 @@ export function ShopDetails() {
           latitude: updatedShop.location.coordinates[1],
           longitude: updatedShop.location.coordinates[0],
         };
-  
+
         setShop(formattedShop);
         setIsEditing(false);
         setIsCreating(false);
@@ -208,7 +215,54 @@ export function ShopDetails() {
       </Card>
     );
   }
+  const getLocationWithPermissionCheck = async () => {
+    if (!("geolocation" in navigator)) {
+      throw new Error("Geolocation is not supported by your browser.");
+    }
 
+    let permissionStatus;
+    if ("permissions" in navigator) {
+      try {
+        permissionStatus = await navigator.permissions.query({
+          name: "geolocation",
+        });
+      } catch (err) {
+        permissionStatus = { state: "prompt" };
+      }
+    } else {
+      permissionStatus = { state: "prompt" };
+    }
+
+    if (
+      permissionStatus.state === "granted" ||
+      permissionStatus.state === "prompt"
+    ) {
+      return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 60000,
+        });
+      });
+    } else {
+      throw new Error("Location access denied. Enable it in browser settings.");
+    }
+  };
+
+  const handleUseLocation = async () => {
+    setIsLoadingLocation(true);
+    setLocationError(null);
+
+    try {
+      const position = await getLocationWithPermissionCheck();
+      form.setValue("latitude", position.coords.latitude.toFixed(6));
+      form.setValue("longitude", position.coords.longitude.toFixed(6));
+    } catch (error) {
+      setLocationError(error.message);
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  };
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -290,7 +344,6 @@ export function ShopDetails() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="category"
@@ -319,7 +372,6 @@ export function ShopDetails() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="latitude"
@@ -339,7 +391,6 @@ export function ShopDetails() {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="longitude"
@@ -359,7 +410,25 @@ export function ShopDetails() {
                   </FormItem>
                 )}
               />
-
+              <div className="md:col-span-2">
+                <Button
+                  type="button"
+                  onClick={handleUseLocation}
+                  disabled={(!isEditing && !isCreating) || isLoadingLocation}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {isLoadingLocation ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                  Use Current Location
+                </Button>
+                {locationError && (
+                  <p className="text-red-500 text-sm mt-2">{locationError}</p>
+                )}
+              </div>
               <FormField
                 control={form.control}
                 name="isOrganicCertified"
@@ -397,7 +466,7 @@ export function ShopDetails() {
                   </FormItem>
                 )}
               />
-
+              
               <FormField
                 control={form.control}
                 name="isLocalFarm"
