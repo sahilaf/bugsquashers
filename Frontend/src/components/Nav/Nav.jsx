@@ -77,7 +77,7 @@ const Nav = () => {
   };
 
   return (
-    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-white dark:bg-background/80 backdrop-blur-md ">
+    <nav className="fixed top-0 w-full py-4 px-4 md:px-8 lg:px-32 flex items-center justify-between z-50 bg-white/40 dark:bg-background/80 backdrop-blur-md ">
       <h1 className="text-3xl font-black ">
         <span className="dark:bg-gradient-to-r dark:from-green-400 dark:to-white bg-clip-text dark:text-transparent text-primary">
           FAIRBASKET<span className="text-secondary">.</span>

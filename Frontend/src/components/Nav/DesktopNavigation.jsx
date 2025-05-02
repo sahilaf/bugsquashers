@@ -14,8 +14,6 @@ import {
 } from "../ui/dropdown-menu";
 import {
   User,
-  Settings,
-  Package,
   LogOut,
   ShoppingCart,
   Brain,
