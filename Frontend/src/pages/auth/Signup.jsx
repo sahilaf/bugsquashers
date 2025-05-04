@@ -232,7 +232,6 @@ function Signup() {
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
                     <SelectItem value="User">User</SelectItem>
                     <SelectItem value="Shopkeeper">Shopkeeper</SelectItem>
                     <SelectItem value="Deliveryman">Deliveryman</SelectItem>
