@@ -1,6 +1,6 @@
-import { Button } from "../../../components/ui/button";
+import { Badge } from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
-import { HeadsetIcon, BrainIcon, ShieldCheckIcon } from "lucide-react";
+import { HeadsetIcon, BrainIcon, ShieldCheckIcon, Badge } from "lucide-react";
 
 function HowItWorksSection() {
   return (
@@ -75,12 +75,12 @@ function HowItWorksSection() {
           <h3 className="text-3xl font-semibold mb-6 text-foreground">
             Ready to Experience Smart Grocery Shopping?
           </h3>
-          <Button 
+          <Badge 
             className="bg-primary h-12 px-8 text-lg" 
             onClick={() => window.location.href = '/recommendation'}
           >
             Get AI Budget Plan
-          </Button>
+          </Badge>
           <p className="mt-4 text-foreground text-sm">
             100% free, quick, and easy to start!
           </p>
