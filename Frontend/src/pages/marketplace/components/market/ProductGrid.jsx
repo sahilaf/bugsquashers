@@ -50,12 +50,6 @@ function ProductGrid({ shops, currentPage, totalPages, onPageChange }) {
           <div key={shop._id} className="rounded-lg border bg-card p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold">{shop.name}</h2>
-              <Link
-                to={`/shop/${shop._id}`}
-                className="flex items-center text-xs text-primary hover:underline"
-              >
-                View all <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
             </div>
 
             {shop.products && shop.products.length > 0 ? (
